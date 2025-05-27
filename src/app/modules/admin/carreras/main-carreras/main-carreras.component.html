@@ -1,0 +1,51 @@
+<div class="d-flex">
+  <!-- Sidebar reutilizable -->
+  <app-sidebar [rol]="rolUsuario"></app-sidebar>
+
+
+  <!-- Contenido principal -->
+  <div class="flex-grow-1 p-4" style="background-color: #f4f6fa; min-height: 100vh;">
+    <!-- Botones y título -->
+    <div class="d-flex justify-content-between align-items-start mb-4">
+      <div>
+        <button class="btn btn-success me-2" (click)="abrirDialog('crear')">
+          <i class="bi bi-plus-circle me-1"></i> Nueva Carrera
+        </button>
+        <button class="btn btn-info me-2 text-white" [disabled]="!seleccionada" (click)="abrirDialog('ver')">
+          <i class="bi bi-eye me-1"></i> Ver
+        </button>
+        <button class="btn btn-warning text-white" [disabled]="!seleccionada" (click)="abrirDialog('editar')">
+          <i class="bi bi-pencil-square me-1"></i> Editar
+        </button>
+      </div>
+      <h3 class="fw-bold" style="color: #002F5D;">
+        <i class="bi bi-mortarboard-fill me-2"></i>Gestión de Carreras Académicas
+      </h3>
+    </div>
+
+    <!-- Tabla -->
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Nombre</th>
+              <th>Jefe de Carrera</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let carrera of carreras"
+              (click)="seleccionar(carrera)"
+              [class.table-active]="seleccionada?.ID_Carrera === carrera.ID_Carrera"
+              style="cursor: pointer;"
+            >
+              <td>{{ carrera.Nombre }}</td>
+              <td>{{ carrera.JefeCarrera }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

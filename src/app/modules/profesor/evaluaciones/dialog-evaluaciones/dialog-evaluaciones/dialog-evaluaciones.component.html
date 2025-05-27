@@ -1,0 +1,38 @@
+<div class="modal-header">
+  <h5 class="modal-title text-primary">
+    <i class="bi bi-journals me-2"></i> Evaluaciones de {{ asignatura?.Nombre }}
+  </h5>
+  <button type="button" class="btn-close" (click)="cerrar()"></button>
+</div>
+
+<div class="modal-body">
+  <div class="d-flex justify-content-end mb-3">
+    <button class="btn btn-outline-success" (click)="abrirDialogCrearEvaluacion()">
+      <i class="bi bi-plus-circle me-1"></i> Crear Evaluación
+    </button>
+  </div>
+
+  <div *ngIf="evaluaciones.length === 0" class="alert alert-info">
+    No hay evaluaciones registradas para esta asignatura.
+  </div>
+
+  <div *ngFor="let eva of evaluaciones" class="card border-primary mb-3">
+    <div class="card-body">
+      <h5 class="card-title text-primary">{{ eva.Nombre }}</h5>
+      <p class="card-text text-muted">
+        Tipo: {{ eva.Tipo }} |
+        Instancia: {{ eva.N_Instancia }} |
+        Fecha: {{ eva.Fecha | date:'longDate' }}
+      </p>
+      <div class="text-end">
+        <button class="btn btn-outline-primary btn-sm" (click)="abrirDetalleEvaluacion(eva.ID_Evaluacion)">
+          <i class="bi bi-eye me-1"></i> Ver Detalle
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-footer">
+  <button class="btn btn-secondary" (click)="cerrar()">Cerrar</button>
+</div>

@@ -1,0 +1,58 @@
+<div class="modal-header">
+  <h5 class="modal-title text-primary">Rúbrica del Contenido</h5>
+  <button type="button" class="btn-close" (click)="cancelar()"></button>
+</div>
+
+<div class="modal-body">
+  <div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+      <button class="btn btn-success me-2" (click)="agregarIndicador()">
+        <i class="bi bi-plus-circle me-1"></i> Agregar Indicador
+      </button>
+      <button class="btn btn-info me-2 text-white" [disabled]="!seleccionado" (click)="verIndicador()">
+        <i class="bi bi-eye me-1"></i> Ver
+      </button>
+      <button class="btn btn-warning text-white" [disabled]="!seleccionado" (click)="editarIndicador()">
+        <i class="bi bi-pencil-square me-1"></i> Editar
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="indicadores.length === 0" class="alert alert-secondary text-center">
+    No se ha definido una rúbrica aún para este contenido.
+  </div>
+
+  <table *ngIf="indicadores.length > 0" class="table table-bordered text-center align-middle">
+    <thead class="table-light">
+      <tr>
+        <th class="text-start">Indicador</th>
+        <ng-container *ngFor="let col of columnasMaximas">
+          <th>Criterio {{ col + 1 }}</th>
+        </ng-container>
+
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let indicador of indicadores" (click)="seleccionar(indicador)" [class.table-active]="seleccionado?.ID_Indicador === indicador.ID_Indicador">
+        <td class="text-start text-primary fw-bold">
+          {{ indicador.Descripcion }}
+          <div class="text-muted small">({{ indicador.Puntaje_Max }})</div>
+        </td>
+        <ng-container *ngFor="let col of columnasMaximas">
+          <td>
+            <ng-container *ngIf="indicador.Criterios[col]">
+              {{ indicador.Criterios[col].Nombre }}
+              <div class="text-muted small">({{ indicador.Criterios[col].R_Min }} - {{ indicador.Criterios[col].R_Max }})</div>
+            </ng-container>
+            <ng-container *ngIf="!indicador.Criterios[col]">-</ng-container>
+          </td>
+        </ng-container>
+
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="modal-footer">
+  <button class="btn btn-secondary" (click)="cancelar()">Cerrar</button>
+</div>

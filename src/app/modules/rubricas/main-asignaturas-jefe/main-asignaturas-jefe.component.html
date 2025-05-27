@@ -1,0 +1,51 @@
+<div class="d-flex">
+  <app-sidebar [rol]="rolUsuario"></app-sidebar>
+
+  <div class="flex-grow-1 p-4" style="background-color: #f4f6fa; min-height: 100vh;">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-start mb-4">
+      <div>
+        <button class="btn btn-info me-2 text-white" [disabled]="!seleccionada" (click)="verAsignatura()">
+          <i class="bi bi-eye me-1"></i> Ver
+        </button>
+        <button class="btn btn-outline-primary ms-3" [disabled]="!seleccionada" (click)="abrirContenidos()">
+          <i class="bi bi-journals me-1"></i> Contenidos
+        </button>
+      </div>
+      <h3 class="fw-bold" style="color: #002F5D;">
+        <i class="bi bi-book-half me-2"></i>Asignaturas de la Carrera
+      </h3>
+    </div>
+
+    <!-- Tabla de asignaturas -->
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Semestre</th>
+              <th>Plan Académico</th>
+              <th>Profesor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let a of asignaturas"
+              (click)="seleccionar(a)"
+              [class.table-active]="seleccionada?.ID_Asignatura === a.ID_Asignatura"
+              style="cursor: pointer;"
+            >
+              <td>{{ a.ID_Asignatura }}</td>
+              <td>{{ a.Nombre }}</td>
+              <td>{{ a.Semestre }}</td>
+              <td>{{ a.Plan_Academico }}</td>
+              <td>{{ a.Profesor }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
