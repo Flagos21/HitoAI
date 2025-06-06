@@ -68,7 +68,12 @@ export class DialogRaComponent implements OnInit {
         Descripcion: this.datos.Descripcion,
         asignatura_ID_Asignatura: this.datos.asignatura_ID_Asignatura
       };
-      this.competenciasSeleccionadas = this.datos.competencias?.split(' + ') || [];
+      const comp = this.datos.competencias;
+      this.competenciasSeleccionadas = Array.isArray(comp)
+        ? comp
+        : typeof comp === 'string'
+          ? comp.split(' + ')
+          : [];
     }
   }
 
