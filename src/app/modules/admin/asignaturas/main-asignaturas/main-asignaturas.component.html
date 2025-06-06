@@ -9,12 +9,6 @@
         <button class="btn btn-success" (click)="abrirDialog('crear')">
           <i class="bi bi-plus-circle me-1"></i> Nueva Asignatura
         </button>
-        <button class="btn btn-info text-white" [disabled]="!seleccionada" (click)="abrirDialog('ver', seleccionada)">
-          <i class="bi bi-eye me-1"></i> Ver
-        </button>
-        <button class="btn btn-warning text-white" [disabled]="!seleccionada" (click)="abrirDialog('editar', seleccionada)">
-          <i class="bi bi-pencil-square me-1"></i> Editar
-        </button>
         <button class="btn btn-outline-primary" (click)="abrirDialogEstudiantes()">
           <i class="bi bi-people-fill me-1"></i> Estudiantes
         </button>
