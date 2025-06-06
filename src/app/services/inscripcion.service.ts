@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { Observable } from 'rxjs';
+import { Inscripcion } from '../models/inscripcion.model';
 
 @Injectable({
   providedIn: 'root'
@@ -12,13 +13,13 @@ export class InscripcionService {
   constructor(private http: HttpClient) {}
 
   // Inscribir múltiples estudiantes a una asignatura
-  inscribir(inscripciones: any[]): Observable<any> {
+  inscribir(inscripciones: Inscripcion[]): Observable<any> {
     return this.http.post(`${this.apiUrl}/crear-masivo`, { inscripciones });
   }
 
   // Obtener estudiantes inscritos en una asignatura específica
-  obtenerPorAsignatura(idAsignatura: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/por-asignatura/${idAsignatura}`);
+  obtenerPorAsignatura(idAsignatura: string): Observable<Inscripcion[]> {
+    return this.http.get<Inscripcion[]>(`${this.apiUrl}/por-asignatura/${idAsignatura}`);
   }
 
   // Desvincular (eliminar) una inscripción

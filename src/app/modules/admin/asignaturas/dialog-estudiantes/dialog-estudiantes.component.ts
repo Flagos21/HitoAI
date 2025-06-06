@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { EstudianteService } from '../../../../services/estudiante.service';
 import { DialogFormEstudianteComponent } from '../dialog-form-estudiante/dialog-form-estudiante.component';
+import { Estudiante } from '../../../../models';
 
 @Component({
   selector: 'app-dialog-estudiantes',
@@ -13,8 +14,8 @@ import { DialogFormEstudianteComponent } from '../dialog-form-estudiante/dialog-
   styleUrls: ['./dialog-estudiantes.component.css']
 })
 export class DialogEstudiantesComponent implements OnInit {
-  estudiantes: any[] = [];
-  seleccionado: any = null;
+  estudiantes: Estudiante[] = [];
+  seleccionado: Estudiante | null = null;
   bloqueado = false;
   mensajeCSV = '';
   mostrarToastCSV = false;
@@ -35,7 +36,7 @@ export class DialogEstudiantesComponent implements OnInit {
     });
   }
 
-  seleccionar(est: any) {
+  seleccionar(est: Estudiante) {
     this.seleccionado = est;
   }
 
