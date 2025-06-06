@@ -80,7 +80,9 @@ export class MainEvaluacionDetalleComponent implements OnInit {
     const modalRef = this.modalService.open(DialogRubricaEvaluacionComponent, {
       centered: true,
       size: 'xl',
-      scrollable: true
+      scrollable: true,
+      backdrop: 'static',
+      keyboard: false
     });
 
     modalRef.componentInstance.evaluacionID = this.evaluacionID;
@@ -110,7 +112,9 @@ export class MainEvaluacionDetalleComponent implements OnInit {
     const modalRef = this.modalService.open(DialogGruposEvaluacionComponent, {
       centered: true,
       size: 'lg',
-      scrollable: true
+      scrollable: true,
+      backdrop: 'static',
+      keyboard: false
     });
 
     modalRef.componentInstance.evaluacionID = this.evaluacionID;

@@ -36,6 +36,7 @@
             <th>Nombre</th>
             <th>Apellido</th>
             <th>Año Ingreso</th>
+            <th class="text-end">Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -49,6 +50,16 @@
             <td>{{ est.Nombre }}</td>
             <td>{{ est.Apellido }}</td>
             <td>{{ est.Anio_Ingreso }}</td>
+            <td class="text-end">
+              <div class="btn-group btn-group-sm">
+                <button class="btn btn-outline-info" (click)="abrirFormulario('ver')">
+                  <i class="bi bi-eye"></i>
+                </button>
+                <button class="btn btn-outline-warning text-dark" (click)="abrirFormulario('editar')">
+                  <i class="bi bi-pencil-square"></i>
+                </button>
+              </div>
+            </td>
           </tr>
         </tbody>
       </table>

@@ -29,6 +29,7 @@
               <th>Nombre</th>
               <th>Semestre</th>
               <th>Plan Académico</th>
+              <th class="text-end">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -42,6 +43,16 @@
               <td>{{ a.Nombre }}</td>
               <td>{{ a.Semestre }}</td>
               <td>{{ a.Plan_Academico }}</td>
+              <td class="text-end">
+                <div class="btn-group btn-group-sm">
+                  <button class="btn btn-outline-info" (click)="seleccionar(a); verAsignatura()">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                  <button class="btn btn-outline-dark" (click)="seleccionar(a); abrirEvaluaciones()">
+                    <i class="bi bi-ui-checks-grid"></i>
+                  </button>
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>

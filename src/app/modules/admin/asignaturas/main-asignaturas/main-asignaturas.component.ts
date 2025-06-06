@@ -48,10 +48,14 @@ export class MainAsignaturasComponent implements OnInit {
     this.seleccionada = asignatura;
   }
 
-  abrirDialog(modo: 'crear' | 'ver' | 'editar') {
-    const modalRef = this.modalService.open(DialogAsignaturaComponent, { centered: true });
+  abrirDialog(modo: 'crear' | 'ver' | 'editar', asignatura?: any) {
+    const modalRef = this.modalService.open(DialogAsignaturaComponent, {
+      centered: true,
+      backdrop: 'static',
+      keyboard: false
+    });
     modalRef.componentInstance.modo = modo;
-    modalRef.componentInstance.datos = modo === 'crear' ? null : this.seleccionada;
+    modalRef.componentInstance.datos = modo === 'crear' ? null : asignatura ?? this.seleccionada;
 
     modalRef.result.then(res => {
       if (res === 'actualizado') this.cargarAsignaturas();
@@ -59,7 +63,12 @@ export class MainAsignaturasComponent implements OnInit {
   }
 
   abrirDialogEstudiantes() {
-    const modalRef = this.modalService.open(DialogEstudiantesComponent, { centered: true, size: 'lg' });
+    const modalRef = this.modalService.open(DialogEstudiantesComponent, {
+      centered: true,
+      size: 'lg',
+      backdrop: 'static',
+      keyboard: false
+    });
 
     modalRef.result.then(res => {
       if (res === 'actualizado') this.cargarAsignaturas();
@@ -68,7 +77,12 @@ export class MainAsignaturasComponent implements OnInit {
 
   abrirDialogInscripcion() {
     if (!this.seleccionada) return;
-    const modalRef = this.modalService.open(DialogInscripcionComponent, { centered: true, size: 'lg' });
+    const modalRef = this.modalService.open(DialogInscripcionComponent, {
+      centered: true,
+      size: 'lg',
+      backdrop: 'static',
+      keyboard: false
+    });
     modalRef.componentInstance.asignatura = this.seleccionada;
 
     modalRef.result.then(res => {
