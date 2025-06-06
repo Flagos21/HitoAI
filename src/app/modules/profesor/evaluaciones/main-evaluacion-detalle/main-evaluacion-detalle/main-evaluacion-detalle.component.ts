@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { AplicacionService } from '../../../../../services/aplicacion.service';
 import { InscripcionService } from '../../../../../services/inscripcion.service';
@@ -28,6 +28,7 @@ export class MainEvaluacionDetalleComponent implements OnInit {
   accionConfirmada: number | null = null;
 
   constructor(
+    public modal: NgbActiveModal,
     private aplicacionService: AplicacionService,
     private inscripcionService: InscripcionService,
     private modalService: NgbModal
@@ -36,6 +37,10 @@ export class MainEvaluacionDetalleComponent implements OnInit {
   ngOnInit(): void {
     this.cargarEstadoEstudiantes();
     this.cargarGrupos();
+  }
+
+  cancelar() {
+    this.modal.dismiss();
   }
 
   cargarEstadoEstudiantes() {

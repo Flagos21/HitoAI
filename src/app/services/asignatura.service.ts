@@ -18,9 +18,10 @@ export class AsignaturaService {
     return this.http.get<any[]>(`${this.apiUrl}/por-profesor/${rut}`);
   }
 
-  obtenerPorCarreraDelJefe(rut: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/por-jefe/${rut}`);
-  }
+obtenerPorCarreraDelJefe(rut: string): Observable<any[]> {
+  return this.http.get<any[]>(`${this.apiUrl}/por-jefe/${rut}`);
+}
+
 
   crear(asignatura: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/crear`, asignatura);

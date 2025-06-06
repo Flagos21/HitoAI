@@ -16,12 +16,14 @@ export class DialogFormContenidoComponent implements OnInit {
   @Input() datos: any = null;
   @Input() asignaturaID: string = '';
 
-  contenido = {
-    ID_Contenido: 0,
-    Nucleo_Tematico: '',
-    Horas: 0,
-    asignatura_ID_Asignatura: ''
-  };
+contenido = {
+  ID_Contenido: 0,
+  Nucleo_Tematico: '',
+  Descripcion: '',
+  Horas: 0,
+  asignatura_ID_Asignatura: ''
+};
+
 
   mensajeExito = '';
   mensajeError = '';
@@ -55,11 +57,12 @@ export class DialogFormContenidoComponent implements OnInit {
   }
 
   crear() {
-    if (!this.contenido.Nucleo_Tematico || this.contenido.Horas <= 0) {
-      this.mensajeError = 'Complete todos los campos correctamente.';
-      setTimeout(() => this.mensajeError = '', 3000);
-      return;
-    }
+if (!this.contenido.Nucleo_Tematico || !this.contenido.Descripcion || this.contenido.Horas <= 0) {
+  this.mensajeError = 'Complete todos los campos correctamente.';
+  setTimeout(() => this.mensajeError = '', 3000);
+  return;
+}
+
 
     if (!this.accionConfirmada) {
       this.accionConfirmada = 'crear';
@@ -74,11 +77,12 @@ export class DialogFormContenidoComponent implements OnInit {
   }
 
   actualizar() {
-    if (!this.contenido.Nucleo_Tematico || this.contenido.Horas <= 0) {
-      this.mensajeError = 'Complete todos los campos correctamente.';
-      setTimeout(() => this.mensajeError = '', 3000);
-      return;
-    }
+if (!this.contenido.Nucleo_Tematico || !this.contenido.Descripcion || this.contenido.Horas <= 0) {
+  this.mensajeError = 'Complete todos los campos correctamente.';
+  setTimeout(() => this.mensajeError = '', 3000);
+  return;
+}
+
 
     if (!this.accionConfirmada) {
       this.accionConfirmada = 'actualizar';

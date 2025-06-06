@@ -13,7 +13,7 @@ exports.obtenerTodas = () => {
   });
 };
 
-exports.obtenerPorCarreraDelJefe = (rutJefe) => {
+exports.obtenerPorCarreraDelJefe = (idUsuario) => {
   const sql = `
     SELECT a.*, u.Nombre AS Profesor, c.Nombre AS Carrera
     FROM asignatura a
@@ -22,9 +22,15 @@ exports.obtenerPorCarreraDelJefe = (rutJefe) => {
     WHERE c.usuario_ID_Usuario = ?
   `;
   return new Promise((resolve, reject) => {
-    connection.query(sql, [rutJefe], (err, results) => (err ? reject(err) : resolve(results)));
+    connection.query(sql, [idUsuario], (err, results) =>
+      err ? reject(err) : resolve(results)
+    );
   });
 };
+
+
+
+
 
 exports.obtenerPorProfesor = (rutProfesor) => {
   const sql = `

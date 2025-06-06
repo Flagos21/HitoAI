@@ -2,6 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+
 import { IndicadorService } from '../../../services/indicador.service';
 import { RaService } from '../../../services/ra.service';
 
@@ -40,28 +41,33 @@ export class DialogFormIndicadorComponent implements OnInit {
     private indicadorService: IndicadorService,
     private raService: RaService
   ) {}
+ngOnInit(): void {
+  console.log('🧪 contenidoID recibido:', this.contenidoID); // <-- esto
 
-  ngOnInit(): void {
-    this.cargarRAs();
+  this.cargarRAs();
 
-    if (this.datos) {
-      this.indicador = {
-        ...this.datos,
-        Criterios: Array.isArray(this.datos.Criterios) ? [...this.datos.Criterios] : []
-      };
-    } else {
-      this.indicador.contenido_ID_Contenido = this.contenidoID;
-      const copia = localStorage.getItem('criteriosReferencia');
-      if (copia) {
-        try {
-          this.indicador.Criterios = JSON.parse(copia);
-        } catch (e) {}
-      }
+  if (this.datos) {
+    this.indicador = {
+      ...this.datos,
+      Criterios: Array.isArray(this.datos.Criterios) ? [...this.datos.Criterios] : []
+    };
+  } else {
+    this.indicador.contenido_ID_Contenido = this.contenidoID;
+    const copia = localStorage.getItem('criteriosReferencia');
+    if (copia) {
+      try {
+        this.indicador.Criterios = JSON.parse(copia);
+      } catch (e) {}
     }
   }
+}
+
 
   cargarRAs() {
-    this.raService.obtenerTodos().subscribe(data => {
+    if (!this.contenidoID) return;
+
+    this.raService.obtenerPorAsignaturaDesdeContenido(this.contenidoID).subscribe(data => {
+      console.log('RA por contenido:', data);
       this.ras = data;
     });
   }
@@ -197,24 +203,22 @@ export class DialogFormIndicadorComponent implements OnInit {
       });
   }
 
-eliminar() {
-  if (!this.accionConfirmada) {
-    this.accionConfirmada = 'eliminar';
-    return;
+  eliminar() {
+    if (!this.accionConfirmada) {
+      this.accionConfirmada = 'eliminar';
+      return;
+    }
+
+    this.bloqueado = true;
+    this.mensajeExito = 'Indicador eliminado';
+    this.indicadorService.eliminar(this.indicador.ID_Indicador).subscribe(() => {
+      setTimeout(() => this.cerrarConExito(), 1500);
+    });
   }
 
-  this.bloqueado = true;
-  this.mensajeExito = 'Indicador eliminado';
-
-  this.indicadorService.eliminar(this.indicador.ID_Indicador).subscribe(() => {
-    setTimeout(() => this.cerrarConExito(), 1500);
-  });
-}
-
-private cerrarConExito() {
-  if (this.modalCerrado) return;
-  this.modalCerrado = true;
-  this.modal.close('actualizado');
-}
-
+  private cerrarConExito() {
+    if (this.modalCerrado) return;
+    this.modalCerrado = true;
+    this.modal.close('actualizado');
+  }
 }

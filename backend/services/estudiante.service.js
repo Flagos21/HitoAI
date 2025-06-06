@@ -61,12 +61,3 @@ exports.insertarMasivo = (estudiantes) => {
     connection.query(sql, [values], (err) => err ? reject(err) : resolve());
   });
 };
-exports.existe = (id) => {
-  const sql = `SELECT 1 FROM estudiante WHERE ID_Estudiante = ? LIMIT 1`;
-  return new Promise((resolve, reject) => {
-    connection.query(sql, [id], (err, results) => {
-      if (err) return reject(err);
-      resolve(results.length > 0);
-    });
-  });
-};

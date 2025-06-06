@@ -22,19 +22,18 @@ export class LoginComponent {
   login() {
     this.usuarioService.login(this.usuario).subscribe({
       next: (res: any) => {
-        const rol = res.Rol?.toLowerCase();
+        const rol = res?.Rol?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
-        // ✅ Guardar el RUT e identificar el usuario correctamente
         localStorage.setItem('rol', res.Rol);
-        localStorage.setItem('rut', res.ID_Usuario);
+        localStorage.setItem('rut', res.ID_Usuario); // En el futuro puedes cambiar 'rut' por 'usuario' si prefieres
 
         if (rol === 'administrador') this.router.navigate(['/admin']);
         else if (rol === 'jefe de carrera') this.router.navigate(['/jefe-carrera']);
         else if (rol === 'profesor') this.router.navigate(['/profesor']);
-        else if (rol === 'comité curricular' || rol === 'comite curricular') this.router.navigate(['/comite']);
-        else alert('Rol no reconocido');
+        else if (rol === 'comite curricular') this.router.navigate(['/comite']);
+        else alert('⚠️ Rol no reconocido');
       },
-      error: () => alert('RUT o clave incorrecta')
+      error: () => alert('❌ Usuario o clave incorrectos')
     });
   }
 }

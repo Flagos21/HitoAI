@@ -4,6 +4,7 @@ import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar.component';
 import { AsignaturaService } from '../../../services/asignatura.service';
 import { DialogContenidoComponent } from '../dialog-contenido/dialog-contenido.component';
+import { DialogAsignaturaComponent } from '../../admin/asignaturas/dialog-asignatura/dialog-asignatura.component';
 
 @Component({
   selector: 'app-main-asignaturas-jefe',
@@ -40,17 +41,37 @@ export class MainAsignaturasJefeComponent implements OnInit {
     this.seleccionada = asignatura;
   }
 
-  verAsignatura() {
-    if (!this.seleccionada) return;
-    alert(`Ver asignatura: ${this.seleccionada.Nombre}`);
-  }
+verAsignatura() {
+  if (!this.seleccionada) return;
 
-  abrirContenidos() {
-    const modalRef = this.modalService.open(DialogContenidoComponent, { centered: true, size: 'lg' });
-    modalRef.componentInstance.asignaturaID = this.seleccionada.ID_Asignatura;
+  const modalRef = this.modalService.open(DialogAsignaturaComponent, {
+    centered: true,
+    size: 'lg',
+    backdrop: 'static',
+    keyboard: false
+  });
 
-    modalRef.result.then(res => {
-      if (res === 'actualizado') this.cargarAsignaturas();
-    }).catch(() => {});
-  }
+  modalRef.componentInstance.modo = 'ver';
+  modalRef.componentInstance.datos = this.seleccionada;
+}
+
+
+abrirContenidos() {
+  if (!this.seleccionada) return;
+
+  const modalRef = this.modalService.open(DialogContenidoComponent, {
+    centered: true,
+    size: 'lg',
+    backdrop: 'static', // ✅ evita cierre al hacer clic fuera
+    keyboard: false      // ✅ evita cierre con tecla Esc
+  });
+
+  modalRef.componentInstance.asignaturaID = this.seleccionada.ID_Asignatura;
+
+  modalRef.result.then(res => {
+    if (res === 'actualizado') this.cargarAsignaturas();
+  }).catch(() => {});
+}
+
+
 }

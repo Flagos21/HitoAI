@@ -2,8 +2,10 @@ import { Component, Input, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+
 import { RaService } from '../../../services/ra.service';
 import { CompetenciaService } from '../../../services/competencia.service';
+import { AsignaturaService } from '../../../services/asignatura.service';
 
 @Component({
   selector: 'app-dialog-ra',
@@ -17,11 +19,14 @@ export class DialogRaComponent implements OnInit {
   @Input() datos: any = null;
 
   competencias: any[] = [];
+  asignaturas: any[] = [];
   competenciasSeleccionadas: string[] = [];
 
   ra = {
     ID_RA: '',
-    Nombre: ''
+    Nombre: '',
+    Descripcion: '',
+    asignatura_ID_Asignatura: ''
   };
 
   bloqueado = false;
@@ -33,18 +38,31 @@ export class DialogRaComponent implements OnInit {
   constructor(
     public modal: NgbActiveModal,
     private raService: RaService,
-    private competenciaService: CompetenciaService
+    private competenciaService: CompetenciaService,
+    private asignaturaService: AsignaturaService
   ) {}
 
   ngOnInit(): void {
-    if (this.datos) {
-      this.ra = { ID_RA: this.datos.ID_RA, Nombre: this.datos.Nombre };
-      this.competenciasSeleccionadas = this.datos.competencias?.split(' + ') || [];
+    const rut = localStorage.getItem('rut') || '';
+    if (rut) {
+      this.asignaturaService.obtenerPorCarreraDelJefe(rut).subscribe(data => {
+        this.asignaturas = data;
+      });
     }
 
     this.competenciaService.obtenerTodas().subscribe(data => {
       this.competencias = data;
     });
+
+    if (this.datos) {
+      this.ra = {
+        ID_RA: this.datos.ID_RA,
+        Nombre: this.datos.Nombre,
+        Descripcion: this.datos.Descripcion,
+        asignatura_ID_Asignatura: this.datos.asignatura_ID_Asignatura
+      };
+      this.competenciasSeleccionadas = this.datos.competencias?.split(' + ') || [];
+    }
   }
 
   toggleSeleccion(id: string) {
@@ -64,7 +82,7 @@ export class DialogRaComponent implements OnInit {
   }
 
   crearRA() {
-    if (!this.ra.ID_RA || !this.ra.Nombre || this.competenciasSeleccionadas.length === 0) {
+    if (!this.ra.Nombre || !this.ra.Descripcion || !this.ra.asignatura_ID_Asignatura || this.competenciasSeleccionadas.length === 0) {
       this.mensajeError = 'Por favor, complete todos los campos antes de continuar.';
       setTimeout(() => (this.mensajeError = ''), 3000);
       return;
@@ -78,11 +96,8 @@ export class DialogRaComponent implements OnInit {
     this.bloqueado = true;
     this.mensajeExito = 'Resultado de aprendizaje creado con éxito';
 
-    const payload = {
-      ID_RA: this.ra.ID_RA,
-      Nombre: this.ra.Nombre,
-      competencias: this.competenciasSeleccionadas
-    };
+    const { ID_RA, ...raSinID } = this.ra;
+    const payload = { ...raSinID, competencias: this.competenciasSeleccionadas };
 
     this.raService.crear(payload).subscribe(() => {
       setTimeout(() => this.cerrarConExito(), 1500);
@@ -90,7 +105,7 @@ export class DialogRaComponent implements OnInit {
   }
 
   actualizarRA() {
-    if (!this.ra.Nombre || this.competenciasSeleccionadas.length === 0) {
+    if (!this.ra.Nombre || !this.ra.Descripcion || !this.ra.asignatura_ID_Asignatura || this.competenciasSeleccionadas.length === 0) {
       this.mensajeError = 'Por favor, complete todos los campos antes de continuar.';
       setTimeout(() => (this.mensajeError = ''), 3000);
       return;
@@ -104,12 +119,7 @@ export class DialogRaComponent implements OnInit {
     this.bloqueado = true;
     this.mensajeExito = 'Resultado actualizado correctamente';
 
-    const payload = {
-      ID_RA: this.ra.ID_RA,
-      Nombre: this.ra.Nombre,
-      competencias: this.competenciasSeleccionadas
-    };
-
+    const payload = { ...this.ra, competencias: this.competenciasSeleccionadas };
     this.raService.actualizar(this.ra.ID_RA, payload).subscribe(() => {
       setTimeout(() => this.cerrarConExito(), 1500);
     });

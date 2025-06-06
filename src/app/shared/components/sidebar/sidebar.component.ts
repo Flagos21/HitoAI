@@ -14,8 +14,9 @@ export class SidebarComponent {
   constructor(private router: Router) {}
   @Input() rol: string = '';
 
-  cerrarSesion() {
-  // Aquí puedes limpiar localStorage, sessionStorage, etc. si usas autenticación
+cerrarSesion() {
+  localStorage.clear(); // o sessionStorage.clear();
   this.router.navigate(['/login']);
 }
+
 }

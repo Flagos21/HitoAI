@@ -1,14 +1,17 @@
 const ContenidoService = require('../services/contenido.service');
 
+// Obtener contenidos por asignatura
 exports.obtenerPorAsignatura = async (req, res) => {
   const id = req.params.id;
   const data = await ContenidoService.obtenerPorAsignatura(id);
   res.json(data);
 };
 
+// Crear contenido
 exports.crear = async (req, res) => {
   try {
-    await ContenidoService.crear(req.body);
+    const { Nucleo_Tematico, Descripcion, Horas, asignatura_ID_Asignatura } = req.body;
+    await ContenidoService.crear({ Nucleo_Tematico, Descripcion, Horas, asignatura_ID_Asignatura });
     res.status(201).json({ message: 'Contenido creado' });
   } catch (err) {
     console.error(err);
@@ -16,9 +19,11 @@ exports.crear = async (req, res) => {
   }
 };
 
+// Actualizar contenido
 exports.actualizar = async (req, res) => {
   try {
-    await ContenidoService.actualizar(req.params.id, req.body);
+    const { Nucleo_Tematico, Descripcion, Horas } = req.body;
+    await ContenidoService.actualizar(req.params.id, { Nucleo_Tematico, Descripcion, Horas });
     res.json({ message: 'Contenido actualizado' });
   } catch (err) {
     console.error(err);
@@ -26,6 +31,7 @@ exports.actualizar = async (req, res) => {
   }
 };
 
+// Eliminar contenido
 exports.eliminar = async (req, res) => {
   try {
     await ContenidoService.eliminar(req.params.id);

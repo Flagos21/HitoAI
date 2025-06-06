@@ -4,7 +4,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CompetenciaService } from '../../../services/competencia.service';
 
-
 @Component({
   selector: 'app-dialog-form-competencia',
   standalone: true,
@@ -19,12 +18,12 @@ export class DialogFormCompetenciaComponent implements OnInit {
   competencia = {
     ID_Competencia: '',
     Nombre: '',
+    Descripcion: '',
     Tipo: ''
   };
 
   mensajeExito = '';
   mensajeError = '';
-
   accionConfirmada: 'crear' | 'actualizar' | 'eliminar' | null = null;
   bloqueado = false;
   private modalCerrado = false;
@@ -48,29 +47,32 @@ export class DialogFormCompetenciaComponent implements OnInit {
   cerrarToast() {
     this.cerrarConExito();
   }
-crear() {
-  if (!this.competencia.ID_Competencia || !this.competencia.Nombre || !this.competencia.Tipo) {
-    this.mensajeError = 'Por favor, complete todos los campos antes de continuar.';
-    setTimeout(() => this.mensajeError = '', 3000);
-    return;
+
+  crear() {
+    const { ID_Competencia, Nombre, Descripcion, Tipo } = this.competencia;
+    if (!ID_Competencia || !Nombre || !Descripcion || !Tipo) {
+      this.mensajeError = 'Por favor, complete todos los campos antes de continuar.';
+      setTimeout(() => (this.mensajeError = ''), 3000);
+      return;
+    }
+
+    if (!this.accionConfirmada) {
+      this.accionConfirmada = 'crear';
+      return;
+    }
+
+    this.bloqueado = true;
+    this.mensajeExito = 'Competencia creada con éxito';
+    this.competenciaService.crear(this.competencia).subscribe(() => {
+      setTimeout(() => this.cerrarConExito(), 1500);
+    });
   }
-
-  if (!this.accionConfirmada) {
-    this.accionConfirmada = 'crear';
-    return;
-  }
-
-  this.bloqueado = true;
-  this.mensajeExito = 'Competencia creada con éxito';
-  this.competenciaService.crear(this.competencia).subscribe(() => {
-    setTimeout(() => this.cerrarConExito(), 1500);
-  });
-}
-
 
   actualizar() {
-    if (!this.competencia.Nombre || !this.competencia.Tipo) {
-      alert('Por favor, complete todos los campos antes de continuar.');
+    const { Nombre, Descripcion, Tipo } = this.competencia;
+    if (!Nombre || !Descripcion || !Tipo) {
+      this.mensajeError = 'Por favor, complete todos los campos antes de continuar.';
+      setTimeout(() => (this.mensajeError = ''), 3000);
       return;
     }
 
