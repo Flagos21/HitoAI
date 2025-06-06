@@ -3,5 +3,5 @@ export interface ResultadoAprendizaje {
   Nombre: string;
   Descripcion: string;
   asignatura_ID_Asignatura: string;
-  competencias?: string; // IDs concatenated
+  competencias?: string | string[]; // IDs concatenated or array of IDs
 }
