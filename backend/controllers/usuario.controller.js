@@ -53,3 +53,32 @@ exports.getProfesores = async (req, res) => {
     res.status(500).json({ message: 'Error al obtener profesores' });
   }
 };
+
+// Obtener todos los usuarios
+exports.getTodos = async (req, res) => {
+  try {
+    const usuarios = await UsuarioService.getTodos();
+    res.json(usuarios);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al obtener usuarios' });
+  }
+};
+
+// Actualizar clave
+exports.actualizarClave = async (req, res) => {
+  const { id } = req.params;
+  const { clave } = req.body;
+
+  if (!clave) {
+    return res.status(400).json({ message: 'La clave es requerida' });
+  }
+
+  try {
+    await UsuarioService.actualizarClave(id, clave);
+    res.json({ message: 'Clave actualizada' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al actualizar clave' });
+  }
+};

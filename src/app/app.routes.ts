@@ -23,6 +23,12 @@ export const routes: Routes = [
       import('./modules/admin/asignaturas/main-asignaturas/main-asignaturas.component')
         .then(m => m.MainAsignaturasComponent)
   },
+  {
+    path: 'admin/usuarios',
+    loadComponent: () =>
+      import('./modules/admin/usuarios/main-usuarios/main-usuarios.component')
+        .then(m => m.MainUsuariosComponent)
+  },
 
   // JEFE DE CARRERA
   { path: 'jefe-carrera', component: JefeHome },

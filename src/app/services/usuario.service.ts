@@ -26,5 +26,13 @@ export class UsuarioService {
     return this.http.get<Usuario[]>(`${this.apiUrl}/profesores`);
   }
 
+  getUsuarios() {
+    return this.http.get<Usuario[]>(`${this.apiUrl}/todos`);
+  }
+
+  actualizarClave(id: string, clave: string) {
+    return this.http.put(`${this.apiUrl}/clave/${id}`, { clave });
+  }
+
 
 }
