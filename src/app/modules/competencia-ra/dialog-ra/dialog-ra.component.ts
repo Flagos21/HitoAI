@@ -4,10 +4,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { RaService } from '../../../services/ra.service';
-import { CompetenciaService, Competencia } from '../../../services/competencia.service';
+import { CompetenciaService } from '../../../services/competencia.service';
 import { AsignaturaService } from '../../../services/asignatura.service';
-import { ResultadoAprendizaje } from '../../../models/resultado-aprendizaje.model';
-import { Asignatura } from '../../../models/asignatura.model';
 
 @Component({
   selector: 'app-dialog-ra',
@@ -18,13 +16,13 @@ import { Asignatura } from '../../../models/asignatura.model';
 })
 export class DialogRaComponent implements OnInit {
   @Input() modo: 'crear' | 'ver' | 'editar' = 'crear';
-  @Input() datos: ResultadoAprendizaje | null = null;
+  @Input() datos: any = null;
 
-  competencias: Competencia[] = [];
-  asignaturas: Asignatura[] = [];
+  competencias: any[] = [];
+  asignaturas: any[] = [];
   competenciasSeleccionadas: string[] = [];
 
-  ra: ResultadoAprendizaje = {
+  ra = {
     ID_RA: '',
     Nombre: '',
     Descripcion: '',

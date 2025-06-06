@@ -1,8 +1,6 @@
 import { Component } from '@angular/core';
 import { UsuarioService } from '../../../services/usuario.service';
-import { RolService } from '../../../services/rol.service';
-import { Usuario } from '../../../models/usuario.model';
-import { Rol } from '../../../models/rol.model';
+import { RolService } from '../../../services/rol.service'; // NUEVO
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar.component';
@@ -19,14 +17,14 @@ declare const bootstrap: any;
 export class HomeComponent {
   rolUsuario = localStorage.getItem('rol') || '';
 
-  usuario: Usuario = {
+  usuario = {
     ID_Usuario: '',
     Nombre: '',
     Clave: '',
     Rol_ID_Rol: ''
   };
 
-  roles: Rol[] = [];
+  roles: any[] = [];
 
   constructor(
     private usuarioService: UsuarioService,

@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { Observable } from 'rxjs';
-import { Evaluacion } from '../models/evaluacion.model';
 
 @Injectable({
   providedIn: 'root'
@@ -16,12 +15,12 @@ export class EvaluacionService {
     return this.http.get<number>(`${this.apiUrl}/contar/${asignaturaID}`);
   }
 
-  crearConAplicaciones(data: Evaluacion & { aplicaciones: any[] }): Observable<any> {
+  crearConAplicaciones(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/crear-con-aplicaciones`, data)
   }
 
-  obtenerPorAsignatura(asignaturaID: string): Observable<Evaluacion[]> {
-    return this.http.get<Evaluacion[]>(`${this.apiUrl}/por-asignatura/${asignaturaID}`);
+  obtenerPorAsignatura(asignaturaID: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/por-asignatura/${asignaturaID}`);
   }
   obtenerContenidosUsados(asignaturaID: string): Observable<number[]> {
   return this.http.get<number[]>(`${this.apiUrl}/contenidos-usados/${asignaturaID}`);
