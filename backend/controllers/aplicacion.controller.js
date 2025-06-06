@@ -118,13 +118,3 @@ exports.disolverGrupo = async (req, res) => {
     res.status(500).json({ message: 'Error inesperado' });
   }
 };
-exports.obtenerPuntajesEstudiante = async (req, res) => {
-  const { evaluacionID, asignaturaID, estudianteID } = req.params;
-  try {
-    const data = await AplicacionService.obtenerPuntajesEstudiante(evaluacionID, asignaturaID, estudianteID);
-    res.json(data);
-  } catch (err) {
-    console.error('Error al obtener puntajes del estudiante:', err);
-    res.status(500).json({ message: 'Error interno del servidor' });
-  }
-};

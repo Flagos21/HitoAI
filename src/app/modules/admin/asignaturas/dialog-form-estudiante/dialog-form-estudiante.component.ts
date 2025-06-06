@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { EstudianteService } from '../../../../services/estudiante.service';
+import { Estudiante } from '../../../../models';
 
 
 @Component({
@@ -14,9 +15,9 @@ import { EstudianteService } from '../../../../services/estudiante.service';
 })
 export class DialogFormEstudianteComponent implements OnInit {
   @Input() modo: 'crear' | 'ver' | 'editar' = 'crear';
-  @Input() datos: any = null;
+  @Input() datos: Estudiante | null = null;
 
-  estudiante = {
+  estudiante: Estudiante = {
     ID_Estudiante: '',
     Nombre: '',
     Apellido: '',
