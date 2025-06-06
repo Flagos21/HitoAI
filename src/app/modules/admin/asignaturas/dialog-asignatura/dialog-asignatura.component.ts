@@ -6,6 +6,7 @@ import { AsignaturaService } from '../../../../services/asignatura.service';
 import { CarreraService } from '../../../../services/carrera.service';
 import { InscripcionService } from '../../../../services/inscripcion.service';
 import { UsuarioService } from '../../../../services/usuario.service';
+import { Asignatura, Carrera, Usuario, Inscripcion } from '../../../../models';
 
 @Component({
   selector: 'app-dialog-asignatura',
@@ -16,9 +17,9 @@ import { UsuarioService } from '../../../../services/usuario.service';
 })
 export class DialogAsignaturaComponent implements OnInit {
   @Input() modo: 'crear' | 'ver' | 'editar' = 'crear';
-  @Input() datos: any = null;
+  @Input() datos: Asignatura | null = null;
 
-  asignatura = {
+  asignatura: Asignatura = {
     ID_Asignatura: '',
     Nombre: '',
     Semestre: 1,
@@ -28,10 +29,10 @@ export class DialogAsignaturaComponent implements OnInit {
     usuario_ID_Usuario: ''
   };
 
-  carreras: any[] = [];
-  profesores: any[] = [];
-  estudiantesInscritos: any[] = [];
-  estudianteParaDesvincular: any = null;
+  carreras: Carrera[] = [];
+  profesores: Usuario[] = [];
+  estudiantesInscritos: Inscripcion[] = [];
+  estudianteParaDesvincular: Inscripcion | null = null;
 
   nombreCarrera = '';
   mensajeExito = '';
@@ -82,7 +83,7 @@ export class DialogAsignaturaComponent implements OnInit {
     });
   }
 
-  marcarParaDesvincular(est: any) {
+  marcarParaDesvincular(est: Inscripcion) {
     this.estudianteParaDesvincular = est;
   }
 
