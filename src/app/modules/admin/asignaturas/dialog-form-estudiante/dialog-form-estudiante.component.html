@@ -1,5 +1,6 @@
 <div class="modal-header">
-  <h5 class="modal-title text-primary">
+  <h5 class="modal-title d-flex align-items-center gap-2" style="color: #002F5D">
+    <i class="bi bi-person-fill"></i>
     {{
       modo === 'crear'
         ? 'Crear Estudiante'
@@ -64,7 +65,7 @@
     </div>
 
     <!-- Confirmación -->
-    <div *ngIf="accionConfirmada && !bloqueado" class="confirm-overlay shadow-lg p-4 rounded">
+    <div *ngIf="accionConfirmada && !bloqueado" class="confirm-overlay shadow p-4 rounded border mt-3" style="background-color: #f9f9f9;">
       <h5 class="mb-3">
         <i
           class="bi"
