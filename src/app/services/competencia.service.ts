@@ -2,7 +2,12 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { Observable } from 'rxjs';
-import { Competencia } from '../models/competencia.model';
+
+export interface Competencia {
+  ID_Competencia: string;
+  Nombre: string;
+  Tipo: string; // Esto ahora es la descripción
+}
 
 @Injectable({
   providedIn: 'root'

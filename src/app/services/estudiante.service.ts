@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { Observable } from 'rxjs';
-import { Estudiante } from '../models/estudiante.model';
 
 @Injectable({
   providedIn: 'root'
@@ -13,22 +12,22 @@ export class EstudianteService {
   constructor(private http: HttpClient) {}
 
   // Obtener todos los estudiantes
-  obtenerTodos(): Observable<Estudiante[]> {
-    return this.http.get<Estudiante[]>(`${this.apiUrl}`);
+  obtenerTodos(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}`);
   }
 
   // Obtener estudiantes no inscritos
-  obtenerNoInscritos(): Observable<Estudiante[]> {
-    return this.http.get<Estudiante[]>(`${this.apiUrl}/no-inscritos`);
+  obtenerNoInscritos(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/no-inscritos`);
   }
 
   // Crear estudiante
-  crear(estudiante: Estudiante): Observable<any> {
+  crear(estudiante: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/crear`, estudiante);
   }
 
   // Actualizar estudiante
-  actualizar(id: string, estudiante: Estudiante): Observable<any> {
+  actualizar(id: string, estudiante: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/actualizar/${id}`, estudiante);
   }
 
