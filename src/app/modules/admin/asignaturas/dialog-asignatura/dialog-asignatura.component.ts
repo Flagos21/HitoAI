@@ -20,6 +20,7 @@ import { Asignatura, Carrera, Usuario, Estudiante } from '../../../../models';
 export class DialogAsignaturaComponent implements OnInit {
   @Input() modo: 'crear' | 'ver' | 'editar' = 'crear';
   @Input() datos: Asignatura | null = null;
+  @Input() puedeDesvincular = true;
 
   asignatura: Asignatura = {
     ID_Asignatura: '',
@@ -88,12 +89,12 @@ export class DialogAsignaturaComponent implements OnInit {
   }
 
   marcarParaDesvincular(est: Estudiante) {
-
+    if (!this.puedeDesvincular) return;
     this.estudianteParaDesvincular = est;
   }
 
   confirmarDesvincular() {
-    if (!this.estudianteParaDesvincular) return;
+    if (!this.puedeDesvincular || !this.estudianteParaDesvincular) return;
 
     const est = this.estudianteParaDesvincular;
     this.bloqueado = true;

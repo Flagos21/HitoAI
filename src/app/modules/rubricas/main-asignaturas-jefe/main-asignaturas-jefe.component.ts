@@ -46,6 +46,7 @@ export class MainAsignaturasJefeComponent implements OnInit {
 
     modalRef.componentInstance.modo = 'ver';
     modalRef.componentInstance.datos = asignatura;
+    modalRef.componentInstance.puedeDesvincular = false;
   }
 
   abrirContenidos(asignatura: any) {
