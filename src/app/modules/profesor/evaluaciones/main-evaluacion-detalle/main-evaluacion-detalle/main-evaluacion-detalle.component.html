@@ -1,0 +1,135 @@
+<div class="modal-header">
+  <h5 class="modal-title text-primary">
+    <i class="bi bi-clipboard-check me-2"></i> Evaluación Detalle
+  </h5>
+  <button type="button" class="btn-close" (click)="cancelar()"></button>
+</div>
+
+<!-- Contenedor con scroll solo en el cuerpo -->
+<div class="modal-body" style="max-height: 75vh; overflow-y: auto;">
+
+  <!-- Estado estudiantes -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h6 class="fw-bold text-dark mb-0">
+      <i class="bi bi-person-lines-fill me-1"></i> Estado de los Estudiantes
+    </h6>
+    <button class="btn btn-outline-success" (click)="abrirDialogGrupo()" [disabled]="bloqueado">
+      <i class="bi bi-people me-1"></i> Crear Grupo
+    </button>
+  </div>
+
+  <table class="table table-sm table-bordered">
+    <thead class="table-light">
+      <tr>
+        <th>RUT</th>
+        <th>Nombre</th>
+        <th>Apellido</th>
+        <th>Evaluado</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let est of estudiantes">
+        <td>{{ est.ID_Estudiante }}</td>
+        <td>{{ est.Nombre }}</td>
+        <td>{{ est.Apellido }}</td>
+        <td>
+          <i *ngIf="evaluados.has(est.ID_Estudiante)" class="bi bi-check-circle-fill text-success"></i>
+          <i *ngIf="!evaluados.has(est.ID_Estudiante)" class="bi bi-x-circle-fill text-danger"></i>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Grupos evaluados -->
+  <div class="mt-4">
+    <h6 class="fw-bold text-dark mb-3">
+      <i class="bi bi-people-fill me-1"></i> Grupos Evaluados
+    </h6>
+
+    <div *ngIf="grupos.length === 0" class="alert alert-info text-center">
+      Aún no hay grupos evaluados.
+    </div>
+
+    <div *ngFor="let grupo of grupos">
+      <div class="border border-success rounded p-3 mb-3 bg-white shadow-sm">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <strong>Grupo {{ grupo.numero }}</strong>
+            <span class="text-muted small ms-2">Integrantes: {{ grupo.estudiantes.length }}</span>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary btn-sm" (click)="abrirRubrica(grupo, grupo.numero)">
+              <i class="bi" [ngClass]="{
+                'bi-eye': esGrupoEvaluado(grupo),
+                'bi-pencil-square': !esGrupoEvaluado(grupo)
+              }"></i>
+              {{ esGrupoEvaluado(grupo) ? 'Ver Rúbrica' : 'Evaluar' }}
+            </button>
+
+            <ng-container *ngIf="esGrupoEvaluado(grupo); else puedeDisolver">
+              <span class="badge bg-light text-muted border px-3 py-2 d-inline-flex align-items-center">
+                <i class="bi bi-lock-fill me-1"></i> Grupo Evaluado
+              </span>
+            </ng-container>
+
+            <ng-template #puedeDisolver>
+              <button class="btn btn-outline-danger btn-sm"
+                      (click)="confirmarDisolver(grupo.numero)"
+                      [disabled]="bloqueado || accionConfirmada === grupo.numero">
+                <i class="bi bi-trash"></i> Disolver Grupo
+              </button>
+            </ng-template>
+          </div>
+        </div>
+
+        <ul class="mt-2 mb-0">
+          <li *ngFor="let est of grupo.estudiantes">
+            {{ est.Nombre }} {{ est.Apellido }}
+          </li>
+        </ul>
+
+        <!-- Confirmación -->
+        <div *ngIf="accionConfirmada === grupo.numero" class="confirm-overlay shadow-lg p-4 rounded mt-3">
+          <h6 class="mb-2 text-danger">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            Confirmar disolución
+          </h6>
+          <p class="mb-3">¿Deseas <strong>disolver el grupo {{ grupo.numero }}</strong>?</p>
+          <div class="d-flex justify-content-end gap-2">
+            <button class="btn btn-danger btn-sm text-white" (click)="disolverGrupoConfirmado(grupo.numero)">
+              Sí, disolver
+            </button>
+            <button class="btn btn-outline-secondary btn-sm" (click)="cancelarConfirmacion()">
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- TOAST ÉXITO -->
+<div *ngIf="mensajeExito && bloqueado" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 2000">
+  <div class="toast show text-bg-success">
+    <div class="d-flex">
+      <div class="toast-body">
+        <i class="bi bi-check-circle-fill me-2"></i> {{ mensajeExito }}
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" (click)="mensajeExito = ''; bloqueado = false;"></button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST ERROR -->
+<div *ngIf="mensajeError && !bloqueado" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 2000">
+  <div class="toast show text-bg-danger bg-opacity-75">
+    <div class="d-flex">
+      <div class="toast-body">
+        <i class="bi bi-exclamation-octagon-fill me-2"></i> {{ mensajeError }}
+      </div>
+    </div>
+  </div>
+</div>

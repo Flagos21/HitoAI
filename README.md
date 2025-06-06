@@ -2,15 +2,43 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.12.
 
-## Development server
+## Environment variables
 
-To start a local development server, run:
+The backend uses a `.env` file. An example file is provided at `backend/.env.example`. Copy this file and adjust the values for your setup:
 
 ```bash
-ng serve
+cp backend/.env.example backend/.env
+```
+
+## Development servers
+
+### Backend
+
+Install dependencies and start the API server:
+
+```bash
+cd backend
+npm install
+node app.js
+```
+
+### Frontend
+
+From the project root run:
+
+```bash
+npm start
 ```
 
 Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+
+## Backend server
+
+To start the backend API, change into the `backend/` directory and run:
+
+```bash
+npm start
+```
 
 ## Code scaffolding
 
