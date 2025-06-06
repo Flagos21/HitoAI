@@ -3,5 +3,5 @@ export interface Criterio {
   Nombre: string;
   R_Min: number;
   R_Max: number;
-  indicador_ID_Indicador: number;
+  indicador_ID_Indicador?: number;
 }

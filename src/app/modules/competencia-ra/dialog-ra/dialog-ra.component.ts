@@ -127,7 +127,7 @@ export class DialogRaComponent implements OnInit {
     this.mensajeExito = 'Resultado actualizado correctamente';
 
     const payload = { ...this.ra, competencias: this.competenciasSeleccionadas };
-    this.raService.actualizar(this.ra.ID_RA, payload).subscribe(() => {
+    this.raService.actualizar(this.ra.ID_RA!, payload).subscribe(() => {
       setTimeout(() => this.cerrarConExito(), 1500);
     });
   }
@@ -140,7 +140,7 @@ export class DialogRaComponent implements OnInit {
 
     this.bloqueado = true;
     this.mensajeExito = 'Resultado eliminado';
-    this.raService.eliminar(this.ra.ID_RA).subscribe(() => {
+    this.raService.eliminar(this.ra.ID_RA!).subscribe(() => {
       setTimeout(() => this.cerrarConExito(), 1500);
     });
   }
