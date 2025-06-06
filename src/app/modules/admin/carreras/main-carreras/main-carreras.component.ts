@@ -16,7 +16,6 @@ import { Carrera, Usuario } from '../../../../models';
 })
 export class MainCarrerasComponent implements OnInit {
   carreras: Carrera[] = [];
-  seleccionada: Carrera | null = null;
   jefes: Usuario[] = [];
   rolUsuario: string = '';
 
@@ -40,12 +39,7 @@ export class MainCarrerasComponent implements OnInit {
     this.usuarioService.getJefesCarrera().subscribe(data => this.jefes = data);
   }
 
-  seleccionar(carrera: Carrera) {
-    this.seleccionada = carrera;
-  }
-
-
-  abrirDialog(modo: 'crear' | 'ver' | 'editar', carrera?: Carrera | null) {
+  abrirDialog(modo: 'crear' | 'ver' | 'editar', carrera?: Carrera) {
 
     const modalRef = this.modalService.open(DialogCarreraComponent, {
       centered: true,
@@ -54,7 +48,7 @@ export class MainCarrerasComponent implements OnInit {
     });
     modalRef.componentInstance.modo = modo;
     modalRef.componentInstance.jefes = this.jefes;
-    modalRef.componentInstance.datos = modo === 'crear' ? null : carrera ?? this.seleccionada;
+    modalRef.componentInstance.datos = modo === 'crear' ? null : carrera;
 
     modalRef.result.then(res => {
       if (res === 'actualizado') this.cargarCarreras();

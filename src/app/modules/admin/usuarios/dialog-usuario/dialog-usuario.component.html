@@ -1,29 +1,55 @@
 <div class="modal-header" style="background-color: #002f5d">
-  <h5 class="modal-title text-white">Detalles de Usuario</h5>
+  <h5 class="modal-title text-white">
+    {{ modo === 'crear' ? 'Registrar Usuario' : 'Detalles de Usuario' }}
+  </h5>
   <button type="button" class="btn-close btn-close-white" aria-label="Cerrar" (click)="cancelar()"></button>
 </div>
 <div class="modal-body">
-  <div class="mb-3">
-    <label class="form-label">RUT</label>
-    <input type="text" class="form-control" [value]="usuario.ID_Usuario" disabled />
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Nombre</label>
-    <input type="text" class="form-control" [value]="usuario.Nombre" disabled />
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Rol</label>
-    <input type="text" class="form-control" [value]="usuario.Rol" disabled />
-  </div>
-
-  <div *ngIf="modo === 'editar'">
+  <form *ngIf="modo === 'crear'">
     <div class="mb-3">
-      <label class="form-label">Nueva clave</label>
-      <input type="password" class="form-control" [(ngModel)]="nuevaClave" />
+      <label class="form-label">RUT</label>
+      <input type="text" class="form-control" [(ngModel)]="usuario.ID_Usuario" name="rut" [disabled]="bloqueado" required />
     </div>
     <div class="mb-3">
-      <label class="form-label">Confirmar clave</label>
-      <input type="password" class="form-control" [(ngModel)]="confirmar" />
+      <label class="form-label">Nombre</label>
+      <input type="text" class="form-control" [(ngModel)]="usuario.Nombre" name="nombre" [disabled]="bloqueado" required />
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Rol</label>
+      <select class="form-select" [(ngModel)]="usuario.Rol_ID_Rol" name="rol" [disabled]="bloqueado" required>
+        <option value="" disabled selected>Selecciona un rol</option>
+        <option *ngFor="let r of roles" [value]="r.ID_Rol">{{ r.Nombre }}</option>
+      </select>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Clave</label>
+      <input type="password" class="form-control" [(ngModel)]="usuario.Clave" name="clave" [disabled]="bloqueado" required />
+    </div>
+  </form>
+
+  <div *ngIf="modo !== 'crear'">
+    <div class="mb-3">
+      <label class="form-label">RUT</label>
+      <input type="text" class="form-control" [value]="usuario.ID_Usuario" disabled />
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Nombre</label>
+      <input type="text" class="form-control" [value]="usuario.Nombre" disabled />
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Rol</label>
+      <input type="text" class="form-control" [value]="usuario.Rol" disabled />
+    </div>
+
+    <div *ngIf="modo === 'editar'">
+      <div class="mb-3">
+        <label class="form-label">Nueva clave</label>
+        <input type="password" class="form-control" [(ngModel)]="nuevaClave" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Confirmar clave</label>
+        <input type="password" class="form-control" [(ngModel)]="confirmar" />
+      </div>
     </div>
   </div>
 
@@ -38,5 +64,8 @@
   <button type="button" class="btn btn-secondary" (click)="cancelar()" [disabled]="bloqueado">Cerrar</button>
   <button *ngIf="modo === 'editar'" type="button" class="btn btn-primary" (click)="renovarClave()" [disabled]="bloqueado">
     Guardar
+  </button>
+  <button *ngIf="modo === 'crear'" type="button" class="btn btn-primary" (click)="crear()" [disabled]="bloqueado">
+    Registrar
   </button>
 </div>
