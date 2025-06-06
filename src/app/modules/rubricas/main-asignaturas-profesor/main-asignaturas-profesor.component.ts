@@ -53,7 +53,12 @@ export class MainAsignaturasProfesorComponent implements OnInit {
 
   abrirEvaluaciones() {
     if (!this.seleccionada) return;
-    const modalRef = this.modalService.open(DialogEvaluacionesComponent, { centered: true, size: 'xl' });
+    const modalRef = this.modalService.open(DialogEvaluacionesComponent, {
+      centered: true,
+      size: 'xl',
+      backdrop: 'static',
+      keyboard: false
+    });
     modalRef.componentInstance.asignatura = this.seleccionada;
 
     modalRef.result.then(res => {
