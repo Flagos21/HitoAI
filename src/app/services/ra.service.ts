@@ -16,17 +16,21 @@ export class RaService {
     return this.http.get<ResultadoAprendizaje[]>(this.apiUrl);
   }
 
+
   obtenerPorId(id: number): Observable<ResultadoAprendizaje> {
     return this.http.get<ResultadoAprendizaje>(`${this.apiUrl}/${id}`);
   }
 
   crear(ra: ResultadoAprendizaje & { competencias: string[] }): Observable<any> {
+
     // 🔥 asegurarse de no enviar ID_RA si existe
     const { ID_RA, ...nuevoRA } = ra;
     return this.http.post(`${this.apiUrl}/crear`, nuevoRA);
   }
 
+
   actualizar(id: number, ra: ResultadoAprendizaje & { competencias: string[] }): Observable<any> {
+
     return this.http.put(`${this.apiUrl}/actualizar/${id}`, ra);
   }
 

@@ -17,6 +17,7 @@ export class EvaluacionService {
   }
 
   crearConAplicaciones(data: Evaluacion & { contenidos: number[] }): Observable<any> {
+
     return this.http.post(`${this.apiUrl}/crear-con-aplicaciones`, data)
   }
 

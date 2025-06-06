@@ -44,7 +44,9 @@ export class MainCarrerasComponent implements OnInit {
     this.seleccionada = carrera;
   }
 
+
   abrirDialog(modo: 'crear' | 'ver' | 'editar', carrera?: Carrera | null) {
+
     const modalRef = this.modalService.open(DialogCarreraComponent, {
       centered: true,
       backdrop: 'static',

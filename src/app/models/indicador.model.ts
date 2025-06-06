@@ -1,4 +1,3 @@
-import { Criterio } from './criterio.model';
 
 export interface Indicador {
   ID_Indicador?: number;
@@ -6,5 +5,5 @@ export interface Indicador {
   Puntaje_Max: number;
   contenido_ID_Contenido: number;
   ra_ID_RA: number;
-  Criterios?: Criterio[];
+
 }

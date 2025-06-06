@@ -51,6 +51,7 @@ export class MainAsignaturasComponent implements OnInit {
   }
 
   abrirDialog(modo: 'crear' | 'ver' | 'editar', asignatura?: Asignatura | null) {
+
     const modalRef = this.modalService.open(DialogAsignaturaComponent, {
       centered: true,
       backdrop: 'static',
