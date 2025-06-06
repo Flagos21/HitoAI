@@ -43,11 +43,15 @@ export class MainCarrerasComponent implements OnInit {
     this.seleccionada = carrera;
   }
 
-  abrirDialog(modo: 'crear' | 'ver' | 'editar') {
-    const modalRef = this.modalService.open(DialogCarreraComponent, { centered: true });
+  abrirDialog(modo: 'crear' | 'ver' | 'editar', carrera?: any) {
+    const modalRef = this.modalService.open(DialogCarreraComponent, {
+      centered: true,
+      backdrop: 'static',
+      keyboard: false
+    });
     modalRef.componentInstance.modo = modo;
     modalRef.componentInstance.jefes = this.jefes;
-    modalRef.componentInstance.datos = modo === 'crear' ? null : this.seleccionada;
+    modalRef.componentInstance.datos = modo === 'crear' ? null : carrera ?? this.seleccionada;
 
     modalRef.result.then(res => {
       if (res === 'actualizado') this.cargarCarreras();

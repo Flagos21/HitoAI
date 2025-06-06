@@ -52,7 +52,11 @@ export class DialogEstudiantesComponent implements OnInit {
   }
 
   abrirFormulario(modo: 'crear' | 'ver' | 'editar') {
-    const modalRef = this.modalService.open(DialogFormEstudianteComponent, { centered: true });
+    const modalRef = this.modalService.open(DialogFormEstudianteComponent, {
+      centered: true,
+      backdrop: 'static',
+      keyboard: false
+    });
     modalRef.componentInstance.modo = modo;
     modalRef.componentInstance.datos = modo === 'crear' ? null : this.seleccionado;
 

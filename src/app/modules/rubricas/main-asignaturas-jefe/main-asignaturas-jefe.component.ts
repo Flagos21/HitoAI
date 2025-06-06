@@ -16,7 +16,6 @@ import { DialogAsignaturaComponent } from '../../admin/asignaturas/dialog-asigna
 export class MainAsignaturasJefeComponent implements OnInit {
   rolUsuario = '';
   asignaturas: any[] = [];
-  seleccionada: any = null;
 
   constructor(
     private modalService: NgbModal,
@@ -32,46 +31,39 @@ export class MainAsignaturasJefeComponent implements OnInit {
     const rut = localStorage.getItem('rut');
     if (!rut) return;
 
-    this.asignaturaService.obtenerPorCarreraDelJefe(rut).subscribe(data => {
+    this.asignaturaService.obtenerPorCarreraDelJefe(rut).subscribe((data) => {
       this.asignaturas = data;
     });
   }
 
-  seleccionar(asignatura: any) {
-    this.seleccionada = asignatura;
+  verAsignatura(asignatura: any) {
+    const modalRef = this.modalService.open(DialogAsignaturaComponent, {
+      centered: true,
+      size: 'lg',
+      backdrop: 'static',
+      keyboard: false,
+    });
+
+    modalRef.componentInstance.modo = 'ver';
+    modalRef.componentInstance.datos = asignatura;
   }
 
-verAsignatura() {
-  if (!this.seleccionada) return;
+  abrirContenidos(asignatura: any) {
+    const modalRef = this.modalService.open(DialogContenidoComponent, {
+      centered: true,
+      size: 'lg',
+      backdrop: 'static', // ✅ evita cierre al hacer clic fuera
+      keyboard: false, // ✅ evita cierre con tecla Esc
+    });
 
-  const modalRef = this.modalService.open(DialogAsignaturaComponent, {
-    centered: true,
-    size: 'lg',
-    backdrop: 'static',
-    keyboard: false
-  });
+    modalRef.componentInstance.asignaturaID = asignatura.ID_Asignatura;
 
-  modalRef.componentInstance.modo = 'ver';
-  modalRef.componentInstance.datos = this.seleccionada;
-}
-
-
-abrirContenidos() {
-  if (!this.seleccionada) return;
-
-  const modalRef = this.modalService.open(DialogContenidoComponent, {
-    centered: true,
-    size: 'lg',
-    backdrop: 'static', // ✅ evita cierre al hacer clic fuera
-    keyboard: false      // ✅ evita cierre con tecla Esc
-  });
-
-  modalRef.componentInstance.asignaturaID = this.seleccionada.ID_Asignatura;
-
-  modalRef.result.then(res => {
-    if (res === 'actualizado') this.cargarAsignaturas();
-  }).catch(() => {});
-}
+    modalRef.result
+      .then((res) => {
+        if (res === 'actualizado') this.cargarAsignaturas();
+      })
+      .catch(() => {});
+  }
 
 
 }

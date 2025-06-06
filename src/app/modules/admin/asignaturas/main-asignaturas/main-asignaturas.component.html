@@ -7,10 +7,10 @@
         <button class="btn btn-success me-2" (click)="abrirDialog('crear')">
           <i class="bi bi-plus-circle me-1"></i> Nueva Asignatura
         </button>
-        <button class="btn btn-info me-2 text-white" [disabled]="!seleccionada" (click)="abrirDialog('ver')">
+        <button class="btn btn-info me-2 text-white" [disabled]="!seleccionada" (click)="abrirDialog('ver', seleccionada)">
           <i class="bi bi-eye me-1"></i> Ver
         </button>
-        <button class="btn btn-warning text-white" [disabled]="!seleccionada" (click)="abrirDialog('editar')">
+        <button class="btn btn-warning text-white" [disabled]="!seleccionada" (click)="abrirDialog('editar', seleccionada)">
           <i class="bi bi-pencil-square me-1"></i> Editar
         </button>
         <button class="btn btn-outline-primary ms-3" (click)="abrirDialogEstudiantes()">
@@ -38,6 +38,7 @@
                 <th>ID</th>
                 <th>Nombre</th>
                 <th>Profesor</th>
+                <th class="text-end">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -50,6 +51,16 @@
                 <td>{{ asignatura.ID_Asignatura }}</td>
                 <td>{{ asignatura.Nombre }}</td>
                 <td>{{ asignatura.Profesor }}</td>
+                <td class="text-end">
+                  <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-info" (click)="abrirDialog('ver', asignatura)">
+                      <i class="bi bi-eye"></i>
+                    </button>
+                    <button class="btn btn-outline-warning text-dark" (click)="abrirDialog('editar', asignatura)">
+                      <i class="bi bi-pencil-square"></i>
+                    </button>
+                  </div>
+                </td>
               </tr>
             </tbody>
           </table>

@@ -37,7 +37,12 @@ export class DialogEvaluacionesComponent implements OnInit {
   }
 
   abrirDialogCrearEvaluacion() {
-    const modalRef = this.modalService.open(DialogCrearEvaluacionComponent, { centered: true, size: 'lg' });
+    const modalRef = this.modalService.open(DialogCrearEvaluacionComponent, {
+      centered: true,
+      size: 'lg',
+      backdrop: 'static',
+      keyboard: false
+    });
     modalRef.componentInstance.asignatura = this.asignatura;
 
     modalRef.result.then(res => {
@@ -46,7 +51,13 @@ export class DialogEvaluacionesComponent implements OnInit {
   }
 
   abrirDetalleEvaluacion(evaluacionID: number) {
-    const modalRef = this.modalService.open(MainEvaluacionDetalleComponent, { centered: true, size: 'xl', scrollable: true });
+    const modalRef = this.modalService.open(MainEvaluacionDetalleComponent, {
+      centered: true,
+      size: 'xl',
+      scrollable: true,
+      backdrop: 'static',
+      keyboard: false
+    });
     modalRef.componentInstance.evaluacionID = evaluacionID;
     modalRef.componentInstance.asignaturaID = this.asignatura.ID_Asignatura;
 
