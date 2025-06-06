@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { DialogAsignaturaComponent } from '../dialog-asignatura/dialog-asignatura.component';
-import { DialogEstudiantesComponent } from '../dialog-estudiantes/dialog-estudiantes.component';
 import { DialogInscripcionComponent } from '../dialog-inscripcion/dialog-inscripcion.component';
 import { AsignaturaService } from '../../../../services/asignatura.service';
 import { Asignatura } from '../../../../models';
@@ -55,18 +54,6 @@ export class MainAsignaturasComponent implements OnInit {
     modalRef.componentInstance.modo = modo;
     modalRef.componentInstance.datos = modo === 'crear' ? null : asignatura;
 
-    modalRef.result.then(res => {
-      if (res === 'actualizado') this.cargarAsignaturas();
-    }).catch(() => {});
-  }
-
-  abrirDialogEstudiantes() {
-    const modalRef = this.modalService.open(DialogEstudiantesComponent, {
-      centered: true,
-      size: 'lg',
-      backdrop: 'static',
-      keyboard: false
-    });
 
     modalRef.result.then(res => {
       if (res === 'actualizado') this.cargarAsignaturas();

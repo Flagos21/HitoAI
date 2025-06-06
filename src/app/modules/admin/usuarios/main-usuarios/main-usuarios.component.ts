@@ -36,14 +36,14 @@ export class MainUsuariosComponent implements OnInit {
     });
   }
 
-  abrirDialog(modo: 'ver' | 'editar', usuario: Usuario) {
+  abrirDialog(modo: 'crear' | 'ver' | 'editar', usuario?: Usuario) {
     const modalRef = this.modalService.open(DialogUsuarioComponent, {
       centered: true,
       backdrop: 'static',
       keyboard: false
     });
     modalRef.componentInstance.modo = modo;
-    modalRef.componentInstance.datos = usuario;
+    modalRef.componentInstance.datos = modo === 'crear' ? null : usuario!;
     modalRef.result.then(res => {
       if (res === 'actualizado') this.cargarUsuarios();
     }).catch(() => {});

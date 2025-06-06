@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { UsuarioService } from '../../../../services/usuario.service';
-import { Usuario } from '../../../../models';
+import { RolService } from '../../../../services/rol.service';
+import { Usuario, Rol } from '../../../../models';
 
 @Component({
   selector: 'app-dialog-usuario',
@@ -13,10 +14,11 @@ import { Usuario } from '../../../../models';
   styleUrls: ['./dialog-usuario.component.css']
 })
 export class DialogUsuarioComponent {
-  @Input() modo: 'ver' | 'editar' = 'ver';
+  @Input() modo: 'crear' | 'ver' | 'editar' = 'ver';
   @Input() datos: Usuario | null = null;
 
-  usuario: Usuario = { ID_Usuario: '', Nombre: '', Rol: '' };
+  usuario: Usuario = { ID_Usuario: '', Nombre: '', Rol: '', Clave: '', Rol_ID_Rol: '' };
+  roles: Rol[] = [];
   nuevaClave = '';
   confirmar = '';
   mensajeExito = '';
@@ -24,9 +26,19 @@ export class DialogUsuarioComponent {
   bloqueado = false;
   private modalCerrado = false;
 
-  constructor(public modal: NgbActiveModal, private usuarioService: UsuarioService) {}
+  constructor(
+    public modal: NgbActiveModal,
+    private usuarioService: UsuarioService,
+    private rolService: RolService
+  ) {}
 
   ngOnInit(): void {
+    if (this.modo === 'crear') {
+      this.rolService.getRoles().subscribe({
+        next: data => (this.roles = data),
+        error: () => (this.mensajeError = 'Error al cargar roles')
+      });
+    }
     if (this.datos) {
       this.usuario = { ...this.datos };
     }
@@ -48,6 +60,26 @@ export class DialogUsuarioComponent {
     this.bloqueado = true;
     this.usuarioService.actualizarClave(this.usuario.ID_Usuario, this.nuevaClave).subscribe(() => {
       this.mensajeExito = 'Clave actualizada';
+      setTimeout(() => this.cerrarConExito(), 1500);
+    });
+  }
+
+  crear() {
+    if (
+      !this.usuario.ID_Usuario ||
+      !this.usuario.Nombre ||
+      !this.usuario.Clave ||
+      !this.usuario.Rol_ID_Rol
+    ) {
+      this.mensajeError = 'Complete todos los campos.';
+      setTimeout(() => (this.mensajeError = ''), 3000);
+      return;
+    }
+
+    if (this.bloqueado) return;
+    this.bloqueado = true;
+    this.usuarioService.crearUsuario(this.usuario).subscribe(() => {
+      this.mensajeExito = 'Usuario creado';
       setTimeout(() => this.cerrarConExito(), 1500);
     });
   }
