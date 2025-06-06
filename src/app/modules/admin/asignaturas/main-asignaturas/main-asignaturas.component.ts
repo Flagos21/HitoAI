@@ -54,6 +54,7 @@ export class MainAsignaturasComponent implements OnInit {
     modalRef.componentInstance.modo = modo;
     modalRef.componentInstance.datos = modo === 'crear' ? null : asignatura;
 
+
     modalRef.result.then(res => {
       if (res === 'actualizado') this.cargarAsignaturas();
     }).catch(() => {});
