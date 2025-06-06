@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { EstudianteService } from '../../../../services/estudiante.service';
 import { InscripcionService } from '../../../../services/inscripcion.service';
+import { Asignatura, Estudiante, Inscripcion } from '../../../../models';
 
 
 @Component({
@@ -14,9 +15,9 @@ import { InscripcionService } from '../../../../services/inscripcion.service';
   styleUrls: ['./dialog-inscripcion.component.css']
 })
 export class DialogInscripcionComponent implements OnInit {
-  @Input() asignatura: any;
+  @Input() asignatura!: Asignatura;
 
-  estudiantes: any[] = [];
+  estudiantes: (Estudiante & { seleccionado: boolean })[] = [];
   filtro: string = '';
   mensajeExito = '';
   bloqueado = false;

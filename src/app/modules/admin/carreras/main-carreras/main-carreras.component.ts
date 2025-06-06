@@ -5,6 +5,7 @@ import { CarreraService } from '../../../../services/carrera.service';
 import { UsuarioService } from '../../../../services/usuario.service';
 import { DialogCarreraComponent } from '../dialog-carrera/dialog-carrera.component';
 import { SidebarComponent } from '../../../../shared/components/sidebar/sidebar.component';
+import { Carrera, Usuario } from '../../../../models';
 
 @Component({
   selector: 'app-main-carreras',
@@ -14,9 +15,9 @@ import { SidebarComponent } from '../../../../shared/components/sidebar/sidebar.
   imports: [CommonModule, NgbModalModule, SidebarComponent]
 })
 export class MainCarrerasComponent implements OnInit {
-  carreras: any[] = [];
-  seleccionada: any = null;
-  jefes: any[] = [];
+  carreras: Carrera[] = [];
+  seleccionada: Carrera | null = null;
+  jefes: Usuario[] = [];
   rolUsuario: string = '';
 
   constructor(
@@ -39,11 +40,11 @@ export class MainCarrerasComponent implements OnInit {
     this.usuarioService.getJefesCarrera().subscribe(data => this.jefes = data);
   }
 
-  seleccionar(carrera: any) {
+  seleccionar(carrera: Carrera) {
     this.seleccionada = carrera;
   }
 
-  abrirDialog(modo: 'crear' | 'ver' | 'editar', carrera?: any) {
+  abrirDialog(modo: 'crear' | 'ver' | 'editar', carrera?: Carrera | null) {
     const modalRef = this.modalService.open(DialogCarreraComponent, {
       centered: true,
       backdrop: 'static',

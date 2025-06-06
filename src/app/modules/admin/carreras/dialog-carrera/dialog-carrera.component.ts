@@ -3,6 +3,7 @@ import { CarreraService } from '../../../../services/carrera.service';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Carrera, Usuario } from '../../../../models';
 
 @Component({
   selector: 'app-dialog-carrera',
@@ -13,10 +14,10 @@ import { FormsModule } from '@angular/forms';
 })
 export class DialogCarreraComponent {
   @Input() modo: 'crear' | 'ver' | 'editar' = 'crear';
-  @Input() datos: any = null;
-  @Input() jefes: any[] = [];
+  @Input() datos: Carrera | null = null;
+  @Input() jefes: Usuario[] = [];
 
-  carrera = {
+  carrera: Carrera = {
     Nombre: '',
     usuario_ID_Usuario: '',
     facultad_ID_Facultad: 1
@@ -78,7 +79,7 @@ export class DialogCarreraComponent {
 
     this.bloqueado = true;
     this.mensajeExito = 'Carrera actualizada correctamente';
-    this.carreraService.actualizarCarrera(this.datos.ID_Carrera, this.carrera).subscribe(() => {
+    this.carreraService.actualizarCarrera(this.datos!.ID_Carrera as number, this.carrera).subscribe(() => {
       setTimeout(() => this.cerrarConExito(), 1500);
     });
   }
@@ -90,7 +91,7 @@ eliminarCarrera() {
   }
 
   this.bloqueado = true;
-  this.carreraService.eliminarCarrera(this.datos.ID_Carrera).subscribe({
+  this.carreraService.eliminarCarrera(this.datos!.ID_Carrera as number).subscribe({
     next: () => {
       this.mensajeExito = 'Carrera eliminada';
       setTimeout(() => this.cerrarConExito(), 1500);

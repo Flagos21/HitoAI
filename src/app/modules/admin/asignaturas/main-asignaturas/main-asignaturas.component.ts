@@ -6,6 +6,7 @@ import { DialogAsignaturaComponent } from '../dialog-asignatura/dialog-asignatur
 import { DialogEstudiantesComponent } from '../dialog-estudiantes/dialog-estudiantes.component';
 import { DialogInscripcionComponent } from '../dialog-inscripcion/dialog-inscripcion.component';
 import { AsignaturaService } from '../../../../services/asignatura.service';
+import { Asignatura } from '../../../../models';
 import { SidebarComponent } from '../../../../shared/components/sidebar/sidebar.component';
 
 @Component({
@@ -17,8 +18,8 @@ import { SidebarComponent } from '../../../../shared/components/sidebar/sidebar.
 })
 export class MainAsignaturasComponent implements OnInit {
   rolUsuario: string = '';
-  asignaturasPorCarrera: { carrera: string, asignaturas: any[] }[] = [];
-  seleccionada: any = null;
+  asignaturasPorCarrera: { carrera: string; asignaturas: Asignatura[] }[] = [];
+  seleccionada: Asignatura | null = null;
 
   constructor(
     private modalService: NgbModal,
@@ -32,10 +33,11 @@ export class MainAsignaturasComponent implements OnInit {
 
   cargarAsignaturas() {
     this.asignaturaService.obtenerTodas().subscribe(data => {
-      const agrupadas: { [key: string]: any[] } = {};
+      const agrupadas: { [key: string]: Asignatura[] } = {};
       for (const a of data) {
-        if (!agrupadas[a.Carrera]) agrupadas[a.Carrera] = [];
-        agrupadas[a.Carrera].push(a);
+        const key = a.Carrera || '';
+        if (!agrupadas[key]) agrupadas[key] = [];
+        agrupadas[key].push(a);
       }
       this.asignaturasPorCarrera = Object.keys(agrupadas).map(k => ({
         carrera: k,
@@ -44,11 +46,11 @@ export class MainAsignaturasComponent implements OnInit {
     });
   }
 
-  seleccionar(asignatura: any) {
+  seleccionar(asignatura: Asignatura) {
     this.seleccionada = asignatura;
   }
 
-  abrirDialog(modo: 'crear' | 'ver' | 'editar', asignatura?: any) {
+  abrirDialog(modo: 'crear' | 'ver' | 'editar', asignatura?: Asignatura | null) {
     const modalRef = this.modalService.open(DialogAsignaturaComponent, {
       centered: true,
       backdrop: 'static',

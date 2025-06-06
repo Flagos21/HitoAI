@@ -4,6 +4,7 @@ import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { AplicacionService } from '../../../../../services/aplicacion.service';
 import { InscripcionService } from '../../../../../services/inscripcion.service';
+import { Estudiante } from '../../../../../models';
 import { DialogGruposEvaluacionComponent } from '../../dialog-grupos-evaluacion/dialog-grupos-evaluacion/dialog-grupos-evaluacion.component';
 import { DialogRubricaEvaluacionComponent } from '../../dialog-rubrica-evaluacion/dialog-rubrica-evaluacion.component';
 
@@ -44,7 +45,7 @@ export class MainEvaluacionDetalleComponent implements OnInit {
   }
 
   cargarEstadoEstudiantes() {
-    this.inscripcionService.obtenerPorAsignatura(this.asignaturaID).subscribe((data: any[]) => {
+    this.inscripcionService.obtenerPorAsignatura(this.asignaturaID).subscribe((data: Estudiante[]) => {
       this.estudiantes = data;
       this.cargarEvaluados();
     });

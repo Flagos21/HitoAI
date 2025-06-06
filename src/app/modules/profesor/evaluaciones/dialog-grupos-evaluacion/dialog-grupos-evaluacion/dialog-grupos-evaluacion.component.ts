@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { AplicacionService } from '../../../../../services/aplicacion.service';
 import { InscripcionService } from '../../../../../services/inscripcion.service';
+import { Estudiante } from '../../../../../models';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -15,7 +16,7 @@ export class DialogGruposEvaluacionComponent implements OnInit {
   @Input() evaluacionID!: number;
   @Input() asignaturaID!: string;
 
-  estudiantes: any[] = [];
+  estudiantes: Estudiante[] = [];
   seleccionados: Set<string> = new Set();
   bloqueados: Set<string> = new Set();
 
