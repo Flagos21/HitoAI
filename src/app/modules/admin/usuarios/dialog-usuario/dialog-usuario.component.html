@@ -1,0 +1,42 @@
+<div class="modal-header" style="background-color: #002f5d">
+  <h5 class="modal-title text-white">Detalles de Usuario</h5>
+  <button type="button" class="btn-close btn-close-white" aria-label="Cerrar" (click)="cancelar()"></button>
+</div>
+<div class="modal-body">
+  <div class="mb-3">
+    <label class="form-label">RUT</label>
+    <input type="text" class="form-control" [value]="usuario.ID_Usuario" disabled />
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Nombre</label>
+    <input type="text" class="form-control" [value]="usuario.Nombre" disabled />
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Rol</label>
+    <input type="text" class="form-control" [value]="usuario.Rol" disabled />
+  </div>
+
+  <div *ngIf="modo === 'editar'">
+    <div class="mb-3">
+      <label class="form-label">Nueva clave</label>
+      <input type="password" class="form-control" [(ngModel)]="nuevaClave" />
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Confirmar clave</label>
+      <input type="password" class="form-control" [(ngModel)]="confirmar" />
+    </div>
+  </div>
+
+  <div *ngIf="mensajeError" class="alert alert-danger" role="alert">
+    {{ mensajeError }}
+  </div>
+  <div *ngIf="mensajeExito" class="alert alert-success" role="alert" (click)="cerrarToast()">
+    {{ mensajeExito }}
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="cancelar()" [disabled]="bloqueado">Cerrar</button>
+  <button *ngIf="modo === 'editar'" type="button" class="btn btn-primary" (click)="renovarClave()" [disabled]="bloqueado">
+    Guardar
+  </button>
+</div>

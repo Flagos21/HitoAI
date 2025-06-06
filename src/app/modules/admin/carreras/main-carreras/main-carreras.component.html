@@ -1,6 +1,8 @@
 <div class="d-flex">
   <!-- Sidebar reutilizable -->
-  <app-sidebar [rol]="rolUsuario"></app-sidebar>
+  <div style="position: sticky; top: 0; align-self: flex-start; z-index: 100;">
+    <app-sidebar [rol]="rolUsuario"></app-sidebar>
+  </div>
 
 
   <!-- Contenido principal -->

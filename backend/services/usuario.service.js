@@ -70,3 +70,31 @@ exports.getProfesores = () => {
     });
   });
 };
+
+// Obtener todos los usuarios con su rol
+exports.getTodos = () => {
+  const sql = `
+    SELECT u.ID_Usuario, u.Nombre, r.Nombre AS Rol
+    FROM usuario u
+    JOIN rol r ON u.Rol_ID_Rol = r.ID_Rol
+    ORDER BY r.Nombre, u.Nombre
+  `;
+  return new Promise((resolve, reject) => {
+    connection.query(sql, (err, results) => {
+      if (err) return reject(err);
+      resolve(results);
+    });
+  });
+};
+
+// Actualizar la clave de un usuario
+exports.actualizarClave = async (id, nuevaClave) => {
+  const hashed = await bcrypt.hash(nuevaClave, 10);
+  const sql = `UPDATE usuario SET Clave = ? WHERE ID_Usuario = ?`;
+  return new Promise((resolve, reject) => {
+    connection.query(sql, [hashed, id], (err, results) => {
+      if (err) return reject(err);
+      resolve(results);
+    });
+  });
+};
