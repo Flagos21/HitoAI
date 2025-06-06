@@ -15,7 +15,6 @@ import { Estudiante } from '../../../../models';
 })
 export class DialogEstudiantesComponent implements OnInit {
   estudiantes: Estudiante[] = [];
-  seleccionado: Estudiante | null = null;
   bloqueado = false;
   mensajeCSV = '';
   mostrarToastCSV = false;
@@ -36,30 +35,18 @@ export class DialogEstudiantesComponent implements OnInit {
     });
   }
 
-  seleccionar(est: Estudiante) {
-    this.seleccionado = est;
-  }
-
   nuevoEstudiante() {
     this.abrirFormulario('crear');
   }
 
-  verEstudiante() {
-    if (this.seleccionado) this.abrirFormulario('ver');
-  }
-
-  editarEstudiante() {
-    if (this.seleccionado) this.abrirFormulario('editar');
-  }
-
-  abrirFormulario(modo: 'crear' | 'ver' | 'editar') {
+  abrirFormulario(modo: 'crear' | 'ver' | 'editar', est?: Estudiante) {
     const modalRef = this.modalService.open(DialogFormEstudianteComponent, {
       centered: true,
       backdrop: 'static',
       keyboard: false
     });
     modalRef.componentInstance.modo = modo;
-    modalRef.componentInstance.datos = modo === 'crear' ? null : this.seleccionado;
+    modalRef.componentInstance.datos = modo === 'crear' ? null : est;
 
     modalRef.result.then(res => {
       if (res === 'actualizado') this.cargarEstudiantesNoInscritos();
