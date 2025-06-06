@@ -5,6 +5,7 @@ import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar.component';
 import { AsignaturaService } from '../../../services/asignatura.service';
 import { DialogEvaluacionesComponent } from '../../profesor/evaluaciones/dialog-evaluaciones/dialog-evaluaciones/dialog-evaluaciones.component';
+import { DialogAsignaturaComponent } from '../../admin/asignaturas/dialog-asignatura/dialog-asignatura.component';
 
 @Component({
   selector: 'app-main-asignaturas-profesor',
@@ -45,7 +46,15 @@ export class MainAsignaturasProfesorComponent implements OnInit {
   }
 
   verAsignatura(asignatura: any) {
-    alert(`Ver asignatura: ${asignatura.Nombre}`);
+    const modalRef = this.modalService.open(DialogAsignaturaComponent, {
+      centered: true,
+      size: 'lg',
+      backdrop: 'static',
+      keyboard: false
+    });
+    modalRef.componentInstance.modo = 'ver';
+    modalRef.componentInstance.datos = asignatura;
+    modalRef.componentInstance.puedeDesvincular = false;
   }
 
   abrirEvaluaciones(asignatura: any) {
