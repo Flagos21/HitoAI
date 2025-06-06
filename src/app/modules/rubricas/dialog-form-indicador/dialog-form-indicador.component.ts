@@ -5,6 +5,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { IndicadorService } from '../../../services/indicador.service';
 import { RaService } from '../../../services/ra.service';
+import { ResultadoAprendizaje } from '../../../models/resultado-aprendizaje.model';
 
 @Component({
   selector: 'app-dialog-form-indicador',
@@ -23,12 +24,12 @@ export class DialogFormIndicadorComponent implements OnInit {
     Descripcion: '',
     Puntaje_Max: 0,
     contenido_ID_Contenido: 0,
-    ra_ID_RA: '',
+    ra_ID_RA: 0,
     Criterios: [] as { Nombre: string; R_Min: number; R_Max: number }[]
   };
 
   criterioTemp = { Nombre: '', R_Min: 1, R_Max: 1 };
-  ras: any[] = [];
+  ras: ResultadoAprendizaje[] = [];
 
   mensajeExito = '';
   mensajeError = '';

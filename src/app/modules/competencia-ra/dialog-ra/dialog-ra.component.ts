@@ -4,7 +4,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { RaService } from '../../../services/ra.service';
-import { CompetenciaService, Competencia } from '../../../services/competencia.service';
+
+import { CompetenciaService } from '../../../services/competencia.service';
+import { Competencia } from '../../../models/competencia.model';
+
 import { AsignaturaService } from '../../../services/asignatura.service';
 import { ResultadoAprendizaje } from '../../../models/resultado-aprendizaje.model';
 import { Asignatura } from '../../../models/asignatura.model';
@@ -25,7 +28,9 @@ export class DialogRaComponent implements OnInit {
   competenciasSeleccionadas: string[] = [];
 
   ra: ResultadoAprendizaje = {
-    ID_RA: '',
+
+    ID_RA: 0,
+
     Nombre: '',
     Descripcion: '',
     asignatura_ID_Asignatura: ''

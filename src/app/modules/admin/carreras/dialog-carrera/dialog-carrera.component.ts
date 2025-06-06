@@ -79,7 +79,7 @@ export class DialogCarreraComponent {
 
     this.bloqueado = true;
     this.mensajeExito = 'Carrera actualizada correctamente';
-    this.carreraService.actualizarCarrera(this.datos.ID_Carrera, this.carrera).subscribe(() => {
+    this.carreraService.actualizarCarrera(this.datos!.ID_Carrera as number, this.carrera).subscribe(() => {
       setTimeout(() => this.cerrarConExito(), 1500);
     });
   }
@@ -91,7 +91,7 @@ eliminarCarrera() {
   }
 
   this.bloqueado = true;
-  this.carreraService.eliminarCarrera(this.datos.ID_Carrera).subscribe({
+  this.carreraService.eliminarCarrera(this.datos!.ID_Carrera as number).subscribe({
     next: () => {
       this.mensajeExito = 'Carrera eliminada';
       setTimeout(() => this.cerrarConExito(), 1500);

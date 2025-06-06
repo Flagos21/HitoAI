@@ -16,7 +16,8 @@ export class EvaluacionService {
     return this.http.get<number>(`${this.apiUrl}/contar/${asignaturaID}`);
   }
 
-  crearConAplicaciones(data: Evaluacion & { aplicaciones: any[] }): Observable<any> {
+  crearConAplicaciones(data: Evaluacion & { contenidos: number[] }): Observable<any> {
+
     return this.http.post(`${this.apiUrl}/crear-con-aplicaciones`, data)
   }
 

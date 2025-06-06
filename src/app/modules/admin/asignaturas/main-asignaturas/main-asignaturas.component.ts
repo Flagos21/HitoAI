@@ -35,8 +35,9 @@ export class MainAsignaturasComponent implements OnInit {
     this.asignaturaService.obtenerTodas().subscribe(data => {
       const agrupadas: { [key: string]: Asignatura[] } = {};
       for (const a of data) {
-        if (!agrupadas[a.Carrera]) agrupadas[a.Carrera] = [];
-        agrupadas[a.Carrera].push(a);
+        const key = a.Carrera || '';
+        if (!agrupadas[key]) agrupadas[key] = [];
+        agrupadas[key].push(a);
       }
       this.asignaturasPorCarrera = Object.keys(agrupadas).map(k => ({
         carrera: k,
@@ -49,7 +50,8 @@ export class MainAsignaturasComponent implements OnInit {
     this.seleccionada = asignatura;
   }
 
-  abrirDialog(modo: 'crear' | 'ver' | 'editar', asignatura?: Asignatura) {
+  abrirDialog(modo: 'crear' | 'ver' | 'editar', asignatura?: Asignatura | null) {
+
     const modalRef = this.modalService.open(DialogAsignaturaComponent, {
       centered: true,
       backdrop: 'static',

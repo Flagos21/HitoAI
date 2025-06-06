@@ -4,6 +4,10 @@ import { environment } from '../../environments/environment';
 import { Observable } from 'rxjs';
 import { Inscripcion } from '../models/inscripcion.model';
 
+import { Estudiante } from '../models/estudiante.model';
+
+
+
 @Injectable({
   providedIn: 'root'
 })
@@ -18,8 +22,10 @@ export class InscripcionService {
   }
 
   // Obtener estudiantes inscritos en una asignatura específica
-  obtenerPorAsignatura(idAsignatura: string): Observable<Inscripcion[]> {
-    return this.http.get<Inscripcion[]>(`${this.apiUrl}/por-asignatura/${idAsignatura}`);
+
+  obtenerPorAsignatura(idAsignatura: string): Observable<Estudiante[]> {
+    return this.http.get<Estudiante[]>(`${this.apiUrl}/por-asignatura/${idAsignatura}`);
+
   }
 
   // Desvincular (eliminar) una inscripción
