@@ -13,12 +13,6 @@
       <button class="btn btn-success me-2" (click)="nuevoEstudiante()">
         <i class="bi bi-plus-circle me-1"></i> Nuevo Estudiante
       </button>
-      <button class="btn btn-info me-2 text-white" [disabled]="!seleccionado" (click)="verEstudiante()">
-        <i class="bi bi-eye me-1"></i> Ver
-      </button>
-      <button class="btn btn-warning text-white" [disabled]="!seleccionado" (click)="editarEstudiante()">
-        <i class="bi bi-pencil-square me-1"></i> Editar
-      </button>
     </div>
 
     <div>
@@ -43,24 +37,28 @@
           </tr>
         </thead>
         <tbody>
-          <tr
-            *ngFor="let est of estudiantes"
-            (click)="seleccionar(est)"
-            [class.table-active]="seleccionado?.ID_Estudiante === est.ID_Estudiante"
-            style="cursor: pointer;"
-          >
+          <tr *ngFor="let est of estudiantes" style="cursor: pointer;">
             <td>{{ est.ID_Estudiante }}</td>
             <td>{{ est.Nombre }}</td>
             <td>{{ est.Apellido }}</td>
             <td>{{ est.Anio_Ingreso }}</td>
             <td class="text-end">
-              <div class="btn-group btn-group-sm">
-                <button class="btn btn-outline-info" (click)="abrirFormulario('ver')">
-                  <i class="bi bi-eye"></i>
+              <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                  <i class="bi bi-three-dots-vertical"></i>
                 </button>
-                <button class="btn btn-outline-warning text-dark" (click)="abrirFormulario('editar')">
-                  <i class="bi bi-pencil-square"></i>
-                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li>
+                    <a class="dropdown-item" (click)="abrirFormulario('ver', est)">
+                      <i class="bi bi-eye me-1"></i> Ver
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" (click)="abrirFormulario('editar', est)">
+                      <i class="bi bi-pencil-square me-1"></i> Editar
+                    </a>
+                  </li>
+                </ul>
               </div>
             </td>
           </tr>
