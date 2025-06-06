@@ -24,6 +24,7 @@ export class DialogUsuarioComponent {
   mensajeExito = '';
   mensajeError = '';
   bloqueado = false;
+  accionConfirmada: 'crear' | 'actualizar' | null = null;
   private modalCerrado = false;
 
   constructor(
@@ -55,13 +56,19 @@ export class DialogUsuarioComponent {
       setTimeout(() => (this.mensajeError = ''), 3000);
       return;
     }
+    if (!this.accionConfirmada) {
+      this.accionConfirmada = 'actualizar';
+      return;
+    }
 
     if (this.bloqueado) return;
     this.bloqueado = true;
-    this.usuarioService.actualizarClave(this.usuario.ID_Usuario, this.nuevaClave).subscribe(() => {
-      this.mensajeExito = 'Clave actualizada';
-      setTimeout(() => this.cerrarConExito(), 1500);
-    });
+    this.usuarioService
+      .actualizarClave(this.usuario.ID_Usuario, this.nuevaClave)
+      .subscribe(() => {
+        this.mensajeExito = 'Clave actualizada';
+        setTimeout(() => this.cerrarConExito(), 1500);
+      });
   }
 
   crear() {
@@ -76,6 +83,11 @@ export class DialogUsuarioComponent {
       return;
     }
 
+    if (!this.accionConfirmada) {
+      this.accionConfirmada = 'crear';
+      return;
+    }
+
     if (this.bloqueado) return;
     this.bloqueado = true;
     this.usuarioService.crearUsuario(this.usuario).subscribe(() => {
@@ -86,6 +98,10 @@ export class DialogUsuarioComponent {
 
   cancelar() {
     if (!this.bloqueado) this.modal.dismiss();
+  }
+
+  cancelarConfirmacion() {
+    this.accionConfirmada = null;
   }
 
   cerrarToast() {
