@@ -63,6 +63,7 @@ export class DialogRubricaComponent implements OnInit {
       keyboard: false,
     });
     modalRef.componentInstance.modo = 'editar';
+    modalRef.componentInstance.contenidoID = this.contenidoID;
     modalRef.componentInstance.datos = indicador;
 
     modalRef.result
@@ -80,6 +81,7 @@ export class DialogRubricaComponent implements OnInit {
       keyboard: false,
     });
     modalRef.componentInstance.modo = 'ver';
+    modalRef.componentInstance.contenidoID = this.contenidoID;
     modalRef.componentInstance.datos = indicador;
   }
 
