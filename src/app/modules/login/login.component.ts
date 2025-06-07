@@ -64,6 +64,7 @@ export class LoginComponent {
 
   enviarSolicitud() {
     if (!this.rutOlvido) return;
+
     const rut = cleanRut(this.rutOlvido);
     this.mensajeService.solicitarReinicio(rut).subscribe({
       next: () => {
@@ -76,6 +77,7 @@ export class LoginComponent {
         this.mensajeError = 'No se pudo enviar la solicitud';
         setTimeout(() => (this.mensajeError = ''), 3000);
       }
+
     });
   }
 }
