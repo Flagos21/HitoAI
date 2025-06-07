@@ -35,22 +35,27 @@ export class MainRaComponent implements OnInit {
 
   cargarRA() {
     const rut = localStorage.getItem('rut') || '';
-    if (!rut) return;
+    if (!rut && this.rolUsuario !== 'Comité Curricular') return;
 
     this.raService.obtenerTodos().subscribe((data) => {
-      this.asignaturaService.obtenerPorCarreraDelJefe(rut).subscribe((asignaturas) => {
+      const obtenerAsignaturas =
+        this.rolUsuario === 'Comité Curricular'
+          ? this.asignaturaService.obtenerTodas()
+          : this.asignaturaService.obtenerPorCarreraDelJefe(rut);
+
+      obtenerAsignaturas.subscribe((listaAsignaturas) => {
         const mapa = new Map<string, any>();
 
         for (let ra of data) {
           const idAsig = ra.asignatura_ID_Asignatura;
-          const asignatura = asignaturas.find((a) => a.ID_Asignatura === idAsig);
+          const asig = listaAsignaturas.find((a) => a.ID_Asignatura === idAsig);
 
-          if (!asignatura) continue;
+          if (!asig) continue;
 
           if (!mapa.has(idAsig)) {
             mapa.set(idAsig, {
               asignatura: idAsig,
-              nombreAsignatura: asignatura.Nombre,
+              nombreAsignatura: asig.Nombre,
               ras: [],
             });
           }
