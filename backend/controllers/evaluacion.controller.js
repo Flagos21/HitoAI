@@ -41,3 +41,13 @@ exports.obtenerContenidosUsados = async (req, res) => {
     res.status(500).json({ message: 'Error interno del servidor' });
   }
 };
+
+exports.eliminar = async (req, res) => {
+  try {
+    await EvaluacionService.eliminar(req.params.id);
+    res.json({ message: 'Evaluación eliminada' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error al eliminar evaluación' });
+  }
+};
