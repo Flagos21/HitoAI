@@ -26,8 +26,10 @@
 
     <div class="row row-cols-1 row-cols-md-3 g-3">
       <div class="col" *ngFor="let grupo of grupos">
+
         <div class="border rounded p-3 h-100 shadow-sm"
              [ngClass]="esGrupoEvaluado(grupo) ? 'border-success bg-success bg-opacity-10' : 'border-secondary bg-white'">
+
           <div class="d-flex justify-content-between align-items-center">
             <div>
             <strong>Grupo {{ grupo.numero }}</strong>
