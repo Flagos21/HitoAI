@@ -36,6 +36,7 @@
     <div *ngIf="mostrarOlvido" class="mb-3">
       <input type="text" name="rutOlvido" class="form-control mb-2" [(ngModel)]="rutOlvido" placeholder="Ingrese su RUT" />
 
+
       <button type="button" class="btn btn-warning w-100" (click)="enviarSolicitud()">Enviar solicitud</button>
     </div>
     <div *ngIf="mensajeSolicitud" class="text-success mb-2">{{ mensajeSolicitud }}</div>

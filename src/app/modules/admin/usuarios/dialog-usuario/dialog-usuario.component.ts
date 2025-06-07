@@ -24,6 +24,10 @@ export class DialogUsuarioComponent {
   nuevaClave = '';
   confirmar = '';
   mostrarClave = false;
+
+  mostrarNueva = false;
+  mostrarConfirmar = false;
+
   mensajeExito = '';
   mensajeError = '';
   bloqueado = false;
