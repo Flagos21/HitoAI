@@ -45,20 +45,46 @@
         </thead>
         <tbody>
           <tr *ngFor="let c of indicador.Criterios; let i = index">
-            <td>{{ c.Nombre }}</td>
-            <td>{{ c.R_Min }}</td>
-            <td>{{ c.R_Max }}</td>
+            <td>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                [(ngModel)]="c.Nombre"
+                name="nombre{{ i }}"
+                [ngModelOptions]="{ standalone: true }"
+                [disabled]="bloqueado"
+              />
+            </td>
+            <td>
+              <input
+                type="number"
+                class="form-control form-control-sm"
+                [(ngModel)]="c.R_Min"
+                name="rmin{{ i }}"
+                [ngModelOptions]="{ standalone: true }"
+                min="1"
+                [disabled]="bloqueado"
+              />
+            </td>
+            <td>
+              <input
+                type="number"
+                class="form-control form-control-sm"
+                [(ngModel)]="c.R_Max"
+                name="rmax{{ i }}"
+                [ngModelOptions]="{ standalone: true }"
+                min="1"
+                [disabled]="bloqueado"
+              />
+            </td>
             <td>
               <button class="btn btn-sm btn-outline-danger" (click)="eliminarCriterio(i)" [disabled]="bloqueado">
-                <i class="bi bi-trash"></i>
+                <i class="bi bi-dash-circle"></i>
               </button>
             </td>
           </tr>
           <tr>
-            <td><input type="text" class="form-control form-control-sm" [(ngModel)]="criterioTemp.Nombre" name="nombreTemp" /></td>
-            <td><input type="number" class="form-control form-control-sm" [(ngModel)]="criterioTemp.R_Min" name="rmin" min="1" /></td>
-            <td><input type="number" class="form-control form-control-sm" [(ngModel)]="criterioTemp.R_Max" name="rmax" min="1" /></td>
-            <td>
+            <td colspan="4" class="text-end">
               <button class="btn btn-sm btn-outline-success" (click)="agregarCriterio()" [disabled]="bloqueado">
                 <i class="bi bi-plus-circle"></i>
               </button>
