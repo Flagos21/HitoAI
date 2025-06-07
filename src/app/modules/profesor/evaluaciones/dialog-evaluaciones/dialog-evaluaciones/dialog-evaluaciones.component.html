@@ -16,18 +16,57 @@
     No hay evaluaciones registradas para esta asignatura.
   </div>
 
-  <div *ngFor="let eva of evaluaciones" class="card border-primary mb-3">
-    <div class="card-body">
-      <h5 class="card-title text-primary">{{ eva.Nombre }}</h5>
-      <p class="card-text text-muted">
-        Tipo: {{ eva.Tipo }} |
-        Instancia: {{ eva.N_Instancia }} |
-        Fecha: {{ eva.Fecha | date:'longDate' }}
-      </p>
-      <div class="text-end">
-        <button class="btn btn-outline-primary btn-sm" (click)="abrirDetalleEvaluacion(eva.ID_Evaluacion)">
-          <i class="bi bi-eye me-1"></i> Ver Detalle
-        </button>
+  <div class="row row-cols-1 row-cols-md-2 g-4" *ngIf="evaluaciones.length > 0">
+    <div class="col" *ngFor="let eva of evaluaciones">
+      <div class="card h-100 shadow-sm border-start border-4 border-primary">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-primary d-flex align-items-center">
+            <i class="bi bi-journal-text me-2"></i>{{ eva.Nombre }}
+          </h5>
+          <p class="card-text mb-2">
+            <strong>Tipo:</strong> {{ eva.Tipo }}<br>
+            <strong>Instancia:</strong> {{ eva.N_Instancia }}<br>
+            <strong>Fecha:</strong> {{ eva.Fecha | date:'longDate' }}
+          </p>
+          <div class="mt-auto text-end" *ngIf="accionConfirmada !== eva.ID_Evaluacion">
+            <button class="btn btn-outline-primary btn-sm me-2" (click)="abrirDetalleEvaluacion(eva.ID_Evaluacion)">
+              <i class="bi bi-eye me-1"></i> Ver Detalle
+            </button>
+            <button class="btn btn-outline-danger btn-sm" (click)="confirmarEliminar(eva.ID_Evaluacion)">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+
+          <div *ngIf="accionConfirmada === eva.ID_Evaluacion" class="confirm-overlay shadow p-3 rounded mt-2">
+            <p class="mb-2">¿Eliminar esta evaluación?</p>
+            <div class="d-flex justify-content-end gap-2">
+              <button class="btn btn-danger btn-sm text-white" (click)="eliminarConfirmado(eva.ID_Evaluacion)">Sí</button>
+              <button class="btn btn-outline-secondary btn-sm" (click)="cancelarConfirmacion()">No</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Éxito -->
+<div *ngIf="mensajeExito" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 2000">
+  <div class="toast show text-bg-success" role="alert">
+    <div class="d-flex">
+      <div class="toast-body">
+        <i class="bi bi-check-circle-fill me-2"></i>{{ mensajeExito }}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Error -->
+<div *ngIf="mensajeError" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 2000">
+  <div class="toast show text-bg-danger bg-opacity-75" role="alert">
+    <div class="d-flex">
+      <div class="toast-body">
+        <i class="bi bi-exclamation-octagon-fill me-2"></i>{{ mensajeError }}
       </div>
     </div>
   </div>

@@ -25,7 +25,11 @@ export class EvaluacionService {
     return this.http.get<Evaluacion[]>(`${this.apiUrl}/por-asignatura/${asignaturaID}`);
   }
   obtenerContenidosUsados(asignaturaID: string): Observable<number[]> {
-  return this.http.get<number[]>(`${this.apiUrl}/contenidos-usados/${asignaturaID}`);
-}
+    return this.http.get<number[]>(`${this.apiUrl}/contenidos-usados/${asignaturaID}`);
+  }
+
+  eliminar(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/eliminar/${id}`);
+  }
 
 }

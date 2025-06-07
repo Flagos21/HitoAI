@@ -125,3 +125,18 @@ exports.obtenerContenidosUsados = (asignaturaID) => {
     });
   });
 };
+
+exports.eliminar = (id) => {
+  const borrarAplicaciones = `DELETE FROM aplicacion WHERE evaluacion_ID_Evaluacion = ?`;
+  const borrarEvaluacion = `DELETE FROM evaluacion WHERE ID_Evaluacion = ?`;
+
+  return new Promise((resolve, reject) => {
+    connection.query(borrarAplicaciones, [id], (err) => {
+      if (err) return reject(err);
+      connection.query(borrarEvaluacion, [id], (err2) => {
+        if (err2) return reject(err2);
+        resolve();
+      });
+    });
+  });
+};
