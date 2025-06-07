@@ -64,8 +64,10 @@ export class LoginComponent {
 
   enviarSolicitud() {
     if (!this.rutOlvido) return;
+
     const rut = cleanRut(this.rutOlvido);
     this.mensajeService.solicitarReinicio(rut).subscribe(() => {
+
       this.mensajeSolicitud = 'Solicitud enviada';
       this.rutOlvido = '';
       this.mostrarOlvido = false;
