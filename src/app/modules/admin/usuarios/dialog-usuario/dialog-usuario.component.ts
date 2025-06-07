@@ -6,6 +6,7 @@ import { UsuarioService } from '../../../../services/usuario.service';
 import { RolService } from '../../../../services/rol.service';
 import { Usuario, Rol } from '../../../../models';
 import { cleanRut, validarRut } from '../../../../utils/rut';
+import { claveSegura } from '../../../../utils/clave';
 
 @Component({
   selector: 'app-dialog-usuario',
@@ -52,6 +53,12 @@ export class DialogUsuarioComponent {
       setTimeout(() => (this.mensajeError = ''), 3000);
       return;
     }
+    if (!claveSegura(this.nuevaClave)) {
+      this.mensajeError =
+        'La clave debe tener al menos 8 caracteres e incluir mayúsculas, minúsculas, números y símbolos.';
+      setTimeout(() => (this.mensajeError = ''), 3000);
+      return;
+    }
     if (this.nuevaClave !== this.confirmar) {
       this.mensajeError = 'Las claves no coinciden.';
       setTimeout(() => (this.mensajeError = ''), 3000);
@@ -80,6 +87,13 @@ export class DialogUsuarioComponent {
       !this.usuario.Rol_ID_Rol
     ) {
       this.mensajeError = 'Complete todos los campos.';
+      setTimeout(() => (this.mensajeError = ''), 3000);
+      return;
+    }
+
+    if (!claveSegura(this.usuario.Clave)) {
+      this.mensajeError =
+        'La clave debe tener al menos 8 caracteres e incluir mayúsculas, minúsculas, números y símbolos.';
       setTimeout(() => (this.mensajeError = ''), 3000);
       return;
     }
