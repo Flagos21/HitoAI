@@ -4,6 +4,7 @@ import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { DialogAsignaturaComponent } from '../dialog-asignatura/dialog-asignatura.component';
 import { DialogInscripcionComponent } from '../dialog-inscripcion/dialog-inscripcion.component';
+import { DialogEstudiantesComponent } from '../dialog-estudiantes/dialog-estudiantes.component';
 import { AsignaturaService } from '../../../../services/asignatura.service';
 import { Asignatura } from '../../../../models';
 import { SidebarComponent } from '../../../../shared/components/sidebar/sidebar.component';
@@ -72,5 +73,16 @@ export class MainAsignaturasComponent implements OnInit {
     modalRef.result.then(res => {
       if (res === 'actualizado') this.cargarAsignaturas();
     }).catch(() => {});
+  }
+
+  abrirDialogEstudiantes() {
+    const modalRef = this.modalService.open(DialogEstudiantesComponent, {
+      centered: true,
+      size: 'lg',
+      backdrop: 'static',
+      keyboard: false
+    });
+
+    modalRef.result.catch(() => {});
   }
 }
