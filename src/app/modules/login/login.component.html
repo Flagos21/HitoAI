@@ -29,13 +29,16 @@
       <button type="button" class="btn btn-outline-secondary btn-sm toggle-btn" (click)="toggleClave()">
         <i class="bi" [ngClass]="mostrarClave ? 'bi-eye-slash' : 'bi-eye'"></i>
       </button>
+
     </div>
 
     <button type="button" class="btn btn-link p-0 mb-2" (click)="mostrarOlvido = !mostrarOlvido">¿Olvidó su clave?</button>
     <div *ngIf="mostrarOlvido" class="mb-3">
       <input type="text" name="rutOlvido" class="form-control mb-2" [(ngModel)]="rutOlvido" placeholder="Ingrese su RUT" />
+
       <button type="button" class="btn btn-warning w-100" (click)="enviarSolicitud()">Enviar solicitud</button>
     </div>
+    <div *ngIf="mensajeSolicitud" class="text-success mb-2">{{ mensajeSolicitud }}</div>
 
     <button type="submit" class="btn btn-primary btn-lg w-100">ENTRAR</button>
   </form>
