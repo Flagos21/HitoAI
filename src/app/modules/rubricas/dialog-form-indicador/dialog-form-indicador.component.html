@@ -45,6 +45,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let c of indicador.Criterios; let i = index">
+
             <td>
               <input
                 type="text"
@@ -77,6 +78,7 @@
                 [disabled]="bloqueado"
               />
             </td>
+
             <td>
               <button class="btn btn-sm btn-outline-danger" (click)="eliminarCriterio(i)" [disabled]="bloqueado">
                 <i class="bi bi-dash-circle"></i>
