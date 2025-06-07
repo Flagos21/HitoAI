@@ -48,8 +48,7 @@
   </div>
 
   <div class="mt-3 text-end">
-    <strong class="me-3">Puntaje Total: {{ calcularTotal() }}</strong>
-    <span class="badge bg-primary">Nota: {{ calcularNota() }}</span>
+    <strong>Puntaje Total: {{ calcularTotal() }}</strong>
   </div>
 
   <div *ngIf="hayErroresDePuntaje()" class="alert alert-warning mt-3">
