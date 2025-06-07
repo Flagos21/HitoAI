@@ -6,6 +6,5 @@ router.get('/contar/:idAsignatura', controller.contarPorAsignatura);
 router.post('/crear-con-aplicaciones', controller.crearConAplicaciones);
 router.get('/por-asignatura/:id', controller.obtenerPorAsignatura);
 router.get('/contenidos-usados/:asignaturaID', controller.obtenerContenidosUsados);
-router.delete('/eliminar/:id', controller.eliminar);
 
 module.exports = router;
