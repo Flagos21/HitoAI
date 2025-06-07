@@ -29,7 +29,7 @@
       <button type="button" class="btn btn-outline-secondary btn-sm toggle-btn" (click)="toggleClave()">
         <i class="bi" [ngClass]="mostrarClave ? 'bi-eye-slash' : 'bi-eye'"></i>
       </button>
-    </div>
+
 
     <button type="button" class="btn btn-link p-0 mb-2" (click)="mostrarOlvido = !mostrarOlvido">¿Olvidó su clave?</button>
     <div *ngIf="mostrarOlvido" class="mb-3">
@@ -46,6 +46,7 @@
       </div>
 
     </div>
+
 
     <button type="button" class="btn btn-link p-0 mb-2" (click)="mostrarOlvido = !mostrarOlvido">¿Olvidó su clave?</button>
     <div *ngIf="mostrarOlvido" class="mb-3">

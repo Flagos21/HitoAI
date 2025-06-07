@@ -66,12 +66,18 @@ export class LoginComponent {
     if (!this.rutOlvido) return;
 
     const rut = cleanRut(this.rutOlvido);
-    this.mensajeService.solicitarReinicio(rut).subscribe(() => {
+    this.mensajeService.solicitarReinicio(rut).subscribe({
+      next: () => {
+        this.mensajeSolicitud = 'Solicitud enviada';
+        this.rutOlvido = '';
+        this.mostrarOlvido = false;
+        setTimeout(() => (this.mensajeSolicitud = ''), 3000);
+      },
+      error: () => {
+        this.mensajeError = 'No se pudo enviar la solicitud';
+        setTimeout(() => (this.mensajeError = ''), 3000);
+      }
 
-      this.mensajeSolicitud = 'Solicitud enviada';
-      this.rutOlvido = '';
-      this.mostrarOlvido = false;
-      setTimeout(() => (this.mensajeSolicitud = ''), 3000);
     });
   }
 }
