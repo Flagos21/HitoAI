@@ -3,9 +3,10 @@ import { CommonModule } from '@angular/common';
 import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { DialogAsignaturaComponent } from '../dialog-asignatura/dialog-asignatura.component';
-import { DialogEstudiantesComponent } from '../dialog-estudiantes/dialog-estudiantes.component';
 import { DialogInscripcionComponent } from '../dialog-inscripcion/dialog-inscripcion.component';
+import { DialogEstudiantesComponent } from '../dialog-estudiantes/dialog-estudiantes.component';
 import { AsignaturaService } from '../../../../services/asignatura.service';
+import { Asignatura } from '../../../../models';
 import { SidebarComponent } from '../../../../shared/components/sidebar/sidebar.component';
 
 @Component({
@@ -17,8 +18,7 @@ import { SidebarComponent } from '../../../../shared/components/sidebar/sidebar.
 })
 export class MainAsignaturasComponent implements OnInit {
   rolUsuario: string = '';
-  asignaturasPorCarrera: { carrera: string, asignaturas: any[] }[] = [];
-  seleccionada: any = null;
+  asignaturasPorCarrera: { carrera: string; asignaturas: Asignatura[] }[] = [];
 
   constructor(
     private modalService: NgbModal,
@@ -32,10 +32,11 @@ export class MainAsignaturasComponent implements OnInit {
 
   cargarAsignaturas() {
     this.asignaturaService.obtenerTodas().subscribe(data => {
-      const agrupadas: { [key: string]: any[] } = {};
+      const agrupadas: { [key: string]: Asignatura[] } = {};
       for (const a of data) {
-        if (!agrupadas[a.Carrera]) agrupadas[a.Carrera] = [];
-        agrupadas[a.Carrera].push(a);
+        const key = a.Carrera || '';
+        if (!agrupadas[key]) agrupadas[key] = [];
+        agrupadas[key].push(a);
       }
       this.asignaturasPorCarrera = Object.keys(agrupadas).map(k => ({
         carrera: k,
@@ -44,14 +45,30 @@ export class MainAsignaturasComponent implements OnInit {
     });
   }
 
-  seleccionar(asignatura: any) {
-    this.seleccionada = asignatura;
+  abrirDialog(modo: 'crear' | 'ver' | 'editar', asignatura?: Asignatura) {
+
+    const modalRef = this.modalService.open(DialogAsignaturaComponent, {
+      centered: true,
+      backdrop: 'static',
+      keyboard: false
+    });
+    modalRef.componentInstance.modo = modo;
+    modalRef.componentInstance.datos = modo === 'crear' ? null : asignatura;
+
+
+    modalRef.result.then(res => {
+      if (res === 'actualizado') this.cargarAsignaturas();
+    }).catch(() => {});
   }
 
-  abrirDialog(modo: 'crear' | 'ver' | 'editar') {
-    const modalRef = this.modalService.open(DialogAsignaturaComponent, { centered: true });
-    modalRef.componentInstance.modo = modo;
-    modalRef.componentInstance.datos = modo === 'crear' ? null : this.seleccionada;
+  abrirDialogInscripcion(asignatura: Asignatura) {
+    const modalRef = this.modalService.open(DialogInscripcionComponent, {
+      centered: true,
+      size: 'lg',
+      backdrop: 'static',
+      keyboard: false
+    });
+    modalRef.componentInstance.asignatura = asignatura;
 
     modalRef.result.then(res => {
       if (res === 'actualizado') this.cargarAsignaturas();
@@ -59,20 +76,13 @@ export class MainAsignaturasComponent implements OnInit {
   }
 
   abrirDialogEstudiantes() {
-    const modalRef = this.modalService.open(DialogEstudiantesComponent, { centered: true, size: 'lg' });
+    const modalRef = this.modalService.open(DialogEstudiantesComponent, {
+      centered: true,
+      size: 'lg',
+      backdrop: 'static',
+      keyboard: false
+    });
 
-    modalRef.result.then(res => {
-      if (res === 'actualizado') this.cargarAsignaturas();
-    }).catch(() => {});
-  }
-
-  abrirDialogInscripcion() {
-    if (!this.seleccionada) return;
-    const modalRef = this.modalService.open(DialogInscripcionComponent, { centered: true, size: 'lg' });
-    modalRef.componentInstance.asignatura = this.seleccionada;
-
-    modalRef.result.then(res => {
-      if (res === 'actualizado') this.cargarAsignaturas();
-    }).catch(() => {});
+    modalRef.result.catch(() => {});
   }
 }

@@ -4,8 +4,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { RaService } from '../../../services/ra.service';
+
 import { CompetenciaService } from '../../../services/competencia.service';
+import { Competencia } from '../../../models/competencia.model';
+
 import { AsignaturaService } from '../../../services/asignatura.service';
+import { ResultadoAprendizaje } from '../../../models/resultado-aprendizaje.model';
+import { Asignatura } from '../../../models/asignatura.model';
 
 @Component({
   selector: 'app-dialog-ra',
@@ -16,14 +21,16 @@ import { AsignaturaService } from '../../../services/asignatura.service';
 })
 export class DialogRaComponent implements OnInit {
   @Input() modo: 'crear' | 'ver' | 'editar' = 'crear';
-  @Input() datos: any = null;
+  @Input() datos: ResultadoAprendizaje | null = null;
 
-  competencias: any[] = [];
-  asignaturas: any[] = [];
+  competencias: Competencia[] = [];
+  asignaturas: Asignatura[] = [];
   competenciasSeleccionadas: string[] = [];
 
-  ra = {
-    ID_RA: '',
+  ra: ResultadoAprendizaje = {
+
+    ID_RA: 0,
+
     Nombre: '',
     Descripcion: '',
     asignatura_ID_Asignatura: ''
@@ -44,8 +51,13 @@ export class DialogRaComponent implements OnInit {
 
   ngOnInit(): void {
     const rut = localStorage.getItem('rut') || '';
-    if (rut) {
-      this.asignaturaService.obtenerPorCarreraDelJefe(rut).subscribe(data => {
+    const rol = localStorage.getItem('rol') || '';
+    if (rol === 'Comité Curricular') {
+      this.asignaturaService.obtenerTodas().subscribe((data) => {
+        this.asignaturas = data;
+      });
+    } else if (rut) {
+      this.asignaturaService.obtenerPorCarreraDelJefe(rut).subscribe((data) => {
         this.asignaturas = data;
       });
     }
@@ -61,7 +73,12 @@ export class DialogRaComponent implements OnInit {
         Descripcion: this.datos.Descripcion,
         asignatura_ID_Asignatura: this.datos.asignatura_ID_Asignatura
       };
-      this.competenciasSeleccionadas = this.datos.competencias?.split(' + ') || [];
+      const comp = this.datos.competencias;
+      this.competenciasSeleccionadas = Array.isArray(comp)
+        ? comp
+        : typeof comp === 'string'
+          ? comp.split(' + ')
+          : [];
     }
   }
 
@@ -120,7 +137,7 @@ export class DialogRaComponent implements OnInit {
     this.mensajeExito = 'Resultado actualizado correctamente';
 
     const payload = { ...this.ra, competencias: this.competenciasSeleccionadas };
-    this.raService.actualizar(this.ra.ID_RA, payload).subscribe(() => {
+    this.raService.actualizar(this.ra.ID_RA!, payload).subscribe(() => {
       setTimeout(() => this.cerrarConExito(), 1500);
     });
   }
@@ -133,7 +150,7 @@ export class DialogRaComponent implements OnInit {
 
     this.bloqueado = true;
     this.mensajeExito = 'Resultado eliminado';
-    this.raService.eliminar(this.ra.ID_RA).subscribe(() => {
+    this.raService.eliminar(this.ra.ID_RA!).subscribe(() => {
       setTimeout(() => this.cerrarConExito(), 1500);
     });
   }

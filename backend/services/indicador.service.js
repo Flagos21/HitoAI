@@ -109,15 +109,22 @@ exports.actualizar = (id, indicador) => {
 };
 
 exports.eliminar = (id) => {
+  const borrarAplicaciones = `DELETE FROM aplicacion WHERE indicador_ID_Indicador = ?`;
   const borrarCriterios = `DELETE FROM criterio WHERE indicador_ID_Indicador = ?`;
   const borrarIndicador = `DELETE FROM indicador WHERE ID_Indicador = ?`;
 
   return new Promise((resolve, reject) => {
-    connection.query(borrarCriterios, [id], (err) => {
+    // Primero eliminar las aplicaciones para evitar errores de clave foránea
+    connection.query(borrarAplicaciones, [id], (err) => {
       if (err) return reject(err);
-      connection.query(borrarIndicador, [id], (err2) => {
+      // Luego eliminar los criterios asociados
+      connection.query(borrarCriterios, [id], (err2) => {
         if (err2) return reject(err2);
-        resolve();
+        // Finalmente eliminar el indicador
+        connection.query(borrarIndicador, [id], (err3) => {
+          if (err3) return reject(err3);
+          resolve();
+        });
       });
     });
   });

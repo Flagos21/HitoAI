@@ -5,6 +5,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { IndicadorService } from '../../../services/indicador.service';
 import { RaService } from '../../../services/ra.service';
+import { ResultadoAprendizaje } from '../../../models/resultado-aprendizaje.model';
 
 @Component({
   selector: 'app-dialog-form-indicador',
@@ -23,12 +24,11 @@ export class DialogFormIndicadorComponent implements OnInit {
     Descripcion: '',
     Puntaje_Max: 0,
     contenido_ID_Contenido: 0,
-    ra_ID_RA: '',
+    ra_ID_RA: 0,
     Criterios: [] as { Nombre: string; R_Min: number; R_Max: number }[]
   };
 
-  criterioTemp = { Nombre: '', R_Min: 1, R_Max: 1 };
-  ras: any[] = [];
+  ras: ResultadoAprendizaje[] = [];
 
   mensajeExito = '';
   mensajeError = '';
@@ -58,6 +58,11 @@ ngOnInit(): void {
       try {
         this.indicador.Criterios = JSON.parse(copia);
       } catch (e) {}
+    }
+    if (this.indicador.Criterios.length < 4) {
+      for (let i = this.indicador.Criterios.length; i < 4; i++) {
+        this.indicador.Criterios.push({ Nombre: '', R_Min: 1, R_Max: 1 });
+      }
     }
   }
 }
@@ -90,46 +95,7 @@ ngOnInit(): void {
   }
 
   agregarCriterio() {
-    const { Nombre, R_Min, R_Max } = this.criterioTemp;
-
-    if (!Nombre || R_Min == null || R_Max == null) {
-      this.mensajeError = 'Complete los campos del criterio.';
-      setTimeout(() => (this.mensajeError = ''), 3000);
-      return;
-    }
-
-    if (R_Min > R_Max) {
-      this.mensajeError = 'El rango mínimo no puede ser mayor al máximo.';
-      setTimeout(() => (this.mensajeError = ''), 3000);
-      return;
-    }
-
-    const totalAsignado = this.indicador.Criterios.reduce(
-      (sum, c) => sum + (c.R_Max - c.R_Min + 1),
-      0
-    );
-    const nuevoRango = R_Max - R_Min + 1;
-
-    if ((totalAsignado + nuevoRango) > this.indicador.Puntaje_Max) {
-      this.mensajeError = 'La suma de los rangos supera el puntaje máximo.';
-      setTimeout(() => (this.mensajeError = ''), 3000);
-      return;
-    }
-
-    const existeSolapamiento = this.indicador.Criterios.some(
-      c =>
-        (R_Min >= c.R_Min && R_Min <= c.R_Max) ||
-        (R_Max >= c.R_Min && R_Max <= c.R_Max)
-    );
-
-    if (existeSolapamiento) {
-      this.mensajeError = 'Este rango se solapa con otro criterio.';
-      setTimeout(() => (this.mensajeError = ''), 3000);
-      return;
-    }
-
-    this.indicador.Criterios.push({ ...this.criterioTemp });
-    this.criterioTemp = { Nombre: '', R_Min: 1, R_Max: 1 };
+    this.indicador.Criterios.push({ Nombre: '', R_Min: 1, R_Max: 1 });
   }
 
   eliminarCriterio(index: number) {
@@ -139,6 +105,12 @@ ngOnInit(): void {
   validarRangosCompletos(): boolean {
     const totalEsperado = this.indicador.Puntaje_Max;
     const rangos = this.indicador.Criterios.map(c => ({ ...c })).sort((a, b) => a.R_Min - b.R_Min);
+
+    for (const r of rangos) {
+      if (!r.Nombre || r.R_Min == null || r.R_Max == null || r.R_Min > r.R_Max) {
+        return false;
+      }
+    }
 
     let actual = 1;
     for (const r of rangos) {
@@ -157,7 +129,7 @@ ngOnInit(): void {
     }
 
     if (!this.validarRangosCompletos()) {
-      this.mensajeError = 'Los criterios no cubren el rango completo del puntaje o tienen huecos.';
+      this.mensajeError = 'Verifique que todos los criterios sean válidos y cubran el puntaje máximo sin huecos.';
       setTimeout(() => (this.mensajeError = ''), 3000);
       return;
     }
@@ -184,7 +156,7 @@ ngOnInit(): void {
     }
 
     if (!this.validarRangosCompletos()) {
-      this.mensajeError = 'Los criterios no cubren el rango completo del puntaje.';
+      this.mensajeError = 'Verifique que todos los criterios sean válidos y cubran el puntaje máximo sin huecos.';
       setTimeout(() => (this.mensajeError = ''), 3000);
       return;
     }

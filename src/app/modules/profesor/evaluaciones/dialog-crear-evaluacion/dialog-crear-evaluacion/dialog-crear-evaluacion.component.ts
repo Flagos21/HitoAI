@@ -20,7 +20,6 @@ export class DialogCrearEvaluacionComponent implements OnInit {
   instancia = 1;
   contenidos: any[] = [];
   seleccionados: number[] = [];
-  contenidosUsados: number[] = [];
 
   mensajeError = '';
   mensajeExito = '';
@@ -38,12 +37,11 @@ export class DialogCrearEvaluacionComponent implements OnInit {
   }
 
   cargarContenidos() {
-    this.contenidoService.obtenerPorAsignatura(this.asignatura.ID_Asignatura).subscribe(data => {
-      this.contenidos = data;
-      this.evaluacionService.obtenerContenidosUsados(this.asignatura.ID_Asignatura).subscribe(usados => {
-        this.contenidosUsados = usados;
+    this.contenidoService
+      .obtenerPorAsignatura(this.asignatura.ID_Asignatura)
+      .subscribe((data) => {
+        this.contenidos = data;
       });
-    });
   }
 
   obtenerInstancia() {

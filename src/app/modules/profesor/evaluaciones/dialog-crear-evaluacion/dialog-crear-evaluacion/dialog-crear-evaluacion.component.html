@@ -32,12 +32,11 @@
         type="checkbox"
         [value]="c.ID_Contenido"
         (change)="toggleContenido(c.ID_Contenido)"
-        [disabled]="contenidosUsados.includes(c.ID_Contenido) || bloqueado"
+        [disabled]="bloqueado"
         [checked]="seleccionados.includes(c.ID_Contenido)"
       />
-      <label class="form-check-label text-muted" [ngClass]="{ 'text-decoration-line-through': contenidosUsados.includes(c.ID_Contenido) }">
+      <label class="form-check-label">
         {{ c.Nucleo_Tematico }}
-        <span *ngIf="contenidosUsados.includes(c.ID_Contenido)" class="badge bg-secondary ms-2">Ya utilizado</span>
       </label>
     </div>
   </div>

@@ -13,7 +13,7 @@ exports.crearUsuario = async (ID_Usuario, Nombre, Clave, Rol_ID_Rol) => {
   });
 };
 
-// Validar login
+// Validar login y retornar detalle de errores
 exports.validarLogin = (rut, clave) => {
   const sql = `
     SELECT u.ID_Usuario, u.Nombre, u.Clave, r.Nombre AS Rol
@@ -24,11 +24,11 @@ exports.validarLogin = (rut, clave) => {
   return new Promise((resolve, reject) => {
     connection.query(sql, [rut], async (err, results) => {
       if (err) return reject(err);
-      if (results.length === 0) return resolve(null);
+      if (results.length === 0) return resolve({ error: 'not_found' });
 
       const usuario = results[0];
       const match = await bcrypt.compare(clave, usuario.Clave);
-      if (!match) return resolve(null);
+      if (!match) return resolve({ error: 'invalid_password' });
 
       resolve({
         ID_Usuario: usuario.ID_Usuario,
@@ -65,6 +65,45 @@ exports.getProfesores = () => {
   `;
   return new Promise((resolve, reject) => {
     connection.query(sql, (err, results) => {
+      if (err) return reject(err);
+      resolve(results);
+    });
+  });
+};
+
+// Obtener todos los usuarios con su rol
+exports.getTodos = () => {
+  const sql = `
+    SELECT u.ID_Usuario, u.Nombre, r.Nombre AS Rol
+    FROM usuario u
+    JOIN rol r ON u.Rol_ID_Rol = r.ID_Rol
+    ORDER BY r.Nombre, u.Nombre
+  `;
+  return new Promise((resolve, reject) => {
+    connection.query(sql, (err, results) => {
+      if (err) return reject(err);
+      resolve(results);
+    });
+  });
+};
+
+// Actualizar la clave de un usuario
+exports.actualizarClave = async (id, nuevaClave) => {
+  const hashed = await bcrypt.hash(nuevaClave, 10);
+  const sql = `UPDATE usuario SET Clave = ? WHERE ID_Usuario = ?`;
+  return new Promise((resolve, reject) => {
+    connection.query(sql, [hashed, id], (err, results) => {
+      if (err) return reject(err);
+      resolve(results);
+    });
+  });
+};
+
+// Actualizar el rol de un usuario
+exports.actualizarRol = (id, rolId) => {
+  const sql = `UPDATE usuario SET Rol_ID_Rol = ? WHERE ID_Usuario = ?`;
+  return new Promise((resolve, reject) => {
+    connection.query(sql, [rolId, id], (err, results) => {
       if (err) return reject(err);
       resolve(results);
     });

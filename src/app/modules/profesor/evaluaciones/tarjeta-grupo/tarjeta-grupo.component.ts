@@ -16,6 +16,7 @@ export class TarjetaGrupoComponent {
   @Input() nombreGrupo: string = '';
   @Input() numero!: number;
   @Input() evaluados: Set<number> = new Set();
+  @Input() nota: number | null = null;
 
 
   constructor(private modalService: NgbModal) {}
@@ -24,7 +25,9 @@ export class TarjetaGrupoComponent {
     const modalRef = this.modalService.open(DialogRubricaEvaluacionComponent, {
       centered: true,
       size: 'xl',
-      scrollable: true
+      scrollable: true,
+      backdrop: 'static',
+      keyboard: false
     });
 
     modalRef.componentInstance.evaluacionID = this.evaluacionID;

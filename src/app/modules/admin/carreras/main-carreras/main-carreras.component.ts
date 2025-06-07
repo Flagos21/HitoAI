@@ -5,6 +5,7 @@ import { CarreraService } from '../../../../services/carrera.service';
 import { UsuarioService } from '../../../../services/usuario.service';
 import { DialogCarreraComponent } from '../dialog-carrera/dialog-carrera.component';
 import { SidebarComponent } from '../../../../shared/components/sidebar/sidebar.component';
+import { Carrera, Usuario } from '../../../../models';
 
 @Component({
   selector: 'app-main-carreras',
@@ -14,9 +15,8 @@ import { SidebarComponent } from '../../../../shared/components/sidebar/sidebar.
   imports: [CommonModule, NgbModalModule, SidebarComponent]
 })
 export class MainCarrerasComponent implements OnInit {
-  carreras: any[] = [];
-  seleccionada: any = null;
-  jefes: any[] = [];
+  carreras: Carrera[] = [];
+  jefes: Usuario[] = [];
   rolUsuario: string = '';
 
   constructor(
@@ -39,15 +39,16 @@ export class MainCarrerasComponent implements OnInit {
     this.usuarioService.getJefesCarrera().subscribe(data => this.jefes = data);
   }
 
-  seleccionar(carrera: any) {
-    this.seleccionada = carrera;
-  }
+  abrirDialog(modo: 'crear' | 'ver' | 'editar', carrera?: Carrera) {
 
-  abrirDialog(modo: 'crear' | 'ver' | 'editar') {
-    const modalRef = this.modalService.open(DialogCarreraComponent, { centered: true });
+    const modalRef = this.modalService.open(DialogCarreraComponent, {
+      centered: true,
+      backdrop: 'static',
+      keyboard: false
+    });
     modalRef.componentInstance.modo = modo;
     modalRef.componentInstance.jefes = this.jefes;
-    modalRef.componentInstance.datos = modo === 'crear' ? null : this.seleccionada;
+    modalRef.componentInstance.datos = modo === 'crear' ? null : carrera;
 
     modalRef.result.then(res => {
       if (res === 'actualizado') this.cargarCarreras();

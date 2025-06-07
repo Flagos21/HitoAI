@@ -5,6 +5,7 @@ import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar.component';
 import { AsignaturaService } from '../../../services/asignatura.service';
 import { DialogEvaluacionesComponent } from '../../profesor/evaluaciones/dialog-evaluaciones/dialog-evaluaciones/dialog-evaluaciones.component';
+import { DialogAsignaturaComponent } from '../../admin/asignaturas/dialog-asignatura/dialog-asignatura.component';
 
 @Component({
   selector: 'app-main-asignaturas-profesor',
@@ -16,7 +17,6 @@ import { DialogEvaluacionesComponent } from '../../profesor/evaluaciones/dialog-
 export class MainAsignaturasProfesorComponent implements OnInit {
   rolUsuario = '';
   asignaturas: any[] = [];
-  seleccionada: any = null;
 
   constructor(
     private modalService: NgbModal,
@@ -35,29 +35,41 @@ export class MainAsignaturasProfesorComponent implements OnInit {
       return;
     }
 
-    this.asignaturaService.obtenerPorProfesor(rut).subscribe(data => {
-      this.asignaturas = data;
-    }, error => {
-      console.error('❌ Error al cargar asignaturas del profesor:', error);
+    this.asignaturaService.obtenerPorProfesor(rut).subscribe(
+      (data) => {
+        this.asignaturas = data;
+      },
+      (error) => {
+        console.error('❌ Error al cargar asignaturas del profesor:', error);
+      }
+    );
+  }
+
+  verAsignatura(asignatura: any) {
+    const modalRef = this.modalService.open(DialogAsignaturaComponent, {
+      centered: true,
+      size: 'lg',
+      backdrop: 'static',
+      keyboard: false
     });
+    modalRef.componentInstance.modo = 'ver';
+    modalRef.componentInstance.datos = asignatura;
+    modalRef.componentInstance.puedeDesvincular = false;
   }
 
-  seleccionar(asignatura: any) {
-    this.seleccionada = asignatura;
-  }
+  abrirEvaluaciones(asignatura: any) {
+    const modalRef = this.modalService.open(DialogEvaluacionesComponent, {
+      centered: true,
+      size: 'xl',
+      backdrop: 'static',
+      keyboard: false
+    });
+    modalRef.componentInstance.asignatura = asignatura;
 
-  verAsignatura() {
-    if (!this.seleccionada) return;
-    alert(`Ver asignatura: ${this.seleccionada.Nombre}`);
-  }
-
-  abrirEvaluaciones() {
-    if (!this.seleccionada) return;
-    const modalRef = this.modalService.open(DialogEvaluacionesComponent, { centered: true, size: 'xl' });
-    modalRef.componentInstance.asignatura = this.seleccionada;
-
-    modalRef.result.then(res => {
-      if (res === 'actualizado') this.cargarAsignaturas();
-    }).catch(() => {});
+    modalRef.result
+      .then((res) => {
+        if (res === 'actualizado') this.cargarAsignaturas();
+      })
+      .catch(() => {});
   }
 }

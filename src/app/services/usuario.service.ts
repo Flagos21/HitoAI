@@ -1,28 +1,41 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Usuario } from '../models/usuario.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UsuarioService {
-  private apiUrl = 'http://localhost:3000/api/usuario';
+  private apiUrl = `${environment.apiUrl}/api/usuario`;
 
   constructor(private http: HttpClient) {}
 
-  crearUsuario(usuario: any) {
+  crearUsuario(usuario: Usuario) {
     return this.http.post(`${this.apiUrl}/crear`, usuario);
   }
 
-  login(data: any) {
-    return this.http.post(`${this.apiUrl}/login`, data);
+  login(data: Pick<Usuario, 'ID_Usuario' | 'Clave'>) {
+    return this.http.post<Usuario>(`${this.apiUrl}/login`, data);
   }
 
   getJefesCarrera() {
-    return this.http.get<any[]>(`${this.apiUrl}/jefes`);
+    return this.http.get<Usuario[]>(`${this.apiUrl}/jefes`);
   }
-getProfesores() {
-  return this.http.get<any[]>(`${this.apiUrl}/profesores`);
-}
+  getProfesores() {
+    return this.http.get<Usuario[]>(`${this.apiUrl}/profesores`);
+  }
 
+  getUsuarios() {
+    return this.http.get<Usuario[]>(`${this.apiUrl}/todos`);
+  }
+
+  actualizarClave(id: string, clave: string) {
+    return this.http.put(`${this.apiUrl}/clave/${id}`, { clave });
+  }
+
+  actualizarRol(id: string, rolId: string) {
+    return this.http.put(`${this.apiUrl}/rol/${id}`, { rolId });
+  }
 
 }

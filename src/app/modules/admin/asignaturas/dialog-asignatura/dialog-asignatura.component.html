@@ -1,5 +1,6 @@
 <div class="modal-header">
-  <h5 class="modal-title text-primary">
+  <h5 class="modal-title d-flex align-items-center gap-2" style="color: #002F5D">
+    <i class="bi bi-journal-text"></i>
     {{
       modo === 'crear'
         ? 'Crear Asignatura'
@@ -61,7 +62,7 @@
 </div>
 
 <!-- Confirmación -->
-<div *ngIf="accionConfirmada && !bloqueado" class="confirm-overlay shadow-lg p-4 rounded">
+<div *ngIf="accionConfirmada && !bloqueado" class="confirm-overlay shadow p-4 rounded border mt-3" style="background-color: #f9f9f9;">
   <h5 class="mb-3">
     <i
       class="bi"
@@ -104,7 +105,7 @@
             <th>RUT</th>
             <th>Nombre</th>
             <th>Apellido</th>
-            <th></th>
+          <th *ngIf="puedeDesvincular"></th>
           </tr>
         </thead>
         <tbody>
@@ -112,7 +113,7 @@
             <td>{{ est.ID_Estudiante }}</td>
             <td>{{ est.Nombre }}</td>
             <td>{{ est.Apellido }}</td>
-            <td>
+            <td *ngIf="puedeDesvincular">
               <button class="btn btn-sm border border-danger text-danger bg-light"
                       (click)="marcarParaDesvincular(est)">
                 <i class="bi bi-dash-circle"></i>
@@ -123,7 +124,7 @@
       </table>
 
       <!-- Confirmación visual de desvincular -->
-      <div *ngIf="estudianteParaDesvincular" class="confirm-overlay shadow-lg p-4 rounded bg-white text-dark">
+      <div *ngIf="estudianteParaDesvincular && puedeDesvincular" class="confirm-overlay shadow p-4 rounded border mt-3 bg-white text-dark" style="background-color: #f9f9f9;">
         <h5 class="mb-3">
           <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
           Confirmar desvinculación

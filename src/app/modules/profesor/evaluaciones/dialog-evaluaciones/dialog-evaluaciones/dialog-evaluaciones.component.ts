@@ -17,6 +17,10 @@ export class DialogEvaluacionesComponent implements OnInit {
   @Input() asignatura: any;
 
   evaluaciones: any[] = [];
+  accionConfirmada: number | null = null;
+  mensajeExito = '';
+  mensajeError = '';
+  bloqueado = false;
 
   constructor(
     public modal: NgbActiveModal,
@@ -37,7 +41,12 @@ export class DialogEvaluacionesComponent implements OnInit {
   }
 
   abrirDialogCrearEvaluacion() {
-    const modalRef = this.modalService.open(DialogCrearEvaluacionComponent, { centered: true, size: 'lg' });
+    const modalRef = this.modalService.open(DialogCrearEvaluacionComponent, {
+      centered: true,
+      size: 'lg',
+      backdrop: 'static',
+      keyboard: false
+    });
     modalRef.componentInstance.asignatura = this.asignatura;
 
     modalRef.result.then(res => {
@@ -46,13 +55,47 @@ export class DialogEvaluacionesComponent implements OnInit {
   }
 
   abrirDetalleEvaluacion(evaluacionID: number) {
-    const modalRef = this.modalService.open(MainEvaluacionDetalleComponent, { centered: true, size: 'xl', scrollable: true });
+    const modalRef = this.modalService.open(MainEvaluacionDetalleComponent, {
+      centered: true,
+      size: 'xl',
+      scrollable: true,
+      backdrop: 'static',
+      keyboard: false
+    });
     modalRef.componentInstance.evaluacionID = evaluacionID;
     modalRef.componentInstance.asignaturaID = this.asignatura.ID_Asignatura;
 
     modalRef.result.then(res => {
       if (res === 'actualizado') this.cargarEvaluaciones();
     }).catch(() => {});
+  }
+
+  confirmarEliminar(id: number) {
+    this.accionConfirmada = id;
+  }
+
+  cancelarConfirmacion() {
+    this.accionConfirmada = null;
+  }
+
+  eliminarConfirmado(id: number) {
+    this.bloqueado = true;
+    this.evaluacionService.eliminar(id).subscribe({
+      next: () => {
+        this.mensajeExito = 'Evaluación eliminada';
+        this.accionConfirmada = null;
+        setTimeout(() => {
+          this.mensajeExito = '';
+          this.bloqueado = false;
+          this.cargarEvaluaciones();
+        }, 1500);
+      },
+      error: () => {
+        this.bloqueado = false;
+        this.mensajeError = 'No se pudo eliminar la evaluación';
+        setTimeout(() => (this.mensajeError = ''), 3000);
+      }
+    });
   }
 
   cerrar() {

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { EstudianteService } from '../../../../services/estudiante.service';
 import { DialogFormEstudianteComponent } from '../dialog-form-estudiante/dialog-form-estudiante.component';
+import { Estudiante } from '../../../../models';
 
 @Component({
   selector: 'app-dialog-estudiantes',
@@ -13,8 +14,7 @@ import { DialogFormEstudianteComponent } from '../dialog-form-estudiante/dialog-
   styleUrls: ['./dialog-estudiantes.component.css']
 })
 export class DialogEstudiantesComponent implements OnInit {
-  estudiantes: any[] = [];
-  seleccionado: any = null;
+  estudiantes: Estudiante[] = [];
   bloqueado = false;
   mensajeCSV = '';
   mostrarToastCSV = false;
@@ -35,26 +35,18 @@ export class DialogEstudiantesComponent implements OnInit {
     });
   }
 
-  seleccionar(est: any) {
-    this.seleccionado = est;
-  }
-
   nuevoEstudiante() {
     this.abrirFormulario('crear');
   }
 
-  verEstudiante() {
-    if (this.seleccionado) this.abrirFormulario('ver');
-  }
-
-  editarEstudiante() {
-    if (this.seleccionado) this.abrirFormulario('editar');
-  }
-
-  abrirFormulario(modo: 'crear' | 'ver' | 'editar') {
-    const modalRef = this.modalService.open(DialogFormEstudianteComponent, { centered: true });
+  abrirFormulario(modo: 'crear' | 'ver' | 'editar', est?: Estudiante) {
+    const modalRef = this.modalService.open(DialogFormEstudianteComponent, {
+      centered: true,
+      backdrop: 'static',
+      keyboard: false
+    });
     modalRef.componentInstance.modo = modo;
-    modalRef.componentInstance.datos = modo === 'crear' ? null : this.seleccionado;
+    modalRef.componentInstance.datos = modo === 'crear' ? null : est;
 
     modalRef.result.then(res => {
       if (res === 'actualizado') this.cargarEstudiantesNoInscritos();

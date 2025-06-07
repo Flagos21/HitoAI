@@ -1,25 +1,23 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal, NgbModal, NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AplicacionService } from '../../../../../services/aplicacion.service';
-import { InscripcionService } from '../../../../../services/inscripcion.service';
 import { DialogGruposEvaluacionComponent } from '../../dialog-grupos-evaluacion/dialog-grupos-evaluacion/dialog-grupos-evaluacion.component';
 import { DialogRubricaEvaluacionComponent } from '../../dialog-rubrica-evaluacion/dialog-rubrica-evaluacion.component';
 
 @Component({
   selector: 'app-main-evaluacion-detalle',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, NgbDropdownModule],
   templateUrl: './main-evaluacion-detalle.component.html'
 })
 export class MainEvaluacionDetalleComponent implements OnInit {
   @Input() evaluacionID!: number;
   @Input() asignaturaID!: string;
 
-  estudiantes: any[] = [];
   evaluados: Set<number> = new Set();
-  grupos: { numero: number, estudiantes: any[] }[] = [];
+  grupos: { numero: number, estudiantes: any[], nota: number }[] = [];
 
   mensajeExito = '';
   mensajeError = '';
@@ -30,24 +28,16 @@ export class MainEvaluacionDetalleComponent implements OnInit {
   constructor(
     public modal: NgbActiveModal,
     private aplicacionService: AplicacionService,
-    private inscripcionService: InscripcionService,
     private modalService: NgbModal
   ) {}
 
   ngOnInit(): void {
-    this.cargarEstadoEstudiantes();
+    this.cargarEvaluados();
     this.cargarGrupos();
   }
 
   cancelar() {
     this.modal.dismiss();
-  }
-
-  cargarEstadoEstudiantes() {
-    this.inscripcionService.obtenerPorAsignatura(this.asignaturaID).subscribe((data: any[]) => {
-      this.estudiantes = data;
-      this.cargarEvaluados();
-    });
   }
 
   cargarEvaluados() {
@@ -58,20 +48,33 @@ export class MainEvaluacionDetalleComponent implements OnInit {
 
   cargarGrupos() {
     this.aplicacionService.obtenerAplicacionesAgrupadas(this.evaluacionID, this.asignaturaID).subscribe((data: any[]) => {
-      const agrupado: { [grupo: number]: any[] } = {};
+      const agrupado: {
+        [grupo: number]: { estudiantes: any[]; total: number; max: number };
+      } = {};
+
       for (const app of data) {
-        if (!agrupado[app.Grupo]) agrupado[app.Grupo] = [];
-        if (!agrupado[app.Grupo].some((e: any) => e.ID_Estudiante === app.ID_Estudiante)) {
-          agrupado[app.Grupo].push({
+        if (!agrupado[app.Grupo]) {
+          agrupado[app.Grupo] = { estudiantes: [], total: 0, max: 0 };
+        }
+
+        if (!agrupado[app.Grupo].estudiantes.some((e: any) => e.ID_Estudiante === app.ID_Estudiante)) {
+          agrupado[app.Grupo].estudiantes.push({
             ID_Estudiante: app.ID_Estudiante,
             Nombre: app.Nombre,
             Apellido: app.Apellido
           });
         }
+
+        agrupado[app.Grupo].total += app.Obtenido;
+        agrupado[app.Grupo].max += app.Puntaje_Max;
       }
 
       this.grupos = Object.keys(agrupado)
-        .map(g => ({ numero: +g, estudiantes: agrupado[+g] }))
+        .map(g => ({
+          numero: +g,
+          estudiantes: agrupado[+g].estudiantes,
+          nota: agrupado[+g].max ? Math.round((agrupado[+g].total / agrupado[+g].max) * 100) : 0
+        }))
         .sort((a, b) => a.numero - b.numero);
     });
   }
@@ -80,7 +83,9 @@ export class MainEvaluacionDetalleComponent implements OnInit {
     const modalRef = this.modalService.open(DialogRubricaEvaluacionComponent, {
       centered: true,
       size: 'xl',
-      scrollable: true
+      scrollable: true,
+      backdrop: 'static',
+      keyboard: false
     });
 
     modalRef.componentInstance.evaluacionID = this.evaluacionID;
@@ -110,7 +115,9 @@ export class MainEvaluacionDetalleComponent implements OnInit {
     const modalRef = this.modalService.open(DialogGruposEvaluacionComponent, {
       centered: true,
       size: 'lg',
-      scrollable: true
+      scrollable: true,
+      backdrop: 'static',
+      keyboard: false
     });
 
     modalRef.componentInstance.evaluacionID = this.evaluacionID;
