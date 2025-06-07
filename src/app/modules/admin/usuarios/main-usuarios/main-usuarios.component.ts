@@ -36,7 +36,7 @@ export class MainUsuariosComponent implements OnInit {
     });
   }
 
-  abrirDialog(modo: 'crear' | 'ver' | 'editar', usuario?: Usuario) {
+  abrirDialog(modo: 'crear' | 'ver' | 'editar' | 'rol', usuario?: Usuario) {
     const modalRef = this.modalService.open(DialogUsuarioComponent, {
       centered: true,
       backdrop: 'static',

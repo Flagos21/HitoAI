@@ -29,6 +29,12 @@ export const routes: Routes = [
       import('./modules/admin/usuarios/main-usuarios/main-usuarios.component')
         .then(m => m.MainUsuariosComponent)
   },
+  {
+    path: 'admin/solicitudes',
+    loadComponent: () =>
+      import('./modules/admin/solicitudes/main-solicitudes/main-solicitudes.component')
+        .then(m => m.MainSolicitudesComponent)
+  },
 
   // JEFE DE CARRERA
   { path: 'jefe-carrera', component: JefeHome },

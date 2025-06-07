@@ -17,19 +17,38 @@
       />
     </div>
 
-    <div class="form-group mb-4">
+    <div class="form-group mb-4 position-relative">
       <input
-        type="password"
+        [type]="mostrarClave ? 'text' : 'password'"
         [(ngModel)]="usuario.Clave"
         name="clave"
         class="form-control"
         placeholder="Ingrese su clave"
         required
       />
+      <button type="button" class="btn btn-outline-secondary btn-sm toggle-btn" (click)="toggleClave()">
+        <i class="bi" [ngClass]="mostrarClave ? 'bi-eye-slash' : 'bi-eye'"></i>
+      </button>
+    </div>
+
+    <button type="button" class="btn btn-link p-0 mb-2" (click)="mostrarOlvido = !mostrarOlvido">¿Olvidó su clave?</button>
+    <div *ngIf="mostrarOlvido" class="mb-3">
+      <input type="text" name="rutOlvido" class="form-control mb-2" [(ngModel)]="rutOlvido" placeholder="Ingrese su RUT" />
+      <button type="button" class="btn btn-warning w-100" (click)="enviarSolicitud()">Enviar solicitud</button>
     </div>
 
     <button type="submit" class="btn btn-primary btn-lg w-100">ENTRAR</button>
   </form>
+
+  <div *ngIf="mensajeSolicitud" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 2000">
+    <div class="toast show text-bg-success" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+          <i class="bi bi-check-circle-fill me-2"></i>{{ mensajeSolicitud }}
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div *ngIf="mensajeError" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 2000">
     <div class="toast show text-bg-danger bg-opacity-75" role="alert" aria-live="assertive" aria-atomic="true">

@@ -29,9 +29,12 @@
         <option *ngFor="let r of roles" [value]="r.ID_Rol">{{ r.Nombre }}</option>
       </select>
     </div>
-    <div class="mb-3">
+    <div class="mb-3 position-relative">
       <label class="form-label">Clave</label>
-      <input type="password" class="form-control" [(ngModel)]="usuario.Clave" name="clave" [disabled]="bloqueado" required />
+      <input [type]="mostrarClave ? 'text' : 'password'" class="form-control" [(ngModel)]="usuario.Clave" name="clave" [disabled]="bloqueado" required />
+      <button type="button" class="btn btn-outline-secondary btn-sm toggle-btn" (click)="mostrarClave = !mostrarClave">
+        <i class="bi" [ngClass]="mostrarClave ? 'bi-eye-slash' : 'bi-eye'"></i>
+      </button>
     </div>
   </form>
 
@@ -48,15 +51,28 @@
       <label class="form-label">Rol</label>
       <input type="text" class="form-control" [value]="usuario.Rol" disabled />
     </div>
+    <div *ngIf="modo === 'rol'" class="mb-3">
+      <label class="form-label">Nuevo rol</label>
+      <select class="form-select" [(ngModel)]="usuario.Rol_ID_Rol">
+        <option value="" disabled selected>Selecciona un rol</option>
+        <option *ngFor="let r of roles" [value]="r.ID_Rol">{{ r.Nombre }}</option>
+      </select>
+    </div>
 
     <div *ngIf="modo === 'editar'">
-      <div class="mb-3">
+      <div class="mb-3 position-relative">
         <label class="form-label">Nueva clave</label>
-        <input type="password" class="form-control" [(ngModel)]="nuevaClave" />
+        <input [type]="mostrarNueva ? 'text' : 'password'" class="form-control" [(ngModel)]="nuevaClave" />
+        <button type="button" class="btn btn-outline-secondary btn-sm toggle-btn" (click)="mostrarNueva = !mostrarNueva">
+          <i class="bi" [ngClass]="mostrarNueva ? 'bi-eye-slash' : 'bi-eye'"></i>
+        </button>
       </div>
-      <div class="mb-3">
+      <div class="mb-3 position-relative">
         <label class="form-label">Confirmar clave</label>
-        <input type="password" class="form-control" [(ngModel)]="confirmar" />
+        <input [type]="mostrarConfirmar ? 'text' : 'password'" class="form-control" [(ngModel)]="confirmar" />
+        <button type="button" class="btn btn-outline-secondary btn-sm toggle-btn" (click)="mostrarConfirmar = !mostrarConfirmar">
+          <i class="bi" [ngClass]="mostrarConfirmar ? 'bi-eye-slash' : 'bi-eye'"></i>
+        </button>
       </div>
     </div>
   </div>
@@ -68,7 +84,7 @@
         class="bi"
         [ngClass]="{
           'bi-check-circle-fill': accionConfirmada === 'crear',
-          'bi-pencil-fill': accionConfirmada === 'actualizar'
+          'bi-pencil-fill': accionConfirmada === 'actualizar' || accionConfirmada === 'rol'
         }"
       ></i>
       Confirmar {{ accionConfirmada }}
@@ -79,6 +95,7 @@
     <div class="d-flex justify-content-end gap-2 mt-3">
       <button class="btn btn-success btn-sm text-white" *ngIf="accionConfirmada === 'crear'" (click)="crear()">Sí, crear</button>
       <button class="btn btn-primary btn-sm text-white" *ngIf="accionConfirmada === 'actualizar'" (click)="renovarClave()">Sí, actualizar</button>
+      <button class="btn btn-info btn-sm text-white" *ngIf="accionConfirmada === 'rol'" (click)="cambiarRol()">Sí, actualizar</button>
       <button class="btn btn-outline-secondary btn-sm" (click)="cancelarConfirmacion()">Cancelar</button>
     </div>
   </div>
@@ -112,6 +129,9 @@
   </button>
   <button *ngIf="modo === 'editar'" class="btn btn-success" (click)="renovarClave()" [disabled]="bloqueado">
     <i class="bi bi-pencil-square me-1"></i> Guardar
+  </button>
+  <button *ngIf="modo === 'rol'" class="btn btn-info text-white" (click)="cambiarRol()" [disabled]="bloqueado">
+    <i class="bi bi-shuffle me-1"></i> Guardar
   </button>
   <button class="btn btn-secondary" (click)="cancelar()" [disabled]="bloqueado">Cancelar</button>
 </div>
