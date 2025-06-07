@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal, NgbModal, NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AplicacionService } from '../../../../../services/aplicacion.service';
 import { DialogGruposEvaluacionComponent } from '../../dialog-grupos-evaluacion/dialog-grupos-evaluacion/dialog-grupos-evaluacion.component';
@@ -9,7 +9,7 @@ import { DialogRubricaEvaluacionComponent } from '../../dialog-rubrica-evaluacio
 @Component({
   selector: 'app-main-evaluacion-detalle',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, NgbDropdownModule],
   templateUrl: './main-evaluacion-detalle.component.html'
 })
 export class MainEvaluacionDetalleComponent implements OnInit {
