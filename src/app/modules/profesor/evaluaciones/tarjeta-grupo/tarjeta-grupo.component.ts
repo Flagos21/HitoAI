@@ -16,6 +16,7 @@ export class TarjetaGrupoComponent {
   @Input() nombreGrupo: string = '';
   @Input() numero!: number;
   @Input() evaluados: Set<number> = new Set();
+  @Input() nota: number | null = null;
 
 
   constructor(private modalService: NgbModal) {}
