@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UsuarioService } from '../../services/usuario.service';
+import { MensajeService } from '../../services/mensaje.service';
 import { cleanRut, validarRut } from '../../utils/rut';
 
 @Component({
@@ -18,8 +19,16 @@ export class LoginComponent {
     Clave: ''
   };
   mensajeError = '';
+  mostrarClave = false;
+  mostrarOlvido = false;
+  rutOlvido = '';
+  mensajeSolicitud = '';
 
-  constructor(private usuarioService: UsuarioService, private router: Router) {}
+  constructor(
+    private usuarioService: UsuarioService,
+    private mensajeService: MensajeService,
+    private router: Router
+  ) {}
 
   login() {
     const rut = cleanRut(this.usuario.ID_Usuario);
@@ -46,6 +55,21 @@ export class LoginComponent {
         this.mensajeError = err.error?.message || 'Usuario o clave incorrectos';
         setTimeout(() => (this.mensajeError = ''), 3000);
       }
+    });
+  }
+
+  toggleClave() {
+    this.mostrarClave = !this.mostrarClave;
+  }
+
+  enviarSolicitud() {
+    if (!this.rutOlvido) return;
+    const rut = cleanRut(this.rutOlvido);
+    this.mensajeService.solicitarReinicio(rut).subscribe(() => {
+      this.mensajeSolicitud = 'Solicitud enviada';
+      this.rutOlvido = '';
+      this.mostrarOlvido = false;
+      setTimeout(() => (this.mensajeSolicitud = ''), 3000);
     });
   }
 }
