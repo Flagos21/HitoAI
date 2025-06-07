@@ -51,8 +51,13 @@ export class DialogRaComponent implements OnInit {
 
   ngOnInit(): void {
     const rut = localStorage.getItem('rut') || '';
-    if (rut) {
-      this.asignaturaService.obtenerPorCarreraDelJefe(rut).subscribe(data => {
+    const rol = localStorage.getItem('rol') || '';
+    if (rol === 'Comité Curricular') {
+      this.asignaturaService.obtenerTodas().subscribe((data) => {
+        this.asignaturas = data;
+      });
+    } else if (rut) {
+      this.asignaturaService.obtenerPorCarreraDelJefe(rut).subscribe((data) => {
         this.asignaturas = data;
       });
     }
