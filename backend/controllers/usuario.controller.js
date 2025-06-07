@@ -3,13 +3,14 @@ const UsuarioService = require('../services/usuario.service');
 // Crear nuevo usuario
 exports.crearUsuario = async (req, res) => {
   const { ID_Usuario, Nombre, Clave, Rol_ID_Rol } = req.body;
+  const rut = ID_Usuario.replace(/\./g, '').replace(/-/g, '').toUpperCase();
 
   if (!ID_Usuario || !Nombre || !Clave || !Rol_ID_Rol) {
     return res.status(400).json({ message: 'Faltan datos requeridos para crear el usuario' });
   }
 
   try {
-    await UsuarioService.crearUsuario(ID_Usuario, Nombre, Clave, Rol_ID_Rol);
+    await UsuarioService.crearUsuario(rut, Nombre, Clave, Rol_ID_Rol);
     res.status(201).json({ message: 'Usuario creado correctamente' });
   } catch (error) {
     console.error(error);
@@ -20,12 +21,16 @@ exports.crearUsuario = async (req, res) => {
 // Validar login
 exports.login = async (req, res) => {
   const { ID_Usuario, Clave } = req.body;
+  const rut = ID_Usuario.replace(/\./g, '').replace(/-/g, '').toUpperCase();
   try {
-    const usuario = await UsuarioService.validarLogin(ID_Usuario, Clave);
-    if (!usuario) {
-      return res.status(401).json({ message: 'Credenciales inválidas' });
+    const resultado = await UsuarioService.validarLogin(rut, Clave);
+    if (resultado?.error === 'not_found') {
+      return res.status(404).json({ message: 'RUT no registrado' });
     }
-    res.json(usuario);
+    if (resultado?.error === 'invalid_password') {
+      return res.status(401).json({ message: 'Clave incorrecta' });
+    }
+    res.json(resultado);
   } catch (error) {
     console.error('Error login backend:', error);
     res.status(500).json({ message: 'Error en el login' });

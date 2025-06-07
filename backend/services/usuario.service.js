@@ -13,7 +13,7 @@ exports.crearUsuario = async (ID_Usuario, Nombre, Clave, Rol_ID_Rol) => {
   });
 };
 
-// Validar login
+// Validar login y retornar detalle de errores
 exports.validarLogin = (rut, clave) => {
   const sql = `
     SELECT u.ID_Usuario, u.Nombre, u.Clave, r.Nombre AS Rol
@@ -24,11 +24,11 @@ exports.validarLogin = (rut, clave) => {
   return new Promise((resolve, reject) => {
     connection.query(sql, [rut], async (err, results) => {
       if (err) return reject(err);
-      if (results.length === 0) return resolve(null);
+      if (results.length === 0) return resolve({ error: 'not_found' });
 
       const usuario = results[0];
       const match = await bcrypt.compare(clave, usuario.Clave);
-      if (!match) return resolve(null);
+      if (!match) return resolve({ error: 'invalid_password' });
 
       resolve({
         ID_Usuario: usuario.ID_Usuario,

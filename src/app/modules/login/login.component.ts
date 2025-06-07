@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UsuarioService } from '../../services/usuario.service';
+import { cleanRut, validarRut } from '../../utils/rut';
 
 @Component({
   selector: 'app-login',
@@ -16,11 +17,19 @@ export class LoginComponent {
     ID_Usuario: '',
     Clave: ''
   };
+  mensajeError = '';
 
   constructor(private usuarioService: UsuarioService, private router: Router) {}
 
   login() {
-    this.usuarioService.login(this.usuario).subscribe({
+    const rut = cleanRut(this.usuario.ID_Usuario);
+    if (!validarRut(rut)) {
+      this.mensajeError = 'RUT inválido';
+      setTimeout(() => (this.mensajeError = ''), 3000);
+      return;
+    }
+
+    this.usuarioService.login({ ID_Usuario: rut, Clave: this.usuario.Clave }).subscribe({
       next: (res: any) => {
         const rol = res?.Rol?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
@@ -33,7 +42,10 @@ export class LoginComponent {
         else if (rol === 'comite curricular') this.router.navigate(['/comite']);
         else alert('⚠️ Rol no reconocido');
       },
-      error: () => alert('❌ Usuario o clave incorrectos')
+      error: (err) => {
+        this.mensajeError = err.error?.message || 'Usuario o clave incorrectos';
+        setTimeout(() => (this.mensajeError = ''), 3000);
+      }
     });
   }
 }

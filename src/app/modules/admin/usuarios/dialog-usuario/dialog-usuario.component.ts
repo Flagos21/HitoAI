@@ -5,6 +5,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { UsuarioService } from '../../../../services/usuario.service';
 import { RolService } from '../../../../services/rol.service';
 import { Usuario, Rol } from '../../../../models';
+import { cleanRut, validarRut } from '../../../../utils/rut';
 
 @Component({
   selector: 'app-dialog-usuario',
@@ -82,6 +83,14 @@ export class DialogUsuarioComponent {
       setTimeout(() => (this.mensajeError = ''), 3000);
       return;
     }
+
+    if (!validarRut(this.usuario.ID_Usuario)) {
+      this.mensajeError = 'RUT inválido';
+      setTimeout(() => (this.mensajeError = ''), 3000);
+      return;
+    }
+
+    this.usuario.ID_Usuario = cleanRut(this.usuario.ID_Usuario);
 
     if (!this.accionConfirmada) {
       this.accionConfirmada = 'crear';
