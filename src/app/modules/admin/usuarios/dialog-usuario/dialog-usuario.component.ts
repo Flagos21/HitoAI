@@ -16,17 +16,18 @@ import { claveSegura } from '../../../../utils/clave';
   styleUrls: ['./dialog-usuario.component.css']
 })
 export class DialogUsuarioComponent {
-  @Input() modo: 'crear' | 'ver' | 'editar' = 'ver';
+  @Input() modo: 'crear' | 'ver' | 'editar' | 'rol' = 'ver';
   @Input() datos: Usuario | null = null;
 
   usuario: Usuario = { ID_Usuario: '', Nombre: '', Rol: '', Clave: '', Rol_ID_Rol: '' };
   roles: Rol[] = [];
   nuevaClave = '';
   confirmar = '';
+  mostrarClave = false;
   mensajeExito = '';
   mensajeError = '';
   bloqueado = false;
-  accionConfirmada: 'crear' | 'actualizar' | null = null;
+  accionConfirmada: 'crear' | 'actualizar' | 'rol' | null = null;
   private modalCerrado = false;
 
   constructor(
@@ -36,7 +37,7 @@ export class DialogUsuarioComponent {
   ) {}
 
   ngOnInit(): void {
-    if (this.modo === 'crear') {
+    if (this.modo === 'crear' || this.modo === 'rol') {
       this.rolService.getRoles().subscribe({
         next: data => (this.roles = data),
         error: () => (this.mensajeError = 'Error al cargar roles')
@@ -117,6 +118,28 @@ export class DialogUsuarioComponent {
       this.mensajeExito = 'Usuario creado';
       setTimeout(() => this.cerrarConExito(), 1500);
     });
+  }
+
+  cambiarRol() {
+    if (!this.usuario.Rol_ID_Rol) {
+      this.mensajeError = 'Seleccione un rol.';
+      setTimeout(() => (this.mensajeError = ''), 3000);
+      return;
+    }
+
+    if (!this.accionConfirmada) {
+      this.accionConfirmada = 'rol';
+      return;
+    }
+
+    if (this.bloqueado) return;
+    this.bloqueado = true;
+    this.usuarioService
+      .actualizarRol(this.usuario.ID_Usuario, this.usuario.Rol_ID_Rol)
+      .subscribe(() => {
+        this.mensajeExito = 'Rol actualizado';
+        setTimeout(() => this.cerrarConExito(), 1500);
+      });
   }
 
   cancelar() {

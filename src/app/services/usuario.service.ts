@@ -34,5 +34,8 @@ export class UsuarioService {
     return this.http.put(`${this.apiUrl}/clave/${id}`, { clave });
   }
 
+  actualizarRol(id: string, rolId: string) {
+    return this.http.put(`${this.apiUrl}/rol/${id}`, { rolId });
+  }
 
 }
