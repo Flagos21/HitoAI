@@ -64,6 +64,7 @@ export class DialogRubricaComponent implements OnInit {
     });
     modalRef.componentInstance.modo = 'editar';
     modalRef.componentInstance.datos = indicador;
+    modalRef.componentInstance.contenidoID = indicador.contenido_ID_Contenido;
 
     modalRef.result
       .then((res) => {
@@ -81,6 +82,7 @@ export class DialogRubricaComponent implements OnInit {
     });
     modalRef.componentInstance.modo = 'ver';
     modalRef.componentInstance.datos = indicador;
+    modalRef.componentInstance.contenidoID = indicador.contenido_ID_Contenido;
   }
 
   get columnasMaximas(): number[] {
