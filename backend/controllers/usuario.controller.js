@@ -87,3 +87,19 @@ exports.actualizarClave = async (req, res) => {
     res.status(500).json({ message: 'Error al actualizar clave' });
   }
 };
+
+// Actualizar rol
+exports.actualizarRol = async (req, res) => {
+  const { id } = req.params;
+  const { rolId } = req.body;
+  if (!rolId) {
+    return res.status(400).json({ message: 'Rol requerido' });
+  }
+  try {
+    await UsuarioService.actualizarRol(id, rolId);
+    res.json({ message: 'Rol actualizado' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al actualizar rol' });
+  }
+};

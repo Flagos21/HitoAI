@@ -18,6 +18,7 @@ app.use('/api/contenido', require('./routes/contenido.routes'));
 app.use('/api/aplicacion', require('./routes/aplicacion.routes'));
 app.use('/api/evaluacion', require('./routes/evaluacion.routes'));
 app.use('/api/rol', require('./routes/rol.routes'));
+app.use('/api/mensaje', require('./routes/mensaje.routes'));
 
 
 const PORT = process.env.PORT || 3000;
