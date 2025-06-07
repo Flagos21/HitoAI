@@ -32,7 +32,9 @@
     <div class="mb-3 position-relative">
       <label class="form-label">Clave</label>
       <input [type]="mostrarClave ? 'text' : 'password'" class="form-control" [(ngModel)]="usuario.Clave" name="clave" [disabled]="bloqueado" required />
+
       <button type="button" class="btn btn-outline-secondary btn-sm toggle-btn" (click)="mostrarClave = !mostrarClave">
+
         <i class="bi" [ngClass]="mostrarClave ? 'bi-eye-slash' : 'bi-eye'"></i>
       </button>
     </div>
