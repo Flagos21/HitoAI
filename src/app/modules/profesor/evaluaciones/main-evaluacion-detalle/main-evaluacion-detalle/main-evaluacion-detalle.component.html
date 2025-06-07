@@ -48,10 +48,12 @@
               </button>
               <div ngbDropdownMenu>
                 <button class="dropdown-item" (click)="abrirRubrica(grupo, grupo.numero)">
-                  <i class="bi" [ngClass]="{
+
+                  <i class="bi me-2" [ngClass]="{
                     'bi-eye': esGrupoEvaluado(grupo),
                     'bi-pencil-square': !esGrupoEvaluado(grupo)
-                  } me-2"></i>
+                  }"></i>
+
                   {{ esGrupoEvaluado(grupo) ? 'Ver Rúbrica' : 'Evaluar' }}
                 </button>
                 <button *ngIf="!esGrupoEvaluado(grupo)" class="dropdown-item text-danger"
