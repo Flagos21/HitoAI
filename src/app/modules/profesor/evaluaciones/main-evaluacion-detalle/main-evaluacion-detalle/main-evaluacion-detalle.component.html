@@ -26,8 +26,10 @@
 
     <div class="row row-cols-1 row-cols-md-3 g-3">
       <div class="col" *ngFor="let grupo of grupos">
+
         <div class="border rounded p-3 h-100 shadow-sm"
              [ngClass]="esGrupoEvaluado(grupo) ? 'border-success bg-success bg-opacity-10' : 'border-secondary bg-white'">
+
           <div class="d-flex justify-content-between align-items-center">
             <div>
             <strong>Grupo {{ grupo.numero }}</strong>
@@ -46,10 +48,12 @@
               </button>
               <div ngbDropdownMenu>
                 <button class="dropdown-item" (click)="abrirRubrica(grupo, grupo.numero)">
+
                   <i class="bi me-2" [ngClass]="{
                     'bi-eye': esGrupoEvaluado(grupo),
                     'bi-pencil-square': !esGrupoEvaluado(grupo)
                   }"></i>
+
                   {{ esGrupoEvaluado(grupo) ? 'Ver Rúbrica' : 'Evaluar' }}
                 </button>
                 <button *ngIf="!esGrupoEvaluado(grupo)" class="dropdown-item text-danger"
