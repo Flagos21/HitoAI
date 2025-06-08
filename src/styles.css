@@ -1,6 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
 
 body.dark-mode {
+
   background-color: #1e1e1e;
   color: #ffffff;
 }
@@ -22,6 +23,7 @@ body.dark-mode .form-control {
 body.dark-mode .btn-primary {
   background-color: #0d6efd;
 }
+
 
 /* Override common light backgrounds */
 body.dark-mode .bg-white,
@@ -51,3 +53,4 @@ body.dark-mode [style*="#002f5d" i] {
 body.dark-mode .text-dark {
   color: #ffffff !important;
 }
+

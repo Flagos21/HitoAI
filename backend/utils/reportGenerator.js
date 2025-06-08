@@ -33,6 +33,8 @@ try {
     TextRun,
     ImageRun,
     AlignmentType,
+    WidthType,
+    BorderStyle,
   } = require('docx'));
 } catch (err) {
   console.warn(

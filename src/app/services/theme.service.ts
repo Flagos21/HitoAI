@@ -19,6 +19,7 @@ export class ThemeService {
 
   toggleDarkMode(): void {
     this.darkMode = !this.darkMode;
+
     if (isPlatformBrowser(this.platformId)) {
       localStorage.setItem('darkMode', String(this.darkMode));
     }
