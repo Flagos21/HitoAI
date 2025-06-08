@@ -45,6 +45,12 @@ export const routes: Routes = [
         .then(m => m.MainAsignaturasJefeComponent)
   },
   {
+    path: 'jefe-carrera/reportes',
+    loadComponent: () =>
+      import('./modules/jefe-carrera/reportes/reportes.component')
+        .then(m => m.ReportesComponent)
+  },
+  {
     path: 'jefe-carrera/ra',
     loadComponent: () =>
       import('./modules/competencia-ra/ra-main/ra-main.component')
