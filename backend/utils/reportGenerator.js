@@ -101,7 +101,12 @@ exports.generarPDF = contenido => {
     doc.moveDown();
     doc.fontSize(16).text(contenido.datos.Nombre, { align: 'center' });
     doc.moveDown();
-    doc.fontSize(12).text(contenido.introduccion, { align: 'justify' });
+    const intro = contenido.introduccion;
+    doc.fontSize(14).text(intro.objetivo.titulo);
+    doc.fontSize(12).text(intro.objetivo.texto, { align: 'justify' });
+    doc.moveDown();
+    doc.fontSize(14).text(intro.relevancia.titulo);
+    doc.fontSize(12).text(intro.relevancia.texto, { align: 'justify' });
     doc.moveDown();
     doc.fontSize(12).text(contenido.conclusion, { align: 'justify' });
 
@@ -128,7 +133,22 @@ exports.generarDOCX = contenido => {
             heading: HeadingLevel.HEADING_2,
             alignment: 'center'
           }),
-          new Paragraph(contenido.introduccion),
+          new Paragraph({
+            text: contenido.introduccion.objetivo.titulo,
+            heading: HeadingLevel.HEADING_3,
+          }),
+          new Paragraph({
+            text: contenido.introduccion.objetivo.texto,
+            alignment: 'justify',
+          }),
+          new Paragraph({
+            text: contenido.introduccion.relevancia.titulo,
+            heading: HeadingLevel.HEADING_3,
+          }),
+          new Paragraph({
+            text: contenido.introduccion.relevancia.texto,
+            alignment: 'justify',
+          }),
           new Paragraph(contenido.conclusion)
         ]
       }
@@ -151,7 +171,12 @@ exports.generarPDFCompleto = contenido => {
 
     doc.fontSize(18).text('INFORME DE ASIGNATURA INTEGRADORA DE SABERES I', { align: 'center' });
     doc.moveDown();
-    doc.fontSize(12).text(contenido.introduccion, { align: 'justify' });
+    const intro = contenido.introduccion;
+    doc.fontSize(14).text(intro.objetivo.titulo);
+    doc.fontSize(12).text(intro.objetivo.texto, { align: 'justify' });
+    doc.moveDown();
+    doc.fontSize(14).text(intro.relevancia.titulo);
+    doc.fontSize(12).text(intro.relevancia.texto, { align: 'justify' });
     doc.moveDown();
 
     Object.keys(contenido.instancias)
@@ -321,7 +346,22 @@ exports.generarDOCXCompleto = contenido => {
       {
         children: [
           new Paragraph({ text: 'INFORME DE ASIGNATURA INTEGRADORA DE SABERES I', heading: HeadingLevel.HEADING_1, alignment: 'center' }),
-          new Paragraph(contenido.introduccion),
+          new Paragraph({
+            text: contenido.introduccion.objetivo.titulo,
+            heading: HeadingLevel.HEADING_3,
+          }),
+          new Paragraph({
+            text: contenido.introduccion.objetivo.texto,
+            alignment: 'justify',
+          }),
+          new Paragraph({
+            text: contenido.introduccion.relevancia.titulo,
+            heading: HeadingLevel.HEADING_3,
+          }),
+          new Paragraph({
+            text: contenido.introduccion.relevancia.texto,
+            alignment: 'justify',
+          }),
           ...instanciasParagraphs,
           new Paragraph({ text: 'Cumplimiento por Competencia', heading: HeadingLevel.HEADING_2 }),
           compTable,
