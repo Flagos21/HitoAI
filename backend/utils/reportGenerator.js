@@ -453,6 +453,9 @@ exports.generarPDFCompleto = contenido => {
     doc.fontSize(12).text(intro.relevancia.texto, { align: 'justify' });
     doc.moveDown();
 
+    generarTablaResumenIndicadoresPDF(doc, contenido.resumenIndicadores);
+    doc.moveDown();
+
     const ordinales = [
       'Primera',
       'Segunda',
@@ -480,7 +483,6 @@ exports.generarPDFCompleto = contenido => {
         generarGraficoDesempenoPDF(doc, contenido.graficos && contenido.graficos[num]);
         generarConclusionPDF(doc, inst);
         generarRecomendacionesPDF(doc, inst);
-        generarTablaCriteriosPorIndicadorPDF(doc, inst);
       });
 
 
@@ -583,7 +585,6 @@ exports.generarDOCXCompleto = async contenido => {
       if (graf) instanciasParagraphs.push(graf);
       instanciasParagraphs.push(...generarConclusionDOCX(inst));
       instanciasParagraphs.push(...generarRecomendacionesDOCX(inst));
-      instanciasParagraphs.push(generarTablaCriteriosPorIndicadorDOCX(inst));
     });
 
   const grafParags = Object.entries(contenido.graficos || {})
