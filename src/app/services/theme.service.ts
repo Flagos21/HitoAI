@@ -1,12 +1,16 @@
-import { Injectable } from '@angular/core';
+
+import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
   private darkMode = false;
 
-  constructor() {
-    const stored = localStorage.getItem('darkMode');
-    this.darkMode = stored === 'true';
+  constructor(@Inject(PLATFORM_ID) private platformId: object) {
+    if (isPlatformBrowser(this.platformId)) {
+      const stored = localStorage.getItem('darkMode');
+      this.darkMode = stored === 'true';
+    }
     this.applyTheme();
   }
 
@@ -16,15 +20,23 @@ export class ThemeService {
 
   toggleDarkMode(): void {
     this.darkMode = !this.darkMode;
-    localStorage.setItem('darkMode', String(this.darkMode));
+
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('darkMode', String(this.darkMode));
+    }
+
     this.applyTheme();
   }
 
   private applyTheme(): void {
-    if (this.darkMode) {
-      document.body.classList.add('dark-mode');
-    } else {
-      document.body.classList.remove('dark-mode');
+
+    if (typeof document !== 'undefined') {
+      if (this.darkMode) {
+        document.body.classList.add('dark-mode');
+      } else {
+        document.body.classList.remove('dark-mode');
+      }
+
     }
   }
 }
