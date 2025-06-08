@@ -175,6 +175,7 @@ exports.generarInforme = async asignaturaId => {
   for (const i of Object.values(instancias)) {
     const resumen = i.criterios.map(c => c.indicador).join(', ');
     i.conclusion = await conclusionCriterios(resumen);
+    i.recomendaciones = [await recomendacionesTemas(resumen)];
   }
 
   // totalNiveles ya calculado al agregar rubricas
@@ -215,10 +216,13 @@ exports.generarInforme = async asignaturaId => {
     );
   }
 
+  const resumenIndicadores = [...datos].sort((a, b) => a.instancia - b.instancia);
+
   const contenido = {
     asignatura,
     introduccion,
     instancias,
+    resumenIndicadores,
     datos,
     analisis,
     competencias,
