@@ -54,3 +54,15 @@ body.dark-mode .text-dark {
   color: #ffffff !important;
 }
 
+/* Button overrides for dark mode */
+body.dark-mode .btn-outline-dark,
+body.dark-mode .btn-outline-secondary {
+  color: #ffffff;
+  border-color: #ffffff;
+}
+
+body.dark-mode .btn-outline-dark:hover,
+body.dark-mode .btn-outline-secondary:hover {
+  background-color: #ffffff;
+  color: #000000;
+}
