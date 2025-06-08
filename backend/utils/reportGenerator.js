@@ -16,7 +16,9 @@ let Document,
   Table,
   TableRow,
   TableCell,
-  ImageRun;
+  TextRun,
+  ImageRun,
+  AlignmentType;
 try {
   ({
     Document,
@@ -26,7 +28,9 @@ try {
     Table,
     TableRow,
     TableCell,
+    TextRun,
     ImageRun,
+    AlignmentType,
   } = require('docx'));
 } catch (err) {
   console.warn(
@@ -66,8 +70,15 @@ function buildCriteriaTableDOCX(criterios) {
   return new Table({
     rows: [
       new TableRow({
-        children: ['Criterio', 'Max', 'Min', 'Prom', '%>Prom', 'Comp.'].map(t =>
-          new TableCell({ children: [new Paragraph({ text: t, bold: true })] })
+        children: ['Criterio', 'Max', 'Min', 'Prom', '%>Prom', 'Comp.'].map(
+          t =>
+            new TableCell({
+              children: [
+                new Paragraph({
+                  children: [new TextRun({ text: t, bold: true })],
+                }),
+              ],
+            })
         ),
       }),
       ...criterios.map(c =>
@@ -79,7 +90,11 @@ function buildCriteriaTableDOCX(criterios) {
             String(c.promedio),
             `${c.porcentaje}%`,
             c.competencia,
-          ].map(t => new TableCell({ children: [new Paragraph(String(t))] })),
+          ].map(t =>
+            new TableCell({
+              children: [new Paragraph({ children: [new TextRun(String(t))] })],
+            })
+          ),
         })
       ),
     ],
@@ -115,7 +130,7 @@ exports.generarPDF = contenido => {
 };
 
 // Genera un DOCX con la misma información
-exports.generarDOCX = contenido => {
+exports.generarDOCX = async contenido => {
   if (!Document) {
     return Promise.reject(new Error('docx not installed'));
   }
@@ -124,38 +139,38 @@ exports.generarDOCX = contenido => {
       {
         children: [
           new Paragraph({
-            text: 'INFORME DE ASIGNATURA',
             heading: HeadingLevel.HEADING_1,
-            alignment: 'center'
+            alignment: AlignmentType.CENTER,
+            children: [new TextRun('INFORME DE ASIGNATURA')],
           }),
           new Paragraph({
-            text: contenido.datos.Nombre,
             heading: HeadingLevel.HEADING_2,
-            alignment: 'center'
+            alignment: AlignmentType.CENTER,
+            children: [new TextRun(contenido.datos.Nombre)],
           }),
           new Paragraph({
-            text: contenido.introduccion.objetivo.titulo,
             heading: HeadingLevel.HEADING_3,
+            children: [new TextRun(contenido.introduccion.objetivo.titulo)],
           }),
           new Paragraph({
-            text: contenido.introduccion.objetivo.texto,
-            alignment: 'justify',
+            alignment: AlignmentType.JUSTIFIED,
+            children: [new TextRun(contenido.introduccion.objetivo.texto)],
           }),
           new Paragraph({
-            text: contenido.introduccion.relevancia.titulo,
             heading: HeadingLevel.HEADING_3,
+            children: [new TextRun(contenido.introduccion.relevancia.titulo)],
           }),
           new Paragraph({
-            text: contenido.introduccion.relevancia.texto,
-            alignment: 'justify',
+            alignment: AlignmentType.JUSTIFIED,
+            children: [new TextRun(contenido.introduccion.relevancia.texto)],
           }),
-          new Paragraph(contenido.conclusion)
+          new Paragraph({ children: [new TextRun(contenido.conclusion)] })
         ]
       }
     ]
   });
-
-  return Packer.toBuffer(doc);
+  const buffer = await Packer.toBuffer(doc);
+  return buffer;
 };
 
 // Genera un PDF completo con tablas y gráfico
@@ -238,15 +253,22 @@ exports.generarPDFCompleto = contenido => {
 };
 
 // Genera un DOCX completo similar al PDF
-exports.generarDOCXCompleto = contenido => {
+exports.generarDOCXCompleto = async contenido => {
   if (!Document) {
     return Promise.reject(new Error('docx not installed'));
   }
   const tableIndicadores = new Table({
     rows: [
       new TableRow({
-        children: ['Criterio', 'Eval.', 'Max', 'Min', 'Prom', '%', 'Comp.'].map(t =>
-          new TableCell({ children: [new Paragraph({ text: t, bold: true })] })
+        children: ['Criterio', 'Eval.', 'Max', 'Min', 'Prom', '%', 'Comp.'].map(
+          t =>
+            new TableCell({
+              children: [
+                new Paragraph({
+                  children: [new TextRun({ text: t, bold: true })],
+                }),
+              ],
+            })
         ),
       }),
       ...contenido.datos.map(d =>
@@ -259,7 +281,11 @@ exports.generarDOCXCompleto = contenido => {
             String(d.promedio),
             `${d.porcentaje}%`,
             d.competencia,
-          ].map(t => new TableCell({ children: [new Paragraph(String(t))] })),
+          ].map(t =>
+            new TableCell({
+              children: [new Paragraph({ children: [new TextRun(String(t))] })],
+            })
+          ),
         })
       ),
     ],
@@ -268,7 +294,16 @@ exports.generarDOCXCompleto = contenido => {
   const compTable = new Table({
     rows: [
       new TableRow({
-        children: ['Competencia', 'Ideal', 'Promedio', 'Cumplimiento'].map(t => new TableCell({ children: [new Paragraph({ text: t, bold: true })] }))
+        children: ['Competencia', 'Ideal', 'Promedio', 'Cumplimiento'].map(
+          t =>
+            new TableCell({
+              children: [
+                new Paragraph({
+                  children: [new TextRun({ text: t, bold: true })],
+                }),
+              ],
+            })
+        )
       }),
       ...contenido.competencias.map(c =>
         new TableRow({
@@ -277,7 +312,11 @@ exports.generarDOCXCompleto = contenido => {
             String(c.puntaje_ideal),
             String(c.puntaje_promedio),
             `${c.cumplimiento}%`
-          ].map(t => new TableCell({ children: [new Paragraph(String(t))] }))
+          ].map(t =>
+            new TableCell({
+              children: [new Paragraph({ children: [new TextRun(String(t))] })],
+            })
+          )
         })
       )
     ]
@@ -289,90 +328,118 @@ exports.generarDOCXCompleto = contenido => {
     .forEach(num => {
       const inst = contenido.instancias[num];
       instanciasParagraphs.push(
-        new Paragraph({ text: `Instancia Evaluativa ${num}`, heading: HeadingLevel.HEADING_2 })
+        new Paragraph({
+          heading: HeadingLevel.HEADING_2,
+          children: [new TextRun(`Instancia Evaluativa ${num}`)],
+        })
       );
       instanciasParagraphs.push(buildCriteriaTableDOCX(inst.criterios));
       inst.criterios.forEach((c, idx) => {
         instanciasParagraphs.push(
-          new Paragraph({ text: c.indicador, heading: HeadingLevel.HEADING_3 })
-        );
-        instanciasParagraphs.push(
           new Paragraph({
-            text: `Máximo Puntaje Obtenido: ${c.maximo}`,
-            bullet: { level: 0 },
+            heading: HeadingLevel.HEADING_3,
+            children: [new TextRun(c.indicador)],
           })
         );
         instanciasParagraphs.push(
           new Paragraph({
-            text: `Mínimo Puntaje Obtenido: ${c.minimo}`,
             bullet: { level: 0 },
+            children: [new TextRun(`Máximo Puntaje Obtenido: ${c.maximo}`)],
           })
         );
         instanciasParagraphs.push(
           new Paragraph({
-            text: `Puntaje Promedio: ${c.promedio}`,
             bullet: { level: 0 },
+            children: [new TextRun(`Mínimo Puntaje Obtenido: ${c.minimo}`)],
           })
         );
         instanciasParagraphs.push(
           new Paragraph({
-            text: `% de Alumnos sobre el Promedio: ${c.porcentaje}%`,
             bullet: { level: 0 },
+            children: [new TextRun(`Puntaje Promedio: ${c.promedio}`)],
+          })
+        );
+        instanciasParagraphs.push(
+          new Paragraph({
+            bullet: { level: 0 },
+            children: [new TextRun(`% de Alumnos sobre el Promedio: ${c.porcentaje}%`)],
           })
         );
         if (Array.isArray(c.niveles)) {
           c.niveles.forEach(n => {
             instanciasParagraphs.push(
-              new Paragraph(`${n.nombre}: ${n.cantidad} (${n.porcentaje}%)`)
+              new Paragraph({
+                children: [
+                  new TextRun(`${n.nombre}: ${n.cantidad} (${n.porcentaje}%)`),
+                ],
+              })
             );
           });
         }
-        instanciasParagraphs.push(new Paragraph(inst.analisis[idx]));
+        instanciasParagraphs.push(
+          new Paragraph({ children: [new TextRun(inst.analisis[idx] || '')] })
+        );
       });
-      instanciasParagraphs.push(new Paragraph(inst.conclusion));
+      instanciasParagraphs.push(
+        new Paragraph({ children: [new TextRun(inst.conclusion || '')] })
+      );
     });
 
-  const grafParags = Object.values(contenido.graficos || {}).map(
-    p =>
+  const grafParags = Object.values(contenido.graficos || {})
+    .filter(p => p && fs.existsSync(p))
+    .map(p =>
       new Paragraph({
         children: [
-          new ImageRun({ data: fs.readFileSync(p), transformation: { width: 500, height: 250 } })
-        ]
+          new ImageRun({
+            data: fs.readFileSync(p),
+            transformation: { width: 500, height: 250 },
+          }),
+        ],
       })
-  );
+    );
 
   const doc = new Document({
     sections: [
       {
         children: [
-          new Paragraph({ text: 'INFORME DE ASIGNATURA INTEGRADORA DE SABERES I', heading: HeadingLevel.HEADING_1, alignment: 'center' }),
           new Paragraph({
-            text: contenido.introduccion.objetivo.titulo,
+            heading: HeadingLevel.HEADING_1,
+            alignment: AlignmentType.CENTER,
+            children: [new TextRun('INFORME DE ASIGNATURA INTEGRADORA DE SABERES I')],
+          }),
+          new Paragraph({
             heading: HeadingLevel.HEADING_3,
+            children: [new TextRun(contenido.introduccion.objetivo.titulo)],
           }),
           new Paragraph({
-            text: contenido.introduccion.objetivo.texto,
-            alignment: 'justify',
+            alignment: AlignmentType.JUSTIFIED,
+            children: [new TextRun(contenido.introduccion.objetivo.texto)],
           }),
           new Paragraph({
-            text: contenido.introduccion.relevancia.titulo,
             heading: HeadingLevel.HEADING_3,
+            children: [new TextRun(contenido.introduccion.relevancia.titulo)],
           }),
           new Paragraph({
-            text: contenido.introduccion.relevancia.texto,
-            alignment: 'justify',
+            alignment: AlignmentType.JUSTIFIED,
+            children: [new TextRun(contenido.introduccion.relevancia.texto)],
           }),
           ...instanciasParagraphs,
-          new Paragraph({ text: 'Cumplimiento por Competencia', heading: HeadingLevel.HEADING_2 }),
+          new Paragraph({
+            heading: HeadingLevel.HEADING_2,
+            children: [new TextRun('Cumplimiento por Competencia')],
+          }),
           compTable,
-          ...(contenido.recomendacionesComp || []).map(t => new Paragraph(t)),
+          ...(contenido.recomendacionesComp || []).map(
+            t => new Paragraph({ children: [new TextRun(t)] })
+          ),
           ...grafParags,
-          new Paragraph(contenido.conclusion),
-          new Paragraph(contenido.recomendaciones)
+          new Paragraph({ children: [new TextRun(contenido.conclusion)] }),
+          new Paragraph({ children: [new TextRun(contenido.recomendaciones)] })
         ]
       }
     ]
   });
 
-  return Packer.toBuffer(doc);
+  const buffer = await Packer.toBuffer(doc);
+  return buffer;
 };
