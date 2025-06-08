@@ -1,3 +1,4 @@
+
 import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
@@ -19,19 +20,23 @@ export class ThemeService {
 
   toggleDarkMode(): void {
     this.darkMode = !this.darkMode;
+
     if (isPlatformBrowser(this.platformId)) {
       localStorage.setItem('darkMode', String(this.darkMode));
     }
+
     this.applyTheme();
   }
 
   private applyTheme(): void {
+
     if (typeof document !== 'undefined') {
       if (this.darkMode) {
         document.body.classList.add('dark-mode');
       } else {
         document.body.classList.remove('dark-mode');
       }
+
     }
   }
 }
