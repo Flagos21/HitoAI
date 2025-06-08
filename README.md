@@ -8,7 +8,7 @@ The backend uses a `.env` file. An example file is provided at `backend/.env.exa
 
 ```bash
 cp backend/.env.example backend/.env
-# then edit backend/.env and set OPENAI_KEY=your_key
+# then edit backend/.env and set OPENAI_API_KEY=your_key
 ```
 
 ## Development servers

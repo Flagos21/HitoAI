@@ -258,39 +258,64 @@ exports.generarDOCXCompleto = async contenido => {
   if (!Document) {
     return Promise.reject(new Error('docx not installed'));
   }
-  const tableIndicadores = new Table({
-    rows: [
-      new TableRow({
-        children: ['Criterio', 'Eval.', 'Max', 'Min', 'Prom', '%', 'Comp.'].map(
-          t =>
-            new TableCell({
-              children: [
-                new Paragraph({
-                  children: [new TextRun({ text: t, bold: true })],
-                }),
-              ],
-            })
-        ),
-      }),
-      ...contenido.datos.map(d =>
-        new TableRow({
+  const indicadorRows = [
+    new TableRow({
+      children: [
+        'Criterio',
+        'Máximo Puntaje Obtenido',
+        'Mínimo Puntaje Obtenido',
+        'Puntaje Promedio',
+        '% de alumnos sobre el promedio',
+        'Competencia',
+      ].map(t =>
+        new TableCell({
           children: [
-            d.indicador,
-            d.evaluacion,
-            String(d.maximo),
-            String(d.minimo),
-            String(d.promedio),
-            `${d.porcentaje}%`,
-            d.competencia,
-          ].map(t =>
-            new TableCell({
-              children: [new Paragraph({ children: [new TextRun(String(t))] })],
-            })
-          ),
+            new Paragraph({ children: [new TextRun({ text: t, bold: true })] }),
+          ],
         })
       ),
-    ],
-  });
+    }),
+  ];
+
+  Object.keys(contenido.instancias)
+    .sort((a, b) => a - b)
+    .forEach(num => {
+      const inst = contenido.instancias[num];
+      indicadorRows.push(
+        new TableRow({
+          children: [
+            new TableCell({
+              columnSpan: 6,
+              children: [
+                new Paragraph({
+                  children: [new TextRun({ text: inst.nombre, bold: true })],
+                }),
+              ],
+            }),
+          ],
+        })
+      );
+      inst.criterios.forEach(d => {
+        indicadorRows.push(
+          new TableRow({
+            children: [
+              d.indicador,
+              String(d.maximo),
+              String(d.minimo),
+              String(d.promedio),
+              `${d.porcentaje}%`,
+              d.competencia,
+            ].map(t =>
+              new TableCell({
+                children: [new Paragraph({ children: [new TextRun(String(t))] })],
+              })
+            ),
+          })
+        );
+      });
+    });
+
+  const tableIndicadores = new Table({ rows: indicadorRows });
 
   const compTable = new Table({
     rows: [
@@ -328,13 +353,12 @@ exports.generarDOCXCompleto = async contenido => {
     .sort((a, b) => a - b)
     .forEach(num => {
       const inst = contenido.instancias[num];
-      instanciasParagraphs.push(
-        new Paragraph({
-          heading: HeadingLevel.HEADING_2,
-          children: [new TextRun(`Instancia Evaluativa ${num}`)],
-        })
-      );
-      instanciasParagraphs.push(buildCriteriaTableDOCX(inst.criterios));
+    instanciasParagraphs.push(
+      new Paragraph({
+        heading: HeadingLevel.HEADING_2,
+        children: [new TextRun(`Instancia Evaluativa ${num}`)],
+      })
+    );
       inst.criterios.forEach((c, idx) => {
         instanciasParagraphs.push(
           new Paragraph({
@@ -384,11 +408,26 @@ exports.generarDOCXCompleto = async contenido => {
       instanciasParagraphs.push(
         new Paragraph({ children: [new TextRun(inst.conclusion || '')] })
       );
+      if (contenido.graficos && contenido.graficos[num]) {
+        const p = contenido.graficos[num];
+        if (fs.existsSync(p)) {
+          instanciasParagraphs.push(
+            new Paragraph({
+              children: [
+                new ImageRun({
+                  data: fs.readFileSync(p),
+                  transformation: { width: 500, height: 250 },
+                }),
+              ],
+            })
+          );
+        }
+      }
     });
 
-  const grafParags = Object.values(contenido.graficos || {})
-    .filter(p => p && fs.existsSync(p))
-    .map(p =>
+  const grafParags = Object.entries(contenido.graficos || {})
+    .filter(([k, p]) => isNaN(Number(k)) && p && fs.existsSync(p))
+    .map(([_, p]) =>
       new Paragraph({
         children: [
           new ImageRun({
@@ -424,6 +463,7 @@ exports.generarDOCXCompleto = async contenido => {
             alignment: AlignmentType.JUSTIFIED,
             children: [new TextRun(contenido.introduccion.relevancia.texto)],
           }),
+          tableIndicadores,
           ...instanciasParagraphs,
           new Paragraph({
             heading: HeadingLevel.HEADING_2,

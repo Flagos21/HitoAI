@@ -16,6 +16,9 @@ export class ReporteService {
   }
 
   word(asignaturaId: number) {
-    return this.http.get(`${this.apiUrl}/${asignaturaId}/word`, { responseType: 'blob' });
+    return this.http.get(`${this.apiUrl}/${asignaturaId}/word`, {
+      responseType: 'blob',
+      observe: 'response'
+    });
   }
 }

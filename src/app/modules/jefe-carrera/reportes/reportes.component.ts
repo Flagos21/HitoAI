@@ -44,11 +44,14 @@ export class ReportesComponent implements OnInit {
   }
 
   descargarWord(id: number) {
-    this.reporteService.word(id).subscribe(blob => {
+    this.reporteService.word(id).subscribe(response => {
+      const blob = response.body as Blob;
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `Informe-${id}.docx`;
+      const disposition = response.headers.get('Content-Disposition');
+      const match = disposition?.match(/filename=([^;]+)/);
+      a.download = match ? match[1] : `Informe-${id}.docx`;
       a.click();
       window.URL.revokeObjectURL(url);
     });
