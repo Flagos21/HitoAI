@@ -111,7 +111,11 @@ exports.generarPDFCompleto = contenido => {
         inst.criterios.forEach((d, idx) => {
           doc.fontSize(12).text(`${d.indicador} (${d.competencia}) - ${d.evaluacion}`);
           doc.text(`Max: ${d.maximo} Min: ${d.minimo} Prom: ${d.promedio} Sobre prom: ${d.porcentaje}%`);
-          doc.text(`Excelente: ${d.excelente} Aceptable: ${d.aceptable} Insuficiente: ${d.insuficiente}`);
+          if (Array.isArray(d.niveles)) {
+            d.niveles.forEach(n => {
+              doc.text(`${n.nombre}: ${n.cantidad} (${n.porcentaje}%)`);
+            });
+          }
           doc.text(inst.analisis[idx]);
           doc.moveDown();
         });
@@ -132,7 +136,7 @@ exports.generarPDFCompleto = contenido => {
     doc.fontSize(14).text('Cumplimiento por Competencia', { underline: true });
     doc.moveDown();
     contenido.competencias.forEach(c => {
-      doc.text(`${c.ID_Competencia} - Ideal: ${c.puntaje_ideal} Obtenido: ${c.puntaje_total} Cumplimiento: ${c.cumplimiento}%`);
+      doc.text(`${c.ID_Competencia} - Ideal: ${c.puntaje_ideal} Promedio: ${c.puntaje_promedio} Cumplimiento: ${c.cumplimiento}%`);
       if (contenido.recomendacionesComp) {
         const idx = contenido.competencias.findIndex(co => co.ID_Competencia === c.ID_Competencia);
         if (contenido.recomendacionesComp[idx]) {
@@ -181,14 +185,14 @@ exports.generarDOCXCompleto = contenido => {
   const compTable = new Table({
     rows: [
       new TableRow({
-        children: ['Competencia', 'Ideal', 'Total', 'Cumplimiento'].map(t => new TableCell({ children: [new Paragraph({ text: t, bold: true })] }))
+        children: ['Competencia', 'Ideal', 'Promedio', 'Cumplimiento'].map(t => new TableCell({ children: [new Paragraph({ text: t, bold: true })] }))
       }),
       ...contenido.competencias.map(c =>
         new TableRow({
           children: [
             c.ID_Competencia,
             String(c.puntaje_ideal),
-            String(c.puntaje_total),
+            String(c.puntaje_promedio),
             `${c.cumplimiento}%`
           ].map(t => new TableCell({ children: [new Paragraph(String(t))] }))
         })
@@ -211,9 +215,13 @@ exports.generarDOCXCompleto = contenido => {
         instanciasParagraphs.push(
           new Paragraph(`Max: ${c.maximo} Min: ${c.minimo} Prom: ${c.promedio} %:${c.porcentaje}`)
         );
-        instanciasParagraphs.push(
-          new Paragraph(`Excelente: ${c.excelente} Aceptable: ${c.aceptable} Insuficiente: ${c.insuficiente}`)
-        );
+        if (Array.isArray(c.niveles)) {
+          c.niveles.forEach(n => {
+            instanciasParagraphs.push(
+              new Paragraph(`${n.nombre}: ${n.cantidad} (${n.porcentaje}%)`)
+            );
+          });
+        }
         instanciasParagraphs.push(new Paragraph(inst.analisis[idx]));
       });
       instanciasParagraphs.push(new Paragraph(inst.conclusion));
