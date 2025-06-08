@@ -52,8 +52,14 @@ function drawCriteriaTablePDF(doc, criterios) {
     doc.text(h, x, doc.y, { width: widths[i] });
   });
   doc.moveDown();
-  doc.font('Helvetica');
+  let current = null;
   criterios.forEach(c => {
+    if (c.instancia !== current) {
+      current = c.instancia;
+      doc.font('Helvetica-Bold').text(`Instancia ${current}`, startX);
+      doc.moveDown(0.2);
+    }
+    doc.font('Helvetica');
     let x = startX;
     doc.text(c.indicador, x, doc.y, { width: widths[0] });
     x += widths[0];
@@ -71,38 +77,58 @@ function drawCriteriaTablePDF(doc, criterios) {
 }
 
 function buildCriteriaTableDOCX(criterios) {
-  return new Table({
-    rows: [
-      new TableRow({
-        children: ['Criterio', 'Max', 'Min', 'Prom', '%>Prom', 'Comp.'].map(
-          t =>
-            new TableCell({
-              children: [
-                new Paragraph({
-                  children: [new TextRun({ text: t, bold: true })],
-                }),
-              ],
-            })
-        ),
-      }),
-      ...criterios.map(c =>
+  const header = new TableRow({
+    children: ['Criterio', 'Max', 'Min', 'Prom', '%>Prom', 'Comp.'].map(t =>
+      new TableCell({
+        children: [
+          new Paragraph({
+            children: [new TextRun({ text: t, bold: true })],
+          }),
+        ],
+      })
+    ),
+  });
+
+  const rows = [header];
+  let current = null;
+  criterios.forEach(c => {
+    if (c.instancia !== current) {
+      current = c.instancia;
+      rows.push(
         new TableRow({
           children: [
-            c.indicador,
-            String(c.maximo),
-            String(c.minimo),
-            String(c.promedio),
-            `${c.porcentaje}%`,
-            c.competencia,
-          ].map(t =>
             new TableCell({
-              children: [new Paragraph({ children: [new TextRun(String(t))] })],
-            })
-          ),
+              columnSpan: 6,
+              children: [
+                new Paragraph({
+                  children: [new TextRun({ text: `Instancia ${current}`, bold: true })],
+                }),
+              ],
+            }),
+          ],
         })
-      ),
-    ],
+      );
+    }
+
+    rows.push(
+      new TableRow({
+        children: [
+          c.indicador,
+          String(c.maximo),
+          String(c.minimo),
+          String(c.promedio),
+          `${c.porcentaje}%`,
+          c.competencia,
+        ].map(t =>
+          new TableCell({
+            children: [new Paragraph({ children: [new TextRun(String(t))] })],
+          })
+        ),
+      })
+    );
   });
+
+  return new Table({ rows });
 }
 
 function drawDistribucionTablePDF(doc, indicadores) {
