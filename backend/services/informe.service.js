@@ -202,6 +202,15 @@ exports.generarInforme = async asignaturaId => {
     'competencias.png'
   );
 
+  const graficosInstancias = {};
+  for (const [num, inst] of Object.entries(instancias)) {
+    graficosInstancias[num] = await generarGraficoBarras(
+      inst.criterios.map(c => c.indicador),
+      inst.criterios.map(c => c.porcentaje),
+      `instancia_${num}.png`
+    );
+  }
+
   const contenido = {
     asignatura,
     introduccion,
@@ -212,7 +221,7 @@ exports.generarInforme = async asignaturaId => {
     recomendacionesComp,
     conclusion,
     recomendaciones,
-    graficos: { barrasPath, tortaPath, compPath },
+    graficos: { barrasPath, tortaPath, compPath, ...graficosInstancias },
   };
 
   let pdf = Buffer.from('');
@@ -236,7 +245,8 @@ exports.generarInforme = async asignaturaId => {
   if (pdf.length) fs.writeFileSync(path.join(outDir, `${base}.pdf`), pdf);
 
   if (docx.length) fs.writeFileSync(path.join(outDir, `${base}.docx`), docx);
-  [barrasPath, tortaPath, compPath].forEach(p => {
+  const archivosGraficos = [barrasPath, tortaPath, compPath, ...Object.values(graficosInstancias)];
+  archivosGraficos.forEach(p => {
     if (fs.existsSync(p)) fs.unlinkSync(p);
   });
   return { pdf, docx, nombre: `${base}.pdf`, nombreDocx: `${base}.docx` };

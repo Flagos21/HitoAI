@@ -1,7 +1,7 @@
 const https = require('https');
+require('dotenv').config();
 
-const API_KEY = process.env.OPENAI_KEY ||
-  'sk-proj-GznLKfiW7SV3JIXLOUC-jPNQLSM-obg1RqpG7evvy5x0DkfqHJ4yг6OKABQbGG_DjDUgEhpwz0T3BIbkFJ9_6-YuJ3WQDZIg3a71A0mdF7D7CnUOR7GmKBb0-TO7SuXwk|7Bomz-IgExeYoj0ulP55vCB8A';
+const API_KEY = process.env.OPENAI_API_KEY;
 const MODEL = 'gpt-3.5-turbo';
 
 function callOpenAI(prompt) {
