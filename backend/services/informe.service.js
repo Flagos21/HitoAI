@@ -33,10 +33,15 @@ async function obtenerDatosIndicadores(asignaturaId) {
         MAX(a.Obtenido) AS maximo,
         MIN(a.Obtenido) AS minimo,
         ROUND(AVG(a.Obtenido), 1) AS promedio,
-        ROUND(SUM(a.Obtenido > (SELECT AVG(Obtenido) FROM aplicacion WHERE indicador_ID_Indicador = i.ID_Indicador AND evaluacion_ID_Evaluacion = ev.ID_Evaluacion)) / COUNT(*) * 100, 1) AS porcentaje,
-        SUM(a.Obtenido >= i.Puntaje_Max * 0.7) AS excelente,
-        SUM(a.Obtenido >= i.Puntaje_Max * 0.4 AND a.Obtenido < i.Puntaje_Max * 0.7) AS aceptable,
-        SUM(a.Obtenido < i.Puntaje_Max * 0.4) AS insuficiente,
+        ROUND(
+          SUM(a.Obtenido > (
+            SELECT AVG(Obtenido)
+            FROM aplicacion
+            WHERE indicador_ID_Indicador = i.ID_Indicador
+              AND evaluacion_ID_Evaluacion = ev.ID_Evaluacion
+          )) / COUNT(*) * 100,
+          1
+        ) AS porcentaje,
         COUNT(*) AS total,
         c.ID_Competencia AS competencia
       FROM aplicacion a
@@ -53,11 +58,11 @@ async function obtenerDatosIndicadores(asignaturaId) {
 
 async function obtenerCompetencias(asignaturaId) {
   const sql = `
-      SELECT 
+      SELECT
         c.ID_Competencia,
         SUM(i.Puntaje_Max) AS puntaje_ideal,
-        ROUND(SUM(a.Obtenido), 1) AS puntaje_total,
-        ROUND(SUM(a.Obtenido) / SUM(i.Puntaje_Max) * 100, 1) AS cumplimiento
+        ROUND(SUM(a.Obtenido) / COUNT(DISTINCT ins.ID_Inscripcion), 1) AS puntaje_promedio,
+        ROUND((SUM(a.Obtenido) / COUNT(DISTINCT ins.ID_Inscripcion)) / SUM(i.Puntaje_Max) * 100, 1) AS cumplimiento
       FROM aplicacion a
       JOIN indicador i ON i.ID_Indicador = a.indicador_ID_Indicador
       JOIN ra r ON r.ID_RA = i.ra_ID_RA
@@ -74,8 +79,30 @@ async function obtenerAsignatura(id) {
   return rows[0] || { ID_Asignatura: id, Nombre: `Asignatura ${id}` };
 }
 
+async function obtenerRubricas(asignaturaId) {
+  const sql = `
+      SELECT
+        ev.ID_Evaluacion AS evaluacionId,
+        ev.N_Instancia AS instancia,
+        i.ID_Indicador AS indicadorId,
+        c.Nombre AS criterio,
+        c.R_Min AS rMin,
+        c.R_Max AS rMax,
+        SUM(a.Obtenido BETWEEN c.R_Min AND c.R_Max) AS cantidad,
+        COUNT(a.ID_Aplicacion) AS total
+      FROM criterio c
+      JOIN indicador i ON i.ID_Indicador = c.indicador_ID_Indicador
+      JOIN aplicacion a ON a.indicador_ID_Indicador = i.ID_Indicador
+      JOIN evaluacion ev ON ev.ID_Evaluacion = a.evaluacion_ID_Evaluacion
+      JOIN inscripcion ins ON ins.ID_Inscripcion = a.inscripcion_ID_Inscripcion
+      WHERE ins.asignatura_ID_Asignatura = ?
+      GROUP BY ev.ID_Evaluacion, i.ID_Indicador, c.ID_Criterio;`;
+  return query(sql, [asignaturaId]);
+}
+
 exports.generarInforme = async asignaturaId => {
   const datos = await obtenerDatosIndicadores(asignaturaId);
+  const rubricas = await obtenerRubricas(asignaturaId);
   const competencias = await obtenerCompetencias(asignaturaId);
   const asignatura = await obtenerAsignatura(asignaturaId);
 
@@ -95,9 +122,30 @@ exports.generarInforme = async asignaturaId => {
     )
   );
 
+  // Mapear distribución de criterios por indicador
+  const rubricaMap = {};
+  rubricas.forEach(r => {
+    const key = `${r.evaluacionId}-${r.indicadorId}`;
+    if (!rubricaMap[key]) rubricaMap[key] = [];
+    rubricaMap[key].push({
+      nombre: r.criterio,
+      rMin: r.rMin,
+      rMax: r.rMax,
+      cantidad: r.cantidad,
+      porcentaje: Math.round((r.cantidad / r.total) * 1000) / 10,
+    });
+  });
+
   // Agrupar por instancia
   const instancias = {};
+  const totalNiveles = {};
   datos.forEach((d, idx) => {
+    const key = `${d.evaluacionId}-${d.indicadorId}`;
+    d.niveles = rubricaMap[key] || [];
+    d.niveles.forEach(n => {
+      totalNiveles[n.nombre] = (totalNiveles[n.nombre] || 0) + n.cantidad;
+    });
+
     if (!instancias[d.instancia]) {
       instancias[d.instancia] = {
         nombre: d.evaluacion,
@@ -114,12 +162,7 @@ exports.generarInforme = async asignaturaId => {
     i.conclusion = await conclusionCriterios(resumen);
   }
 
-  const totalNiveles = { excelente: 0, aceptable: 0, insuficiente: 0 };
-  datos.forEach(d => {
-    totalNiveles.excelente += d.excelente;
-    totalNiveles.aceptable += d.aceptable;
-    totalNiveles.insuficiente += d.insuficiente;
-  });
+  // totalNiveles ya calculado al agregar rubricas
 
   const resumenComp = competencias.map(c => `${c.ID_Competencia}: ${c.cumplimiento}%`).join(', ');
   const conclusion = await conclusionCompetencias(resumenComp);
@@ -137,8 +180,8 @@ exports.generarInforme = async asignaturaId => {
   );
 
   const tortaPath = await generarGraficoTorta(
-    ['Excelente', 'Aceptable', 'Insuficiente'],
-    [totalNiveles.excelente, totalNiveles.aceptable, totalNiveles.insuficiente],
+    Object.keys(totalNiveles),
+    Object.values(totalNiveles),
     'niveles.png'
   );
 

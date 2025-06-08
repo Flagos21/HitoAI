@@ -9,7 +9,25 @@
       <tbody>
         <tr *ngFor="let a of asignaturas">
           <td>{{a.Nombre}}</td>
-          <td><button class="btn btn-primary" (click)="generar(a.ID_Asignatura)">Generar Informe</button></td>
+          <td class="text-end">
+            <div class="dropdown">
+              <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-three-dots-vertical"></i>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                  <a class="dropdown-item" (click)="descargarWord(a.ID_Asignatura)">
+                    <i class="bi bi-file-earmark-word me-1"></i> Generar Word
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" (click)="descargarPdf(a.ID_Asignatura)">
+                    <i class="bi bi-file-earmark-pdf me-1"></i> Generar PDF
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </td>
         </tr>
       </tbody>
     </table>

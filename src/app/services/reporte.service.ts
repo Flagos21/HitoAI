@@ -10,4 +10,12 @@ export class ReporteService {
   generar(asignaturaId: number) {
     return this.http.get(`${this.apiUrl}/${asignaturaId}`, { responseType: 'blob' });
   }
+
+  pdf(asignaturaId: number) {
+    return this.http.get(`${this.apiUrl}/${asignaturaId}/pdf`, { responseType: 'blob' });
+  }
+
+  word(asignaturaId: number) {
+    return this.http.get(`${this.apiUrl}/${asignaturaId}/word`, { responseType: 'blob' });
+  }
 }

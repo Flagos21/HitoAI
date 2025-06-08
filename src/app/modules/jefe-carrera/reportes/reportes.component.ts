@@ -31,4 +31,26 @@ export class ReportesComponent implements OnInit {
       window.URL.revokeObjectURL(url);
     });
   }
+
+  descargarPdf(id: number) {
+    this.reporteService.pdf(id).subscribe(blob => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Informe-${id}.pdf`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    });
+  }
+
+  descargarWord(id: number) {
+    this.reporteService.word(id).subscribe(blob => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Informe-${id}.docx`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    });
+  }
 }
