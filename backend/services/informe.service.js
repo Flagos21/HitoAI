@@ -75,8 +75,19 @@ async function obtenerCompetencias(asignaturaId) {
 }
 
 async function obtenerAsignatura(id) {
-  const rows = await query('SELECT * FROM asignatura WHERE ID_Asignatura = ?', [id]);
-  return rows[0] || { ID_Asignatura: id, Nombre: `Asignatura ${id}` };
+  const sql = `
+    SELECT a.*, c.Nombre AS Carrera
+    FROM asignatura a
+    JOIN carrera c ON a.carrera_ID_Carrera = c.ID_Carrera
+    WHERE a.ID_Asignatura = ?`;
+  const rows = await query(sql, [id]);
+  return (
+    rows[0] || {
+      ID_Asignatura: id,
+      Nombre: `Asignatura ${id}`,
+      Carrera: 'Carrera Desconocida',
+    }
+  );
 }
 
 async function obtenerRubricas(asignaturaId) {
@@ -106,7 +117,7 @@ exports.generarInforme = async asignaturaId => {
   const competencias = await obtenerCompetencias(asignaturaId);
   const asignatura = await obtenerAsignatura(asignaturaId);
 
-  const introduccion = await crearIntroduccion(asignatura.Nombre);
+  const introduccion = await crearIntroduccion(asignatura.Nombre, asignatura.Carrera);
 
   const analisis = await Promise.all(
     datos.map(d =>

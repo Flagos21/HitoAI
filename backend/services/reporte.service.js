@@ -6,7 +6,11 @@ const { generarPDF, generarDOCX } = require('../utils/reportGenerator');
 
 async function obtenerDatos(asignaturaId) {
   return new Promise(resolve => {
-    const sql = `SELECT * FROM asignatura WHERE ID_Asignatura = ?`;
+    const sql = `
+      SELECT a.*, c.Nombre AS Carrera
+      FROM asignatura a
+      JOIN carrera c ON a.carrera_ID_Carrera = c.ID_Carrera
+      WHERE a.ID_Asignatura = ?`;
     connection.query(sql, [asignaturaId], (err, rows) => {
       if (err || !rows.length) {
         console.error('Error obteniendo asignatura', err);
@@ -19,7 +23,7 @@ async function obtenerDatos(asignaturaId) {
 
 exports.generarReporte = async asignaturaId => {
   const datos = await obtenerDatos(asignaturaId);
-  const introduccion = await crearIntroduccion(datos.Nombre);
+  const introduccion = await crearIntroduccion(datos.Nombre, datos.Carrera);
   const conclusion = await crearConclusion(datos.Nombre);
   const contenido = { datos, introduccion, conclusion };
   let pdf = Buffer.from('');
