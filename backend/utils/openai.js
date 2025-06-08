@@ -1,6 +1,7 @@
 const https = require('https');
 
-const API_KEY = process.env.OPENAI_KEY;
+const API_KEY = process.env.OPENAI_KEY ||
+  'sk-proj-GznLKfiW7SV3JIXLOUC-jPNQLSM-obg1RqpG7evvy5x0DkfqHJ4yг6OKABQbGG_DjDUgEhpwz0T3BIbkFJ9_6-YuJ3WQDZIg3a71A0mdF7D7CnUOR7GmKBb0-TO7SuXwk|7Bomz-IgExeYoj0ulP55vCB8A';
 const MODEL = 'gpt-3.5-turbo';
 
 function callOpenAI(prompt) {
@@ -74,6 +75,21 @@ exports.conclusionCompetencias = resumen => {
 
 exports.recomendacionesTemas = temas => {
   const prompt = `Entrega recomendaciones generales de mejora para los siguientes temas: ${temas}.`;
+  return safe(prompt, `Recomendaciones para ${temas}`);
+};
+
+exports.conclusionCriterios = resumen => {
+  const prompt = `Redacta una conclusion breve sobre el rendimiento observado en los siguientes criterios: ${resumen}.`;
+  return safe(prompt, `Conclusion de criterios: ${resumen}`);
+};
+
+exports.recomendacionesCompetencia = (competencia, cumplimiento) => {
+  const prompt = `Entrega recomendaciones para mejorar la competencia ${competencia} que actualmente tiene un cumplimiento de ${cumplimiento} por ciento.`;
+  return safe(prompt, `Recomendaciones para ${competencia}`);
+};
+
+exports.recomendacionesGenerales = temas => {
+  const prompt = `Entrega recomendaciones generales para reforzar los siguientes temas: ${temas}.`;
   return safe(prompt, `Recomendaciones para ${temas}`);
 };
 
