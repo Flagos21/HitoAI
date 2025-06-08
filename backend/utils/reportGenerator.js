@@ -1,20 +1,16 @@
 
-let PDFDocument;
-try {
-  PDFDocument = require('pdfkit');
-} catch {
-  PDFDocument = require('./minimalPdfKit');
-  console.warn('pdfkit not found, using minimalPdfKit - charts will be omitted');
-}
-
-let docx;
-try {
-  docx = require('docx');
-} catch {
-  docx = require('./minimalDocx');
-  console.warn('docx package not found, using minimalDocx');
-}
-const { Document, Packer, Paragraph, HeadingLevel, Table, TableRow, TableCell, TextRun, Media } = docx;
+const PDFDocument = require('pdfkit');
+const fs = require('fs');
+const {
+  Document,
+  Packer,
+  Paragraph,
+  HeadingLevel,
+  Table,
+  TableRow,
+  TableCell,
+  ImageRun,
+} = require('docx');
 
 // Genera un PDF básico a partir del contenido entregado
 exports.generarPDF = contenido => {
@@ -86,9 +82,8 @@ exports.generarPDFCompleto = contenido => {
     });
 
 
-    if (contenido.chartImage) {
-      doc.image(contenido.chartImage, { fit: [500, 300], align: 'center' });
-
+    if (contenido.chartPath) {
+      doc.image(contenido.chartPath, { width: 500 });
       doc.moveDown();
     }
 
@@ -166,7 +161,16 @@ exports.generarDOCXCompleto = contenido => {
           tableIndicadores,
           ...contenido.analisis.map(a => new Paragraph(a)),
 
-          contenido.chartImage ? Media.addImage(doc, contenido.chartImage) : new Paragraph(''),
+          contenido.chartPath
+            ? new Paragraph({
+                children: [
+                  new ImageRun({
+                    data: fs.readFileSync(contenido.chartPath),
+                    transformation: { width: 500, height: 250 },
+                  }),
+                ],
+              })
+            : new Paragraph(''),
 
           new Paragraph({ text: 'Cumplimiento por Competencia', heading: HeadingLevel.HEADING_2 }),
           compTable,
