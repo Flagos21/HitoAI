@@ -94,8 +94,8 @@ exports.generarInforme = async asignaturaId => {
       datasets: [{ label: '% sobre promedio', data: datos.map(d => d.porcentaje) }],
     },
   });
-  const chartUrl = chart.getUrl();
 
+  const chartImage = await chart.toBinary();
   const contenido = {
     asignatura,
     introduccion,
@@ -104,7 +104,8 @@ exports.generarInforme = async asignaturaId => {
     competencias,
     conclusion,
     recomendaciones,
-    chartUrl,
+
+    chartImage,
   };
 
   const pdf = await generarPDFCompleto(contenido);

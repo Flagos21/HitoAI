@@ -83,6 +83,20 @@ ng e2e
 
 Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
 
+## Automatic subject reports
+
+The backend exposes `/api/informe/:asignaturaId` to generate a full PDF
+and Word report for a given course. Make sure you install backend
+dependencies before running the server:
+
+```bash
+cd backend
+npm install
+```
+
+Reports are saved under `backend/uploads/` and returned directly in the
+HTTP response.
+
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
