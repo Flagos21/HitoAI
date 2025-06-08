@@ -22,12 +22,18 @@ exports.generarReporte = async asignaturaId => {
   const introduccion = await crearIntroduccion(datos.Nombre);
   const conclusion = await crearConclusion(datos.Nombre);
   const contenido = { datos, introduccion, conclusion };
-  const pdf = await generarPDF(contenido);
+  let pdf = Buffer.from('');
+  try {
+    pdf = await generarPDF(contenido);
+  } catch (err) {
+    console.warn('PDF generation skipped:', err.message);
+  }
   const docx = await generarDOCX(contenido);
 
   const base = `Informe-${datos.ID_Asignatura}-${new Date().toISOString().split('T')[0]}`;
   const outDir = path.join(__dirname, '..', 'uploads');
-  fs.writeFileSync(path.join(outDir, `${base}.pdf`), pdf);
+  if (!fs.existsSync(outDir)) fs.mkdirSync(outDir);
+  if (pdf.length) fs.writeFileSync(path.join(outDir, `${base}.pdf`), pdf);
   fs.writeFileSync(path.join(outDir, `${base}.docx`), docx);
   return pdf;
 };

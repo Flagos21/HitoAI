@@ -1,5 +1,13 @@
 
-const PDFDocument = require('pdfkit');
+let PDFDocument;
+try {
+  PDFDocument = require('pdfkit');
+} catch (err) {
+  console.warn(
+    'pdfkit module not found. Run "npm install" in the backend directory to enable PDF generation.'
+  );
+  PDFDocument = null;
+}
 const fs = require('fs');
 const {
   Document,
@@ -14,6 +22,9 @@ const {
 
 // Genera un PDF básico a partir del contenido entregado
 exports.generarPDF = contenido => {
+  if (!PDFDocument) {
+    return Promise.reject(new Error('pdfkit not installed'));
+  }
   return new Promise(resolve => {
     const doc = new PDFDocument();
     const chunks = [];
@@ -60,6 +71,9 @@ exports.generarDOCX = contenido => {
 
 // Genera un PDF completo con tablas y gráfico
 exports.generarPDFCompleto = contenido => {
+  if (!PDFDocument) {
+    return Promise.reject(new Error('pdfkit not installed'));
+  }
   return new Promise(resolve => {
     const doc = new PDFDocument({ margin: 40 });
     const chunks = [];

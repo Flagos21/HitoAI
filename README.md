@@ -107,6 +107,16 @@ These dependencies include `pdfkit`, `docx` and `chartjs-node-canvas`, which are
 Reports are saved under `backend/uploads/` and returned directly in the
 HTTP response.
 
+### Troubleshooting
+
+If you see an error like `Cannot find module 'pdfkit'` when starting the
+backend, install the missing dependencies inside `backend/`:
+
+```bash
+cd backend
+npm install pdfkit docx chartjs-node-canvas
+```
+
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
