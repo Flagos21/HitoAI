@@ -21,7 +21,9 @@ Install dependencies and start the API server:
 cd backend
 npm install
 # If pdfkit, docx or chartjs-node-canvas are missing, install them explicitly
-# npm install pdfkit docx chartjs-node-canvas
+# npm install pdfkit docx chartjs-node-canvas@latest
+# If you hit "No matching version" errors for chartjs-node-canvas, try:
+# npm install chartjs-node-canvas@latest
 # On Linux you may also need development headers for the `canvas` package:
 # sudo apt-get install -y build-essential libcairo2-dev libjpeg-dev libpango1.0-dev libgif-dev librsvg2-dev
 node app.js
@@ -97,7 +99,7 @@ dependencies before running the server:
 cd backend
 npm install
 # If pdfkit, docx or chartjs-node-canvas are missing, install them explicitly
-# npm install pdfkit docx chartjs-node-canvas
+# npm install pdfkit docx chartjs-node-canvas@latest
 # On Linux you may also need development headers for the `canvas` package:
 # sudo apt-get install -y build-essential libcairo2-dev libjpeg-dev libpango1.0-dev libgif-dev librsvg2-dev
 ```
@@ -106,6 +108,24 @@ These dependencies include `pdfkit`, `docx` and `chartjs-node-canvas`, which are
 
 Reports are saved under `backend/uploads/` and returned directly in the
 HTTP response.
+
+### Troubleshooting
+
+If you see an error like `Cannot find module 'pdfkit'` when starting the
+backend, install the missing dependencies inside `backend/`:
+
+```bash
+cd backend
+npm install pdfkit docx chartjs-node-canvas@latest
+```
+
+If `npm install` fails with a message like `No matching version found for chartjs-node-canvas@^4.2.2`,
+install the latest version explicitly:
+
+```bash
+cd backend
+npm install chartjs-node-canvas@latest
+```
 
 ## Additional Resources
 

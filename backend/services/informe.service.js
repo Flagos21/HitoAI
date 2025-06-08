@@ -102,14 +102,24 @@ exports.generarInforme = async asignaturaId => {
     chartPath,
   };
 
-  const pdf = await generarPDFCompleto(contenido);
-  const docx = await generarDOCXCompleto(contenido);
+  let pdf = Buffer.from('');
+  try {
+    pdf = await generarPDFCompleto(contenido);
+  } catch (err) {
+    console.warn('PDF generation skipped:', err.message);
+  }
+  let docx = Buffer.from('');
+  try {
+    docx = await generarDOCXCompleto(contenido);
+  } catch (err) {
+    console.warn('DOCX generation skipped:', err.message);
+  }
 
   const base = `Informe-${asignatura.Nombre}-${new Date().toISOString().split('T')[0]}`.replace(/\s+/g, '_');
   const outDir = path.join(__dirname, '..', 'uploads');
   if (!fs.existsSync(outDir)) fs.mkdirSync(outDir);
-  fs.writeFileSync(path.join(outDir, `${base}.pdf`), pdf);
-  fs.writeFileSync(path.join(outDir, `${base}.docx`), docx);
+  if (pdf.length) fs.writeFileSync(path.join(outDir, `${base}.pdf`), pdf);
+  if (docx.length) fs.writeFileSync(path.join(outDir, `${base}.docx`), docx);
   if (fs.existsSync(chartPath)) fs.unlinkSync(chartPath);
   return { pdf, nombre: `${base}.pdf` };
 };
