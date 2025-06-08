@@ -109,6 +109,10 @@ These dependencies include `pdfkit`, `docx` and `chartjs-node-canvas`, which are
 Reports are saved under `backend/uploads/` and the API returns a ZIP file
 containing both the PDF and Word versions.
 
+If `pdfkit` is not installed, the generated ZIP will only include the Word
+document because the PDF cannot be created. Make sure all optional
+dependencies are installed if you need the PDF output.
+
 ### Troubleshooting
 
 If you see an error like `Cannot find module 'pdfkit'` when starting the
