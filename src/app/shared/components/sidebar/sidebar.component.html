@@ -1,34 +1,43 @@
 <div class="sidebar p-3 d-flex flex-column" style="width: 240px; min-height: 100vh; background-color: #001E3B;">
-  <h5 class="text-white mb-4">{{ rol }}</h5>
+  <div class="text-white text-center mb-4">
+    <i class="bi bi-person-circle fs-2"></i>
+    <div class="fw-bold">{{ nombre }}</div>
+    <small>{{ rol }}</small>
+  </div>
 
   <ul class="nav flex-column gap-1">
     <!-- ADMINISTRADOR -->
 <ng-container *ngIf="rol === 'Administrador'">
-  <li class="nav-item">
-    <a class="nav-link text-navbar"
-       routerLink="/admin"
-       routerLinkActive="active"
-       [routerLinkActiveOptions]="{ exact: true }">Inicio</a>
-  </li>
+    <li class="nav-item">
+      <a class="nav-link text-navbar"
+         routerLink="/admin"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }">
+         <i class="bi bi-house-door-fill me-1"></i>Inicio</a>
+    </li>
   <li class="nav-item">
     <a class="nav-link text-navbar"
        routerLink="/admin/carreras"
-       routerLinkActive="active">Carreras</a>
+       routerLinkActive="active">
+       <i class="bi bi-mortarboard-fill me-1"></i>Carreras</a>
   </li>
   <li class="nav-item">
     <a class="nav-link text-navbar"
        routerLink="/admin/asignaturas"
-       routerLinkActive="active">Asignaturas</a> <!-- ✅ agregado -->
+       routerLinkActive="active">
+       <i class="bi bi-book-fill me-1"></i>Asignaturas</a> <!-- ✅ agregado -->
   </li>
   <li class="nav-item">
     <a class="nav-link text-navbar"
        routerLink="/admin/usuarios"
-       routerLinkActive="active">Usuarios</a>
+       routerLinkActive="active">
+       <i class="bi bi-people-fill me-1"></i>Usuarios</a>
   </li>
   <li class="nav-item">
     <a class="nav-link text-navbar"
        routerLink="/admin/solicitudes"
-       routerLinkActive="active">Solicitudes</a>
+       routerLinkActive="active">
+       <i class="bi bi-inbox-fill me-1"></i>Solicitudes</a>
   </li>
 </ng-container>
 
@@ -39,22 +48,26 @@
         <a class="nav-link text-navbar"
            routerLink="/jefe-carrera"
            routerLinkActive="active"
-           [routerLinkActiveOptions]="{ exact: true }">Inicio</a>
+           [routerLinkActiveOptions]="{ exact: true }">
+           <i class="bi bi-house-door-fill me-1"></i>Inicio</a>
       </li>
       <li class="nav-item">
         <a class="nav-link text-navbar"
            routerLink="/jefe-carrera/asignaturas"
-           routerLinkActive="active">Asignaturas Hito</a>
+           routerLinkActive="active">
+           <i class="bi bi-book-fill me-1"></i>Asignaturas Hito</a>
       </li>
       <li class="nav-item">
         <a class="nav-link text-navbar"
            routerLink="/jefe-carrera/ra"
-           routerLinkActive="active">Resultados De Aprendizaje</a>
+           routerLinkActive="active">
+           <i class="bi bi-bar-chart-line-fill me-1"></i>Resultados De Aprendizaje</a>
       </li>
-            <li class="nav-item">
+      <li class="nav-item">
         <a class="nav-link text-navbar"
            routerLink="/jefe-carrera/reportes"
-           routerLinkActive="active">Reportes Perfil De Egreso</a>
+           routerLinkActive="active">
+           <i class="bi bi-file-earmark-text-fill me-1"></i>Reportes Perfil De Egreso</a>
       </li>
     </ng-container>
 
@@ -64,12 +77,14 @@
         <a class="nav-link text-navbar"
            routerLink="/profesor"
            routerLinkActive="active"
-           [routerLinkActiveOptions]="{ exact: true }">Inicio</a>
+           [routerLinkActiveOptions]="{ exact: true }">
+           <i class="bi bi-house-door-fill me-1"></i>Inicio</a>
       </li>
       <li class="nav-item">
   <a class="nav-link text-navbar"
      routerLink="/profesor/asignaturas"
-     routerLinkActive="active">Asignaturas Hito</a>
+     routerLinkActive="active">
+     <i class="bi bi-book-fill me-1"></i>Asignaturas Hito</a>
 </li>
 
     </ng-container>
@@ -80,12 +95,14 @@
         <a class="nav-link text-navbar"
            routerLink="/comite"
            routerLinkActive="active"
-           [routerLinkActiveOptions]="{ exact: true }">Inicio</a>
+           [routerLinkActiveOptions]="{ exact: true }">
+           <i class="bi bi-house-door-fill me-1"></i>Inicio</a>
       </li>
       <li class="nav-item">
         <a class="nav-link text-navbar"
            routerLink="/comite/ra"
-           routerLinkActive="active">Resultados De Aprendizaje</a>
+           routerLinkActive="active">
+           <i class="bi bi-bar-chart-line-fill me-1"></i>Resultados De Aprendizaje</a>
       </li>
     </ng-container>
   </ul>
@@ -97,7 +114,8 @@
       <span class="ms-1">Modo Oscuro</span>
     </button>
     <button class="btn btn-sm w-100 text-white" style="background-color: #0051A2;" (click)="cerrarSesion()">
-      Cerrar Sesión
+      <i class="bi bi-box-arrow-right"></i>
+      <span class="ms-1">Cerrar Sesión</span>
     </button>
   </div>
 </div>

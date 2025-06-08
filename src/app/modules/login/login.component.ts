@@ -46,6 +46,7 @@ export class LoginComponent {
 
         localStorage.setItem('rol', res.Rol);
         localStorage.setItem('rut', res.ID_Usuario); // En el futuro puedes cambiar 'rut' por 'usuario' si prefieres
+        localStorage.setItem('nombre', res.Nombre);
 
         if (rol === 'administrador') this.router.navigate(['/admin']);
         else if (rol === 'jefe de carrera') this.router.navigate(['/jefe-carrera']);
