@@ -162,6 +162,48 @@ function drawDistribucionTablePDF(doc, indicadores) {
   doc.moveDown();
 }
 
+function generarTablaResumenIndicadoresPDF(doc, instancia) {
+  drawCriteriaTablePDF(doc, instancia.criterios);
+  doc.moveDown(0.5);
+}
+
+function generarBloqueDesgloseIndicadoresPDF(doc, instancia) {
+  instancia.criterios.forEach((d, idx) => {
+    doc.font('Helvetica-Bold').text(d.indicador);
+    doc.font('Helvetica');
+    doc.text(`• Máximo Puntaje Obtenido: ${d.maximo}`);
+    doc.text(`• Mínimo Puntaje Obtenido: ${d.minimo}`);
+    doc.text(`• Puntaje Promedio: ${d.promedio}`);
+    doc.text(`• % de Alumnos sobre el Promedio: ${d.porcentaje}%`);
+    if (Array.isArray(d.niveles)) {
+      d.niveles.forEach(n => {
+        doc.text(`${n.nombre}: ${n.cantidad} (${n.porcentaje}%)`);
+      });
+    }
+    doc.text(instancia.analisis[idx] || '', { align: 'justify' });
+    doc.moveDown();
+  });
+}
+
+function generarGraficoDesempenoPDF(doc, path) {
+  if (path && fs.existsSync(path)) {
+    doc.image(path, { width: 500 });
+    doc.moveDown();
+  }
+}
+
+function generarTablaCriteriosPorIndicadorPDF(doc, instancia) {
+  drawDistribucionTablePDF(doc, instancia.criterios);
+  doc.moveDown(0.5);
+}
+
+function generarConclusionPDF(doc, instancia) {
+  if (instancia.conclusion) {
+    doc.text(instancia.conclusion);
+    doc.moveDown();
+  }
+}
+
 function buildDistribucionTableDOCX(indicadores) {
   const levelMap = {};
   indicadores.forEach(i => {
@@ -244,6 +286,60 @@ function buildDistribucionTableDOCX(indicadores) {
       insideV: { style: BorderStyle.SINGLE, size: 1, color: '000000' },
     },
   });
+}
+
+function generarTablaResumenIndicadoresDOCX(instancia) {
+  return buildCriteriaTableDOCX(instancia.criterios);
+}
+
+function generarBloqueDesgloseIndicadoresDOCX(instancia) {
+  const parts = [];
+  instancia.criterios.forEach((c, idx) => {
+    parts.push(
+      new Paragraph({
+        heading: HeadingLevel.HEADING_3,
+        children: [new TextRun(c.indicador)],
+      })
+    );
+    parts.push(
+      new Paragraph({ bullet: { level: 0 }, children: [new TextRun(`Máximo Puntaje Obtenido: ${c.maximo}`)] })
+    );
+    parts.push(
+      new Paragraph({ bullet: { level: 0 }, children: [new TextRun(`Mínimo Puntaje Obtenido: ${c.minimo}`)] })
+    );
+    parts.push(
+      new Paragraph({ bullet: { level: 0 }, children: [new TextRun(`Puntaje Promedio: ${c.promedio}`)] })
+    );
+    parts.push(
+      new Paragraph({ bullet: { level: 0 }, children: [new TextRun(`% de Alumnos sobre el Promedio: ${c.porcentaje}%`)] })
+    );
+    if (Array.isArray(c.niveles)) {
+      c.niveles.forEach(n => {
+        parts.push(new Paragraph({ children: [new TextRun(`${n.nombre}: ${n.cantidad} (${n.porcentaje}%)`)] }));
+      });
+    }
+    parts.push(new Paragraph({ children: [new TextRun(instancia.analisis[idx] || '')] }));
+  });
+  return parts;
+}
+
+function generarGraficoDesempenoDOCX(path) {
+  if (path && fs.existsSync(path)) {
+    return new Paragraph({
+      children: [
+        new ImageRun({ data: fs.readFileSync(path), transformation: { width: 500, height: 250 } }),
+      ],
+    });
+  }
+  return null;
+}
+
+function generarTablaCriteriosPorIndicadorDOCX(instancia) {
+  return buildDistribucionTableDOCX(instancia.criterios);
+}
+
+function generarConclusionDOCX(instancia) {
+  return new Paragraph({ children: [new TextRun(instancia.conclusion || '')] });
 }
 
 // Genera un PDF básico a partir del contenido entregado
@@ -340,43 +436,46 @@ exports.generarPDFCompleto = contenido => {
     doc.fontSize(12).text(intro.relevancia.texto, { align: 'justify' });
     doc.moveDown();
 
+    const ordinales = [
+      'Primera',
+      'Segunda',
+      'Tercera',
+      'Cuarta',
+      'Quinta',
+      'Sexta',
+      'Séptima',
+      'Octava',
+      'Novena',
+      'Décima',
+    ];
+
     Object.keys(contenido.instancias)
       .sort((a, b) => a - b)
       .forEach(num => {
         const inst = contenido.instancias[num];
-        doc.fontSize(14).text(`Instancia Evaluativa ${num}`, { underline: true });
+        const idx = Number(num) - 1;
+        const titulo = ordinales[idx]
+          ? `${ordinales[idx]} Instancia Evaluativa`
+          : `Instancia Evaluativa ${num}`;
+        doc.fontSize(14).text(titulo, { underline: true });
         doc.moveDown(0.5);
-        drawCriteriaTablePDF(doc, inst.criterios);
-        doc.moveDown(0.5);
-        inst.criterios.forEach((d, idx) => {
-          doc.font('Helvetica-Bold').text(d.indicador);
-          doc.font('Helvetica');
-          doc.text(`• Máximo Puntaje Obtenido: ${d.maximo}`);
-          doc.text(`• Mínimo Puntaje Obtenido: ${d.minimo}`);
-          doc.text(`• Puntaje Promedio: ${d.promedio}`);
-          doc.text(`• % de Alumnos sobre el Promedio: ${d.porcentaje}%`);
-          if (Array.isArray(d.niveles)) {
-            d.niveles.forEach(n => {
-              doc.text(`${n.nombre}: ${n.cantidad} (${n.porcentaje}%)`);
-            });
-          }
-          doc.text(inst.analisis[idx], { align: 'justify' });
-          doc.moveDown();
-        });
-        drawDistribucionTablePDF(doc, inst.criterios);
-        doc.moveDown(0.5);
-        doc.text(inst.conclusion);
-        doc.moveDown();
+        generarTablaResumenIndicadoresPDF(doc, inst);
+        generarBloqueDesgloseIndicadoresPDF(doc, inst);
+        generarGraficoDesempenoPDF(doc, contenido.graficos && contenido.graficos[num]);
+        generarTablaCriteriosPorIndicadorPDF(doc, inst);
+        generarConclusionPDF(doc, inst);
       });
 
 
     if (contenido.graficos) {
-      Object.values(contenido.graficos).forEach(p => {
-        if (p && fs.existsSync(p)) {
-          doc.image(p, { width: 500 });
-          doc.moveDown();
-        }
-      });
+      Object.entries(contenido.graficos)
+        .filter(([k]) => isNaN(Number(k)))
+        .forEach(([_, p]) => {
+          if (p && fs.existsSync(p)) {
+            doc.image(p, { width: 500 });
+            doc.moveDown();
+          }
+        });
     }
 
     doc.fontSize(14).text('Cumplimiento por Competencia', { underline: true });
@@ -405,64 +504,19 @@ exports.generarDOCXCompleto = async contenido => {
   if (!Document) {
     return Promise.reject(new Error('docx not installed'));
   }
-  const indicadorRows = [
-    new TableRow({
-      children: [
-        'Criterio',
-        'Máximo Puntaje Obtenido',
-        'Mínimo Puntaje Obtenido',
-        'Puntaje Promedio',
-        '% de alumnos sobre el promedio',
-        'Competencia',
-      ].map(t =>
-        new TableCell({
-          children: [
-            new Paragraph({ children: [new TextRun({ text: t, bold: true })] }),
-          ],
-        })
-      ),
-    }),
+
+  const ordinales = [
+    'Primera',
+    'Segunda',
+    'Tercera',
+    'Cuarta',
+    'Quinta',
+    'Sexta',
+    'Séptima',
+    'Octava',
+    'Novena',
+    'Décima',
   ];
-
-  Object.keys(contenido.instancias)
-    .sort((a, b) => a - b)
-    .forEach(num => {
-      const inst = contenido.instancias[num];
-      indicadorRows.push(
-        new TableRow({
-          children: [
-            new TableCell({
-              columnSpan: 6,
-              children: [
-                new Paragraph({
-                  children: [new TextRun({ text: inst.nombre, bold: true })],
-                }),
-              ],
-            }),
-          ],
-        })
-      );
-      inst.criterios.forEach(d => {
-        indicadorRows.push(
-          new TableRow({
-            children: [
-              d.indicador,
-              String(d.maximo),
-              String(d.minimo),
-              String(d.promedio),
-              `${d.porcentaje}%`,
-              d.competencia,
-            ].map(t =>
-              new TableCell({
-                children: [new Paragraph({ children: [new TextRun(String(t))] })],
-              })
-            ),
-          })
-        );
-      });
-    });
-
-  const tableIndicadores = new Table({ rows: indicadorRows });
 
   const compTable = new Table({
     rows: [
@@ -500,77 +554,19 @@ exports.generarDOCXCompleto = async contenido => {
     .sort((a, b) => a - b)
     .forEach(num => {
       const inst = contenido.instancias[num];
-    instanciasParagraphs.push(
-      new Paragraph({
-        heading: HeadingLevel.HEADING_2,
-        children: [new TextRun(`Instancia Evaluativa ${num}`)],
-      })
-    );
-      inst.criterios.forEach((c, idx) => {
-        instanciasParagraphs.push(
-          new Paragraph({
-            heading: HeadingLevel.HEADING_3,
-            children: [new TextRun(c.indicador)],
-          })
-        );
-        instanciasParagraphs.push(
-          new Paragraph({
-            bullet: { level: 0 },
-            children: [new TextRun(`Máximo Puntaje Obtenido: ${c.maximo}`)],
-          })
-        );
-        instanciasParagraphs.push(
-          new Paragraph({
-            bullet: { level: 0 },
-            children: [new TextRun(`Mínimo Puntaje Obtenido: ${c.minimo}`)],
-          })
-        );
-        instanciasParagraphs.push(
-          new Paragraph({
-            bullet: { level: 0 },
-            children: [new TextRun(`Puntaje Promedio: ${c.promedio}`)],
-          })
-        );
-        instanciasParagraphs.push(
-          new Paragraph({
-            bullet: { level: 0 },
-            children: [new TextRun(`% de Alumnos sobre el Promedio: ${c.porcentaje}%`)],
-          })
-        );
-        if (Array.isArray(c.niveles)) {
-          c.niveles.forEach(n => {
-            instanciasParagraphs.push(
-              new Paragraph({
-                children: [
-                  new TextRun(`${n.nombre}: ${n.cantidad} (${n.porcentaje}%)`),
-                ],
-              })
-            );
-          });
-        }
-        instanciasParagraphs.push(
-          new Paragraph({ children: [new TextRun(inst.analisis[idx] || '')] })
-        );
-      });
-      instanciasParagraphs.push(buildDistribucionTableDOCX(inst.criterios));
+      const idx = Number(num) - 1;
+      const titulo = ordinales[idx]
+        ? `${ordinales[idx]} Instancia Evaluativa`
+        : `Instancia Evaluativa ${num}`;
       instanciasParagraphs.push(
-        new Paragraph({ children: [new TextRun(inst.conclusion || '')] })
+        new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun(titulo)] })
       );
-      if (contenido.graficos && contenido.graficos[num]) {
-        const p = contenido.graficos[num];
-        if (fs.existsSync(p)) {
-          instanciasParagraphs.push(
-            new Paragraph({
-              children: [
-                new ImageRun({
-                  data: fs.readFileSync(p),
-                  transformation: { width: 500, height: 250 },
-                }),
-              ],
-            })
-          );
-        }
-      }
+      instanciasParagraphs.push(generarTablaResumenIndicadoresDOCX(inst));
+      instanciasParagraphs.push(...generarBloqueDesgloseIndicadoresDOCX(inst));
+      const graf = generarGraficoDesempenoDOCX(contenido.graficos && contenido.graficos[num]);
+      if (graf) instanciasParagraphs.push(graf);
+      instanciasParagraphs.push(generarTablaCriteriosPorIndicadorDOCX(inst));
+      instanciasParagraphs.push(generarConclusionDOCX(inst));
     });
 
   const grafParags = Object.entries(contenido.graficos || {})
@@ -611,7 +607,6 @@ exports.generarDOCXCompleto = async contenido => {
             alignment: AlignmentType.JUSTIFIED,
             children: [new TextRun(contenido.introduccion.relevancia.texto)],
           }),
-          tableIndicadores,
           ...instanciasParagraphs,
           new Paragraph({
             heading: HeadingLevel.HEADING_2,
