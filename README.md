@@ -20,6 +20,8 @@ Install dependencies and start the API server:
 ```bash
 cd backend
 npm install
+# If pdfkit, docx or chartjs-node-canvas are missing, install them explicitly
+# npm install pdfkit docx chartjs-node-canvas
 node app.js
 ```
 
@@ -92,6 +94,8 @@ dependencies before running the server:
 ```bash
 cd backend
 npm install
+# If pdfkit, docx or chartjs-node-canvas are missing, install them explicitly
+# npm install pdfkit docx chartjs-node-canvas
 ```
 
 These dependencies include `pdfkit`, `docx` and `chartjs-node-canvas`, which are required to generate reports with charts.
