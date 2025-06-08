@@ -102,26 +102,43 @@ exports.generarPDFCompleto = contenido => {
     doc.fontSize(12).text(contenido.introduccion, { align: 'justify' });
     doc.moveDown();
 
-    doc.fontSize(14).text('Indicadores por Evaluación', { underline: true });
-    doc.moveDown();
-    // Tabla sencilla
-    contenido.datos.forEach((d, idx) => {
-      doc.text(`${d.indicador} (${d.competencia}) - ${d.evaluacion}`);
-      doc.text(`Max: ${d.maximo} Min: ${d.minimo} Prom: ${d.promedio} Sobre prom: ${d.porcentaje}%`);
-      doc.text(contenido.analisis[idx]);
-      doc.moveDown();
-    });
+    Object.keys(contenido.instancias)
+      .sort((a, b) => a - b)
+      .forEach(num => {
+        const inst = contenido.instancias[num];
+        doc.fontSize(14).text(`Instancia Evaluativa ${num}`, { underline: true });
+        doc.moveDown(0.5);
+        inst.criterios.forEach((d, idx) => {
+          doc.fontSize(12).text(`${d.indicador} (${d.competencia}) - ${d.evaluacion}`);
+          doc.text(`Max: ${d.maximo} Min: ${d.minimo} Prom: ${d.promedio} Sobre prom: ${d.porcentaje}%`);
+          doc.text(`Excelente: ${d.excelente} Aceptable: ${d.aceptable} Insuficiente: ${d.insuficiente}`);
+          doc.text(inst.analisis[idx]);
+          doc.moveDown();
+        });
+        doc.text(inst.conclusion);
+        doc.moveDown();
+      });
 
 
-    if (contenido.chartPath) {
-      doc.image(contenido.chartPath, { width: 500 });
-      doc.moveDown();
+    if (contenido.graficos) {
+      Object.values(contenido.graficos).forEach(p => {
+        if (p && fs.existsSync(p)) {
+          doc.image(p, { width: 500 });
+          doc.moveDown();
+        }
+      });
     }
 
     doc.fontSize(14).text('Cumplimiento por Competencia', { underline: true });
     doc.moveDown();
     contenido.competencias.forEach(c => {
       doc.text(`${c.ID_Competencia} - Ideal: ${c.puntaje_ideal} Obtenido: ${c.puntaje_total} Cumplimiento: ${c.cumplimiento}%`);
+      if (contenido.recomendacionesComp) {
+        const idx = contenido.competencias.findIndex(co => co.ID_Competencia === c.ID_Competencia);
+        if (contenido.recomendacionesComp[idx]) {
+          doc.text(`Recomendación: ${contenido.recomendacionesComp[idx]}`);
+        }
+      }
     });
 
     doc.moveDown();
@@ -141,15 +158,9 @@ exports.generarDOCXCompleto = contenido => {
   const tableIndicadores = new Table({
     rows: [
       new TableRow({
-        children: [
-          'Indicador',
-          'Eval.',
-          'Max',
-          'Min',
-          'Prom',
-          '% Sobre prom',
-          'Comp.'
-        ].map(t => new TableCell({ children: [new Paragraph({ text: t, bold: true })] }))
+        children: ['Criterio', 'Eval.', 'Max', 'Min', 'Prom', '%', 'Comp.'].map(t =>
+          new TableCell({ children: [new Paragraph({ text: t, bold: true })] })
+        ),
       }),
       ...contenido.datos.map(d =>
         new TableRow({
@@ -160,11 +171,11 @@ exports.generarDOCXCompleto = contenido => {
             String(d.minimo),
             String(d.promedio),
             `${d.porcentaje}%`,
-            d.competencia
-          ].map(t => new TableCell({ children: [new Paragraph(String(t))] }))
+            d.competencia,
+          ].map(t => new TableCell({ children: [new Paragraph(String(t))] })),
         })
-      )
-    ]
+      ),
+    ],
   });
 
   const compTable = new Table({
@@ -185,29 +196,49 @@ exports.generarDOCXCompleto = contenido => {
     ]
   });
 
+  const instanciasParagraphs = [];
+  Object.keys(contenido.instancias)
+    .sort((a, b) => a - b)
+    .forEach(num => {
+      const inst = contenido.instancias[num];
+      instanciasParagraphs.push(
+        new Paragraph({ text: `Instancia Evaluativa ${num}`, heading: HeadingLevel.HEADING_2 })
+      );
+      inst.criterios.forEach((c, idx) => {
+        instanciasParagraphs.push(
+          new Paragraph(`${c.indicador} (${c.competencia}) - ${c.evaluacion}`)
+        );
+        instanciasParagraphs.push(
+          new Paragraph(`Max: ${c.maximo} Min: ${c.minimo} Prom: ${c.promedio} %:${c.porcentaje}`)
+        );
+        instanciasParagraphs.push(
+          new Paragraph(`Excelente: ${c.excelente} Aceptable: ${c.aceptable} Insuficiente: ${c.insuficiente}`)
+        );
+        instanciasParagraphs.push(new Paragraph(inst.analisis[idx]));
+      });
+      instanciasParagraphs.push(new Paragraph(inst.conclusion));
+    });
+
+  const grafParags = Object.values(contenido.graficos || {}).map(
+    p =>
+      new Paragraph({
+        children: [
+          new ImageRun({ data: fs.readFileSync(p), transformation: { width: 500, height: 250 } })
+        ]
+      })
+  );
+
   const doc = new Document({
     sections: [
       {
         children: [
           new Paragraph({ text: 'INFORME DE ASIGNATURA INTEGRADORA DE SABERES I', heading: HeadingLevel.HEADING_1, alignment: 'center' }),
           new Paragraph(contenido.introduccion),
-          new Paragraph({ text: 'Indicadores por Evaluación', heading: HeadingLevel.HEADING_2 }),
-          tableIndicadores,
-          ...contenido.analisis.map(a => new Paragraph(a)),
-
-          contenido.chartPath
-            ? new Paragraph({
-                children: [
-                  new ImageRun({
-                    data: fs.readFileSync(contenido.chartPath),
-                    transformation: { width: 500, height: 250 },
-                  }),
-                ],
-              })
-            : new Paragraph(''),
-
+          ...instanciasParagraphs,
           new Paragraph({ text: 'Cumplimiento por Competencia', heading: HeadingLevel.HEADING_2 }),
           compTable,
+          ...(contenido.recomendacionesComp || []).map(t => new Paragraph(t)),
+          ...grafParags,
           new Paragraph(contenido.conclusion),
           new Paragraph(contenido.recomendaciones)
         ]

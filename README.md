@@ -106,8 +106,8 @@ npm install
 
 These dependencies include `pdfkit`, `docx` and `chartjs-node-canvas`, which are required to generate reports with charts.
 
-Reports are saved under `backend/uploads/` and returned directly in the
-HTTP response.
+Reports are saved under `backend/uploads/` and the API returns a ZIP file
+containing both the PDF and Word versions.
 
 ### Troubleshooting
 
