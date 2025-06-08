@@ -1,5 +1,4 @@
 const connection = require('../db/connection');
-
 const fs = require('fs');
 const path = require('path');
 const { crearIntroduccion, crearConclusion } = require('../utils/openai');

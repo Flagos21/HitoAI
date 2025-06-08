@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { AsignaturaService } from '../../../services/asignatura.service';
 import { ReporteService } from '../../../services/reporte.service';
 import { SidebarComponent } from '../../../shared/components/sidebar/sidebar.component';
-
 import { CommonModule } from '@angular/common';
 
 @Component({
