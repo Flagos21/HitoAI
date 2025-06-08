@@ -70,7 +70,7 @@ body.dark-mode .btn-outline-secondary:hover {
 /* Table grid styles */
 body.dark-mode table {
   color: #ffffff;
-  background-color: #2e2e2e;
+  background-color: #2e2e2e !important;
 }
 
 body.dark-mode table thead {
@@ -79,5 +79,16 @@ body.dark-mode table thead {
 }
 
 body.dark-mode table tbody tr:hover {
-  background-color: #383838;
+  background-color: #383838 !important;
+}
+
+/* Ensure Bootstrap table classes respect dark mode */
+body.dark-mode .table,
+body.dark-mode .table-hover tbody tr {
+  background-color: #2e2e2e !important;
+  color: #ffffff !important;
+}
+
+body.dark-mode .table-hover tbody tr:hover {
+  background-color: #383838 !important;
 }
