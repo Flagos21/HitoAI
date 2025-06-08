@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { ThemeService } from './services/theme.service';
 import { RouterOutlet } from '@angular/router';
 
 @Component({
@@ -9,4 +10,6 @@ import { RouterOutlet } from '@angular/router';
 })
 export class AppComponent {
   title = 'HitoAI';
+
+  constructor(public themeService: ThemeService) {}
 }

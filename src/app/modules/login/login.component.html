@@ -1,4 +1,7 @@
 <div class="login-container text-center">
+  <button type="button" class="btn btn-outline-secondary theme-toggle" (click)="toggleTheme()">
+    <i class="bi" [ngClass]="themeService.isDarkMode() ? 'bi-brightness-high' : 'bi-moon-fill'"></i>
+  </button>
   <!-- Imagen superior -->
   <img src="assets/unach3.png" alt="Logo UNACH" class="logo-unach" />
 

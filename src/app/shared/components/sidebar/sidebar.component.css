@@ -23,3 +23,8 @@
   background-color: #0062C4;
   color: #ffffff !important;
 }
+
+.btn-outline-light {
+  color: #ffffff;
+  border-color: #ffffff;
+}
