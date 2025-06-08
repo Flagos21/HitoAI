@@ -1,3 +1,4 @@
+
 exports.generarPDF = contenido => {
   const text = [
     'INFORME DE ASIGNATURA',
