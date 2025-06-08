@@ -50,3 +50,58 @@ exports.generarReporte = async asignaturaId => {
 
   return pdf;
 };
+
+// Distribución de puntajes por instancia e indicador
+exports.obtenerDistribucionPorInstancia = asignaturaId => {
+  const sql = `
+    SELECT
+      ev.N_Instancia AS instancia,
+      i.ID_Indicador AS indicadorId,
+      i.Descripcion AS indicador,
+      c.Nombre AS criterio,
+      c.R_Min AS rMin,
+      c.R_Max AS rMax,
+      SUM(a.Obtenido BETWEEN c.R_Min AND c.R_Max) AS cantidad,
+      COUNT(a.ID_Aplicacion) AS total
+    FROM evaluacion ev
+    JOIN aplicacion a ON ev.ID_Evaluacion = a.evaluacion_ID_Evaluacion
+    JOIN inscripcion ins ON ins.ID_Inscripcion = a.inscripcion_ID_Inscripcion
+    JOIN indicador i ON i.ID_Indicador = a.indicador_ID_Indicador
+    JOIN criterio c ON c.indicador_ID_Indicador = i.ID_Indicador
+    WHERE ins.asignatura_ID_Asignatura = ?
+    GROUP BY ev.N_Instancia, i.ID_Indicador, c.ID_Criterio
+    ORDER BY ev.N_Instancia, i.ID_Indicador, c.R_Max DESC
+  `;
+
+  return new Promise((resolve, reject) => {
+    connection.query(sql, [asignaturaId], (err, rows) => {
+      if (err) return reject(err);
+
+      const instancias = {};
+      for (const r of rows) {
+        if (!instancias[r.instancia]) instancias[r.instancia] = {};
+        if (!instancias[r.instancia][r.indicadorId]) {
+          instancias[r.instancia][r.indicadorId] = {
+            indicador: r.indicador,
+            criterios: [],
+            total: r.total,
+          };
+        }
+        const porcentaje = r.total ? Math.round((r.cantidad / r.total) * 100) : 0;
+        instancias[r.instancia][r.indicadorId].criterios.push({
+          nombre: r.criterio,
+          rMin: r.rMin,
+          rMax: r.rMax,
+          cantidad: r.cantidad,
+          porcentaje,
+        });
+      }
+
+      const resultado = {};
+      for (const [instancia, inds] of Object.entries(instancias)) {
+        resultado[instancia] = Object.values(inds);
+      }
+      resolve(resultado);
+    });
+  });
+};
