@@ -34,6 +34,58 @@ try {
   );
 }
 
+function drawCriteriaTablePDF(doc, criterios) {
+  const startX = doc.x;
+  const widths = [180, 40, 40, 50, 70, 80];
+  const headers = ['Criterio', 'Max', 'Min', 'Prom', '%>Prom', 'Comp.'];
+  doc.font('Helvetica-Bold');
+  headers.forEach((h, i) => {
+    const x = startX + widths.slice(0, i).reduce((a, b) => a + b, 0);
+    doc.text(h, x, doc.y, { width: widths[i] });
+  });
+  doc.moveDown();
+  doc.font('Helvetica');
+  criterios.forEach(c => {
+    let x = startX;
+    doc.text(c.indicador, x, doc.y, { width: widths[0] });
+    x += widths[0];
+    doc.text(String(c.maximo), x, doc.y, { width: widths[1] });
+    x += widths[1];
+    doc.text(String(c.minimo), x, doc.y, { width: widths[2] });
+    x += widths[2];
+    doc.text(String(c.promedio), x, doc.y, { width: widths[3] });
+    x += widths[3];
+    doc.text(`${c.porcentaje}%`, x, doc.y, { width: widths[4] });
+    x += widths[4];
+    doc.text(c.competencia, x, doc.y, { width: widths[5] });
+    doc.moveDown();
+  });
+}
+
+function buildCriteriaTableDOCX(criterios) {
+  return new Table({
+    rows: [
+      new TableRow({
+        children: ['Criterio', 'Max', 'Min', 'Prom', '%>Prom', 'Comp.'].map(t =>
+          new TableCell({ children: [new Paragraph({ text: t, bold: true })] })
+        ),
+      }),
+      ...criterios.map(c =>
+        new TableRow({
+          children: [
+            c.indicador,
+            String(c.maximo),
+            String(c.minimo),
+            String(c.promedio),
+            `${c.porcentaje}%`,
+            c.competencia,
+          ].map(t => new TableCell({ children: [new Paragraph(String(t))] })),
+        })
+      ),
+    ],
+  });
+}
+
 // Genera un PDF básico a partir del contenido entregado
 exports.generarPDF = contenido => {
   if (!PDFDocument) {
@@ -108,9 +160,9 @@ exports.generarPDFCompleto = contenido => {
         const inst = contenido.instancias[num];
         doc.fontSize(14).text(`Instancia Evaluativa ${num}`, { underline: true });
         doc.moveDown(0.5);
+        drawCriteriaTablePDF(doc, inst.criterios);
+        doc.moveDown(0.5);
         inst.criterios.forEach((d, idx) => {
-          doc.fontSize(12).text(`${d.indicador} (${d.competencia}) - ${d.evaluacion}`);
-          doc.text(`Max: ${d.maximo} Min: ${d.minimo} Prom: ${d.promedio} Sobre prom: ${d.porcentaje}%`);
           if (Array.isArray(d.niveles)) {
             d.niveles.forEach(n => {
               doc.text(`${n.nombre}: ${n.cantidad} (${n.porcentaje}%)`);
@@ -208,13 +260,8 @@ exports.generarDOCXCompleto = contenido => {
       instanciasParagraphs.push(
         new Paragraph({ text: `Instancia Evaluativa ${num}`, heading: HeadingLevel.HEADING_2 })
       );
+      instanciasParagraphs.push(buildCriteriaTableDOCX(inst.criterios));
       inst.criterios.forEach((c, idx) => {
-        instanciasParagraphs.push(
-          new Paragraph(`${c.indicador} (${c.competencia}) - ${c.evaluacion}`)
-        );
-        instanciasParagraphs.push(
-          new Paragraph(`Max: ${c.maximo} Min: ${c.minimo} Prom: ${c.promedio} %:${c.porcentaje}`)
-        );
         if (Array.isArray(c.niveles)) {
           c.niveles.forEach(n => {
             instanciasParagraphs.push(
