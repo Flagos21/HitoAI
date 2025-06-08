@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UsuarioService } from '../../services/usuario.service';
 import { MensajeService } from '../../services/mensaje.service';
+import { ThemeService } from '../../services/theme.service';
 import { cleanRut, validarRut } from '../../utils/rut';
 
 @Component({
@@ -27,7 +28,8 @@ export class LoginComponent {
   constructor(
     private usuarioService: UsuarioService,
     private mensajeService: MensajeService,
-    private router: Router
+    private router: Router,
+    public themeService: ThemeService
   ) {}
 
   login() {
@@ -79,5 +81,9 @@ export class LoginComponent {
       }
 
     });
+  }
+
+  toggleTheme() {
+    this.themeService.toggleDarkMode();
   }
 }
