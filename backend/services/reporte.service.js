@@ -29,6 +29,5 @@ exports.generarReporte = async asignaturaId => {
   const outDir = path.join(__dirname, '..', 'uploads');
   fs.writeFileSync(path.join(outDir, `${base}.pdf`), pdf);
   fs.writeFileSync(path.join(outDir, `${base}.docx`), docx);
-
   return pdf;
 };

@@ -8,6 +8,7 @@ import { CommonModule } from '@angular/common';
   selector: 'app-reportes',
   standalone: true,
   imports: [CommonModule, SidebarComponent],
+
   templateUrl: './reportes.component.html'
 })
 export class ReportesComponent implements OnInit {

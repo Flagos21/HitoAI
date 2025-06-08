@@ -52,3 +52,4 @@ async function safe(prompt, fallback) {
 
 exports.crearIntroduccion = asignatura => safe(`Redacta la introduccion del informe para la asignatura ${asignatura}.`, `Introduccion para ${asignatura}`);
 exports.crearConclusion = asignatura => safe(`Redacta la conclusion del informe para la asignatura ${asignatura}.`, `Conclusion para ${asignatura}`);
+
