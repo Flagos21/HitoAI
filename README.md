@@ -4,10 +4,11 @@ This project was generated using [Angular CLI](https://github.com/angular/angula
 
 ## Environment variables
 
-The backend uses a `.env` file. An example file is provided at `backend/.env.example`. Copy this file and adjust the values for your setup:
+The backend uses a `.env` file. An example file is provided at `backend/.env.example`. Copy this file and adjust the values for your setup. You also need an OpenAI API key to enable report generation:
 
 ```bash
 cp backend/.env.example backend/.env
+# then edit backend/.env and set OPENAI_KEY=your_key
 ```
 
 ## Development servers
