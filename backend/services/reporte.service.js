@@ -1,4 +1,5 @@
 const connection = require('../db/connection');
+
 const fs = require('fs');
 const path = require('path');
 const { crearIntroduccion, crearConclusion } = require('../utils/openai');
@@ -29,6 +30,5 @@ exports.generarReporte = async asignaturaId => {
   const outDir = path.join(__dirname, '..', 'uploads');
   fs.writeFileSync(path.join(outDir, `${base}.pdf`), pdf);
   fs.writeFileSync(path.join(outDir, `${base}.docx`), docx);
-
   return pdf;
 };

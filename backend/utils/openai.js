@@ -4,9 +4,11 @@ const API_KEY = process.env.OPENAI_KEY;
 const MODEL = 'gpt-3.5-turbo';
 
 function callOpenAI(prompt) {
+
   if (!API_KEY) {
     return Promise.resolve('(openai key missing) ' + prompt);
   }
+
   return new Promise((resolve, reject) => {
     const data = JSON.stringify({
       model: MODEL,
@@ -52,3 +54,4 @@ async function safe(prompt, fallback) {
 
 exports.crearIntroduccion = asignatura => safe(`Redacta la introduccion del informe para la asignatura ${asignatura}.`, `Introduccion para ${asignatura}`);
 exports.crearConclusion = asignatura => safe(`Redacta la conclusion del informe para la asignatura ${asignatura}.`, `Conclusion para ${asignatura}`);
+
