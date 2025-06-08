@@ -4,8 +4,9 @@ exports.generarReporte = async (req, res) => {
   const { asignaturaId } = req.params;
   try {
     const buffer = await ReporteService.generarReporte(asignaturaId);
+    const date = new Date().toISOString().split('T')[0];
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=Informe-${asignaturaId}.pdf`);
+    res.setHeader('Content-Disposition', `attachment; filename=Informe-${asignaturaId}-${date}.pdf`);
     return res.send(buffer);
   } catch (err) {
     console.error('Error al generar reporte:', err);

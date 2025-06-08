@@ -5,11 +5,9 @@ import { SidebarComponent } from '../../../shared/components/sidebar/sidebar.com
 
 import { CommonModule } from '@angular/common';
 
-
 @Component({
   selector: 'app-reportes',
   standalone: true,
-
   imports: [CommonModule, SidebarComponent],
 
   templateUrl: './reportes.component.html'
