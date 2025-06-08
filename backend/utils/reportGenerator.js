@@ -71,8 +71,10 @@ exports.generarPDFCompleto = contenido => {
       doc.moveDown();
     });
 
+
     if (contenido.chartImage) {
       doc.image(contenido.chartImage, { fit: [500, 300], align: 'center' });
+
       doc.moveDown();
     }
 
@@ -149,7 +151,9 @@ exports.generarDOCXCompleto = contenido => {
           new Paragraph({ text: 'Indicadores por Evaluación', heading: HeadingLevel.HEADING_2 }),
           tableIndicadores,
           ...contenido.analisis.map(a => new Paragraph(a)),
+
           contenido.chartImage ? Media.addImage(doc, contenido.chartImage) : new Paragraph(''),
+
           new Paragraph({ text: 'Cumplimiento por Competencia', heading: HeadingLevel.HEADING_2 }),
           compTable,
           new Paragraph(contenido.conclusion),
