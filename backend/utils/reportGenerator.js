@@ -18,7 +18,9 @@ let Document,
   TableCell,
   TextRun,
   ImageRun,
-  AlignmentType;
+  AlignmentType,
+  WidthType,
+  BorderStyle;
 try {
   ({
     Document,
@@ -31,6 +33,8 @@ try {
     TextRun,
     ImageRun,
     AlignmentType,
+    WidthType,
+    BorderStyle,
   } = require('docx'));
 } catch (err) {
   console.warn(
@@ -119,34 +123,43 @@ function drawDistribucionTablePDF(doc, indicadores) {
     ...niveles.map(n => `${n} (%)`),
   ];
   const startX = doc.x;
+  const rowHeight = 20;
+  let y = doc.y;
   doc.font('Helvetica-Bold');
   headers.forEach((h, i) => {
     const x = startX + widths.slice(0, i).reduce((a, b) => a + b, 0);
-    doc.text(h, x, doc.y, { width: widths[i] });
+    doc.rect(x, y, widths[i], rowHeight).stroke();
+    doc.text(h, x, y + 5, { width: widths[i], align: 'center' });
   });
-  doc.moveDown();
+  y += rowHeight;
   doc.font('Helvetica');
   indicadores.forEach(ind => {
     let x = startX;
-    doc.text(ind.indicador, x, doc.y, { width: widths[0] });
+    doc.rect(x, y, widths[0], rowHeight).stroke();
+    doc.text(ind.indicador, x, y + 5, { width: widths[0], align: 'center' });
     x += widths[0];
     niveles.forEach((n, idx) => {
       const nivel = (ind.niveles || []).find(l => l.nombre === n);
-      doc.text(nivel ? String(nivel.cantidad) : '0', x, doc.y, {
+      doc.rect(x, y, widths[idx + 1], rowHeight).stroke();
+      doc.text(nivel ? String(nivel.cantidad) : '0', x, y + 5, {
         width: widths[idx + 1],
+        align: 'center',
       });
       x += widths[idx + 1];
     });
     niveles.forEach((n, idx) => {
       const nivel = (ind.niveles || []).find(l => l.nombre === n);
       const val = nivel ? `${nivel.porcentaje}%` : '0%';
-      doc.text(val, x, doc.y, {
+      doc.rect(x, y, widths[count + idx + 1], rowHeight).stroke();
+      doc.text(val, x, y + 5, {
         width: widths[count + idx + 1],
+        align: 'center',
       });
       x += widths[count + idx + 1];
     });
-    doc.moveDown();
+    y += rowHeight;
   });
+  doc.moveDown();
 }
 
 function buildDistribucionTableDOCX(indicadores) {
@@ -167,20 +180,35 @@ function buildDistribucionTableDOCX(indicadores) {
     ...niveles.map(n => `${n} (%)`),
   ].map(t =>
     new TableCell({
-      children: [new Paragraph({ children: [new TextRun({ text: t, bold: true })] })],
+      children: [
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          children: [new TextRun({ text: t, bold: true })],
+        }),
+      ],
     })
   );
 
   const rows = indicadores.map(ind =>
     new TableRow({
       children: [
-        new TableCell({ children: [new Paragraph({ children: [new TextRun(ind.indicador)] })] }),
+        new TableCell({
+          children: [
+            new Paragraph({
+              alignment: AlignmentType.CENTER,
+              children: [new TextRun(ind.indicador)],
+            }),
+          ],
+        }),
         ...niveles.map(n =>
           new TableCell({
             children: [
               new Paragraph({
+                alignment: AlignmentType.CENTER,
                 children: [
-                  new TextRun(String((ind.niveles || []).find(l => l.nombre === n)?.cantidad || 0)),
+                  new TextRun(
+                    String((ind.niveles || []).find(l => l.nombre === n)?.cantidad || 0)
+                  ),
                 ],
               }),
             ],
@@ -190,6 +218,7 @@ function buildDistribucionTableDOCX(indicadores) {
           new TableCell({
             children: [
               new Paragraph({
+                alignment: AlignmentType.CENTER,
                 children: [
                   new TextRun(
                     `${(ind.niveles || []).find(l => l.nombre === n)?.porcentaje || 0}%`
@@ -203,7 +232,18 @@ function buildDistribucionTableDOCX(indicadores) {
     })
   );
 
-  return new Table({ rows: [new TableRow({ children: headerCells }), ...rows] });
+  return new Table({
+    rows: [new TableRow({ children: headerCells }), ...rows],
+    width: { size: 100, type: WidthType.PERCENTAGE },
+    borders: {
+      top: { style: BorderStyle.SINGLE, size: 1, color: '000000' },
+      bottom: { style: BorderStyle.SINGLE, size: 1, color: '000000' },
+      left: { style: BorderStyle.SINGLE, size: 1, color: '000000' },
+      right: { style: BorderStyle.SINGLE, size: 1, color: '000000' },
+      insideH: { style: BorderStyle.SINGLE, size: 1, color: '000000' },
+      insideV: { style: BorderStyle.SINGLE, size: 1, color: '000000' },
+    },
+  });
 }
 
 // Genera un PDF básico a partir del contenido entregado
