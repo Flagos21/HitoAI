@@ -17,7 +17,8 @@ let Document,
   TableRow,
   TableCell,
   TextRun,
-  ImageRun;
+  ImageRun,
+  AlignmentType;
 try {
   ({
     Document,
@@ -29,6 +30,7 @@ try {
     TableCell,
     TextRun,
     ImageRun,
+    AlignmentType,
   } = require('docx'));
 } catch (err) {
   console.warn(
@@ -138,12 +140,12 @@ exports.generarDOCX = async contenido => {
         children: [
           new Paragraph({
             heading: HeadingLevel.HEADING_1,
-            alignment: 'center',
+            alignment: AlignmentType.CENTER,
             children: [new TextRun('INFORME DE ASIGNATURA')],
           }),
           new Paragraph({
             heading: HeadingLevel.HEADING_2,
-            alignment: 'center',
+            alignment: AlignmentType.CENTER,
             children: [new TextRun(contenido.datos.Nombre)],
           }),
           new Paragraph({
@@ -151,7 +153,8 @@ exports.generarDOCX = async contenido => {
             children: [new TextRun(contenido.introduccion.objetivo.titulo)],
           }),
           new Paragraph({
-            alignment: 'justify',
+
+            alignment: AlignmentType.JUSTIFIED,
             children: [new TextRun(contenido.introduccion.objetivo.texto)],
           }),
           new Paragraph({
@@ -159,7 +162,7 @@ exports.generarDOCX = async contenido => {
             children: [new TextRun(contenido.introduccion.relevancia.titulo)],
           }),
           new Paragraph({
-            alignment: 'justify',
+            alignment: AlignmentType.JUSTIFIED,
             children: [new TextRun(contenido.introduccion.relevancia.texto)],
           }),
           new Paragraph({ children: [new TextRun(contenido.conclusion)] })
@@ -383,14 +386,18 @@ exports.generarDOCXCompleto = async contenido => {
       );
     });
 
-  const grafParags = Object.values(contenido.graficos || {}).map(
-    p =>
+  const grafParags = Object.values(contenido.graficos || {})
+    .filter(p => p && fs.existsSync(p))
+    .map(p =>
       new Paragraph({
         children: [
-          new ImageRun({ data: fs.readFileSync(p), transformation: { width: 500, height: 250 } })
-        ]
+          new ImageRun({
+            data: fs.readFileSync(p),
+            transformation: { width: 500, height: 250 },
+          }),
+        ],
       })
-  );
+    );
 
   const doc = new Document({
     sections: [
@@ -398,7 +405,7 @@ exports.generarDOCXCompleto = async contenido => {
         children: [
           new Paragraph({
             heading: HeadingLevel.HEADING_1,
-            alignment: 'center',
+            alignment: AlignmentType.CENTER,
             children: [new TextRun('INFORME DE ASIGNATURA INTEGRADORA DE SABERES I')],
           }),
           new Paragraph({
@@ -406,7 +413,7 @@ exports.generarDOCXCompleto = async contenido => {
             children: [new TextRun(contenido.introduccion.objetivo.titulo)],
           }),
           new Paragraph({
-            alignment: 'justify',
+            alignment: AlignmentType.JUSTIFIED,
             children: [new TextRun(contenido.introduccion.objetivo.texto)],
           }),
           new Paragraph({
@@ -414,7 +421,7 @@ exports.generarDOCXCompleto = async contenido => {
             children: [new TextRun(contenido.introduccion.relevancia.titulo)],
           }),
           new Paragraph({
-            alignment: 'justify',
+            alignment: AlignmentType.JUSTIFIED,
             children: [new TextRun(contenido.introduccion.relevancia.texto)],
           }),
           ...instanciasParagraphs,
