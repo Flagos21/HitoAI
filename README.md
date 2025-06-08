@@ -116,6 +116,7 @@ backend, install the missing dependencies inside `backend/`:
 
 ```bash
 cd backend
+
 npm install pdfkit docx chartjs-node-canvas@latest
 ```
 
@@ -125,6 +126,7 @@ install the latest version explicitly:
 ```bash
 cd backend
 npm install chartjs-node-canvas@latest
+
 ```
 
 ## Additional Resources
