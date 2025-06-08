@@ -50,6 +50,30 @@ async function safe(prompt, fallback) {
   }
 }
 
-exports.crearIntroduccion = asignatura => safe(`Redacta la introduccion del informe para la asignatura ${asignatura}.`, `Introduccion para ${asignatura}`);
-exports.crearConclusion = asignatura => safe(`Redacta la conclusion del informe para la asignatura ${asignatura}.`, `Conclusion para ${asignatura}`);
+exports.crearIntroduccion = asignatura =>
+  safe(
+    `Redacta la introducción y objetivo general del informe para la asignatura ${asignatura}.`,
+    `Introducción para ${asignatura}`
+  );
+
+exports.crearConclusion = asignatura =>
+  safe(
+    `Redacta la conclusión general del informe para la asignatura ${asignatura}.`,
+    `Conclusión para ${asignatura}`
+  );
+
+exports.analizarCriterio = ({ indicador, competencia, evaluacion, max, min, promedio, porcentaje }) => {
+  const prompt = `Redacta un análisis pedagógico y recomendaciones para el criterio: "${indicador}". Competencia: ${competencia}. Evaluación: ${evaluacion}. Resultados: Máximo ${max}, Mínimo ${min}, Promedio ${promedio}, ${porcentaje}% sobre el promedio.`;
+  return safe(prompt, `Análisis de ${indicador}`);
+};
+
+exports.conclusionCompetencias = resumen => {
+  const prompt = `Redacta una conclusión general del rendimiento de los estudiantes en base a los siguientes resultados por competencia: ${resumen}.`;
+  return safe(prompt, `Conclusión de competencias: ${resumen}`);
+};
+
+exports.recomendacionesTemas = temas => {
+  const prompt = `Entrega recomendaciones generales de mejora para los siguientes temas: ${temas}.`;
+  return safe(prompt, `Recomendaciones para ${temas}`);
+};
 
