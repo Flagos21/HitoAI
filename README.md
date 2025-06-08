@@ -22,6 +22,8 @@ cd backend
 npm install
 # If pdfkit, docx or chartjs-node-canvas are missing, install them explicitly
 # npm install pdfkit docx chartjs-node-canvas
+# On Linux you may also need development headers for the `canvas` package:
+# sudo apt-get install -y build-essential libcairo2-dev libjpeg-dev libpango1.0-dev libgif-dev librsvg2-dev
 node app.js
 ```
 
@@ -96,6 +98,8 @@ cd backend
 npm install
 # If pdfkit, docx or chartjs-node-canvas are missing, install them explicitly
 # npm install pdfkit docx chartjs-node-canvas
+# On Linux you may also need development headers for the `canvas` package:
+# sudo apt-get install -y build-essential libcairo2-dev libjpeg-dev libpango1.0-dev libgif-dev librsvg2-dev
 ```
 
 These dependencies include `pdfkit`, `docx` and `chartjs-node-canvas`, which are required to generate reports with charts.
