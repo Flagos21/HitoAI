@@ -9,16 +9,30 @@ try {
   PDFDocument = null;
 }
 const fs = require('fs');
-const {
-  Document,
+let Document,
   Packer,
   Paragraph,
   HeadingLevel,
   Table,
   TableRow,
   TableCell,
-  ImageRun,
-} = require('docx');
+  ImageRun;
+try {
+  ({
+    Document,
+    Packer,
+    Paragraph,
+    HeadingLevel,
+    Table,
+    TableRow,
+    TableCell,
+    ImageRun,
+  } = require('docx'));
+} catch (err) {
+  console.warn(
+    'docx module not found. Run "npm install" in the backend directory to enable DOCX generation.'
+  );
+}
 
 // Genera un PDF básico a partir del contenido entregado
 exports.generarPDF = contenido => {
@@ -45,6 +59,9 @@ exports.generarPDF = contenido => {
 
 // Genera un DOCX con la misma información
 exports.generarDOCX = contenido => {
+  if (!Document) {
+    return Promise.reject(new Error('docx not installed'));
+  }
   const doc = new Document({
     sections: [
       {
@@ -118,6 +135,9 @@ exports.generarPDFCompleto = contenido => {
 
 // Genera un DOCX completo similar al PDF
 exports.generarDOCXCompleto = contenido => {
+  if (!Document) {
+    return Promise.reject(new Error('docx not installed'));
+  }
   const tableIndicadores = new Table({
     rows: [
       new TableRow({

@@ -28,12 +28,21 @@ exports.generarReporte = async asignaturaId => {
   } catch (err) {
     console.warn('PDF generation skipped:', err.message);
   }
-  const docx = await generarDOCX(contenido);
+
+  let docx = Buffer.from('');
+  try {
+    docx = await generarDOCX(contenido);
+  } catch (err) {
+    console.warn('DOCX generation skipped:', err.message);
+  }
+
 
   const base = `Informe-${datos.ID_Asignatura}-${new Date().toISOString().split('T')[0]}`;
   const outDir = path.join(__dirname, '..', 'uploads');
   if (!fs.existsSync(outDir)) fs.mkdirSync(outDir);
   if (pdf.length) fs.writeFileSync(path.join(outDir, `${base}.pdf`), pdf);
-  fs.writeFileSync(path.join(outDir, `${base}.docx`), docx);
+
+  if (docx.length) fs.writeFileSync(path.join(outDir, `${base}.docx`), docx);
+
   return pdf;
 };
