@@ -153,6 +153,7 @@ exports.generarDOCX = async contenido => {
             children: [new TextRun(contenido.introduccion.objetivo.titulo)],
           }),
           new Paragraph({
+
             alignment: AlignmentType.JUSTIFIED,
             children: [new TextRun(contenido.introduccion.objetivo.texto)],
           }),
