@@ -1,7 +1,13 @@
 const connection = require('../db/connection');
 const fs = require('fs');
 const path = require('path');
-const quickchart = require('quickchart-js');
+let quickchart;
+try {
+  quickchart = require('quickchart-js');
+} catch {
+  quickchart = require('../utils/minimalChart');
+  console.warn('quickchart-js package not found, using minimalChart');
+}
 const {
   crearIntroduccion,
   analizarCriterio,

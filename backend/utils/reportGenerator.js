@@ -1,6 +1,20 @@
 
-const PDFDocument = require('pdfkit');
-const { Document, Packer, Paragraph, HeadingLevel, Table, TableRow, TableCell, TextRun, Media } = require('docx');
+let PDFDocument;
+try {
+  PDFDocument = require('pdfkit');
+} catch {
+  PDFDocument = require('./minimalPdfKit');
+  console.warn('pdfkit not found, using minimalPdfKit - charts will be omitted');
+}
+
+let docx;
+try {
+  docx = require('docx');
+} catch {
+  docx = require('./minimalDocx');
+  console.warn('docx package not found, using minimalDocx');
+}
+const { Document, Packer, Paragraph, HeadingLevel, Table, TableRow, TableCell, TextRun, Media } = docx;
 
 // Genera un PDF básico a partir del contenido entregado
 exports.generarPDF = contenido => {

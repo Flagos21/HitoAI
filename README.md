@@ -94,6 +94,11 @@ cd backend
 npm install
 ```
 
+If the `pdfkit` package cannot be installed (for example in offline
+environments), the backend will fall back to a minimal built-in PDF
+generator. Reports will render without charts in that case. Install
+`pdfkit` with `npm install pdfkit` to enable full PDF output.
+
 Reports are saved under `backend/uploads/` and returned directly in the
 HTTP response.
 
