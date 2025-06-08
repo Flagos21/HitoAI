@@ -1,1 +1,24 @@
 /* You can add global styles to this file, and also import other style files */
+
+body.dark-mode {
+  background-color: #2e2e2e;
+  color: #e2e2e2;
+}
+
+body.dark-mode a {
+  color: #9ecbff;
+}
+
+body.dark-mode .sidebar {
+  background-color: #1b1b1b !important;
+}
+
+body.dark-mode .form-control {
+  background-color: #454545;
+  color: #ffffff;
+  border-color: #666666;
+}
+
+body.dark-mode .btn-primary {
+  background-color: #0d6efd;
+}

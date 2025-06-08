@@ -90,8 +90,12 @@
     </ng-container>
   </ul>
 
-  <!-- Botón de cerrar sesión -->
+  <!-- Botones inferiores -->
   <div class="mt-auto pt-4">
+    <button type="button" class="btn btn-sm w-100 mb-2 btn-outline-light" (click)="toggleTheme()">
+      <i class="bi" [ngClass]="themeService.isDarkMode() ? 'bi-brightness-high' : 'bi-moon-fill'"></i>
+      <span class="ms-1">Modo Oscuro</span>
+    </button>
     <button class="btn btn-sm w-100 text-white" style="background-color: #0051A2;" (click)="cerrarSesion()">
       Cerrar Sesión
     </button>
