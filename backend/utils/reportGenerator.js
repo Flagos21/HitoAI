@@ -101,6 +101,111 @@ function buildCriteriaTableDOCX(criterios) {
   });
 }
 
+function drawDistribucionTablePDF(doc, indicadores) {
+  const levelMap = {};
+  indicadores.forEach(i => {
+    (i.niveles || []).forEach(n => {
+      if (!levelMap[n.nombre]) levelMap[n.nombre] = n.rMax;
+    });
+  });
+  const niveles = Object.entries(levelMap)
+    .sort((a, b) => b[1] - a[1])
+    .map(([n]) => n);
+  const count = niveles.length;
+  const widths = [180, ...Array(count * 2).fill(50)];
+  const headers = [
+    'Indicador',
+    ...niveles,
+    ...niveles.map(n => `${n} (%)`),
+  ];
+  const startX = doc.x;
+  doc.font('Helvetica-Bold');
+  headers.forEach((h, i) => {
+    const x = startX + widths.slice(0, i).reduce((a, b) => a + b, 0);
+    doc.text(h, x, doc.y, { width: widths[i] });
+  });
+  doc.moveDown();
+  doc.font('Helvetica');
+  indicadores.forEach(ind => {
+    let x = startX;
+    doc.text(ind.indicador, x, doc.y, { width: widths[0] });
+    x += widths[0];
+    niveles.forEach((n, idx) => {
+      const nivel = (ind.niveles || []).find(l => l.nombre === n);
+      doc.text(nivel ? String(nivel.cantidad) : '0', x, doc.y, {
+        width: widths[idx + 1],
+      });
+      x += widths[idx + 1];
+    });
+    niveles.forEach((n, idx) => {
+      const nivel = (ind.niveles || []).find(l => l.nombre === n);
+      const val = nivel ? `${nivel.porcentaje}%` : '0%';
+      doc.text(val, x, doc.y, {
+        width: widths[count + idx + 1],
+      });
+      x += widths[count + idx + 1];
+    });
+    doc.moveDown();
+  });
+}
+
+function buildDistribucionTableDOCX(indicadores) {
+  const levelMap = {};
+  indicadores.forEach(i => {
+    (i.niveles || []).forEach(n => {
+      if (!levelMap[n.nombre] || n.rMax > levelMap[n.nombre]) {
+        levelMap[n.nombre] = n.rMax;
+      }
+    });
+  });
+  const niveles = Object.entries(levelMap)
+    .sort((a, b) => b[1] - a[1])
+    .map(([n]) => n);
+  const headerCells = [
+    'Indicador',
+    ...niveles,
+    ...niveles.map(n => `${n} (%)`),
+  ].map(t =>
+    new TableCell({
+      children: [new Paragraph({ children: [new TextRun({ text: t, bold: true })] })],
+    })
+  );
+
+  const rows = indicadores.map(ind =>
+    new TableRow({
+      children: [
+        new TableCell({ children: [new Paragraph({ children: [new TextRun(ind.indicador)] })] }),
+        ...niveles.map(n =>
+          new TableCell({
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun(String((ind.niveles || []).find(l => l.nombre === n)?.cantidad || 0)),
+                ],
+              }),
+            ],
+          })
+        ),
+        ...niveles.map(n =>
+          new TableCell({
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun(
+                    `${(ind.niveles || []).find(l => l.nombre === n)?.porcentaje || 0}%`
+                  ),
+                ],
+              }),
+            ],
+          })
+        ),
+      ],
+    })
+  );
+
+  return new Table({ rows: [new TableRow({ children: headerCells }), ...rows] });
+}
+
 // Genera un PDF básico a partir del contenido entregado
 exports.generarPDF = contenido => {
   if (!PDFDocument) {
@@ -218,6 +323,8 @@ exports.generarPDFCompleto = contenido => {
           doc.text(inst.analisis[idx], { align: 'justify' });
           doc.moveDown();
         });
+        drawDistribucionTablePDF(doc, inst.criterios);
+        doc.moveDown(0.5);
         doc.text(inst.conclusion);
         doc.moveDown();
       });
@@ -405,6 +512,7 @@ exports.generarDOCXCompleto = async contenido => {
           new Paragraph({ children: [new TextRun(inst.analisis[idx] || '')] })
         );
       });
+      instanciasParagraphs.push(buildDistribucionTableDOCX(inst.criterios));
       instanciasParagraphs.push(
         new Paragraph({ children: [new TextRun(inst.conclusion || '')] })
       );

@@ -146,6 +146,10 @@ exports.generarInforme = async asignaturaId => {
       porcentaje: Math.round((r.cantidad / r.total) * 1000) / 10,
     });
   });
+  // Ordenar criterios de cada indicador por rango máximo descendente
+  Object.keys(rubricaMap).forEach(k => {
+    rubricaMap[k].sort((a, b) => b.rMax - a.rMax);
+  });
 
   // Agrupar por instancia
   const instancias = {};
