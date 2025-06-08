@@ -163,12 +163,18 @@ exports.generarPDFCompleto = contenido => {
         drawCriteriaTablePDF(doc, inst.criterios);
         doc.moveDown(0.5);
         inst.criterios.forEach((d, idx) => {
+          doc.font('Helvetica-Bold').text(d.indicador);
+          doc.font('Helvetica');
+          doc.text(`• Máximo Puntaje Obtenido: ${d.maximo}`);
+          doc.text(`• Mínimo Puntaje Obtenido: ${d.minimo}`);
+          doc.text(`• Puntaje Promedio: ${d.promedio}`);
+          doc.text(`• % de Alumnos sobre el Promedio: ${d.porcentaje}%`);
           if (Array.isArray(d.niveles)) {
             d.niveles.forEach(n => {
               doc.text(`${n.nombre}: ${n.cantidad} (${n.porcentaje}%)`);
             });
           }
-          doc.text(inst.analisis[idx]);
+          doc.text(inst.analisis[idx], { align: 'justify' });
           doc.moveDown();
         });
         doc.text(inst.conclusion);
@@ -262,6 +268,33 @@ exports.generarDOCXCompleto = contenido => {
       );
       instanciasParagraphs.push(buildCriteriaTableDOCX(inst.criterios));
       inst.criterios.forEach((c, idx) => {
+        instanciasParagraphs.push(
+          new Paragraph({ text: c.indicador, heading: HeadingLevel.HEADING_3 })
+        );
+        instanciasParagraphs.push(
+          new Paragraph({
+            text: `Máximo Puntaje Obtenido: ${c.maximo}`,
+            bullet: { level: 0 },
+          })
+        );
+        instanciasParagraphs.push(
+          new Paragraph({
+            text: `Mínimo Puntaje Obtenido: ${c.minimo}`,
+            bullet: { level: 0 },
+          })
+        );
+        instanciasParagraphs.push(
+          new Paragraph({
+            text: `Puntaje Promedio: ${c.promedio}`,
+            bullet: { level: 0 },
+          })
+        );
+        instanciasParagraphs.push(
+          new Paragraph({
+            text: `% de Alumnos sobre el Promedio: ${c.porcentaje}%`,
+            bullet: { level: 0 },
+          })
+        );
         if (Array.isArray(c.niveles)) {
           c.niveles.forEach(n => {
             instanciasParagraphs.push(
