@@ -66,3 +66,18 @@ body.dark-mode .btn-outline-secondary:hover {
   background-color: #ffffff;
   color: #000000;
 }
+
+/* Table grid styles */
+body.dark-mode table {
+  color: #ffffff;
+  background-color: #2e2e2e;
+}
+
+body.dark-mode table thead {
+  background-color: #2b2b2b;
+  color: #ffffff;
+}
+
+body.dark-mode table tbody tr:hover {
+  background-color: #383838;
+}
