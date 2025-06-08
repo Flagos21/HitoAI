@@ -1,13 +1,7 @@
 const connection = require('../db/connection');
 const fs = require('fs');
 const path = require('path');
-let quickchart;
-try {
-  quickchart = require('quickchart-js');
-} catch {
-  quickchart = require('../utils/minimalChart');
-  console.warn('quickchart-js package not found, using minimalChart');
-}
+const { generarGraficoBarras } = require('../utils/grafico');
 const {
   crearIntroduccion,
   analizarCriterio,
@@ -92,16 +86,11 @@ exports.generarInforme = async asignaturaId => {
   const conclusion = await conclusionCompetencias(resumenComp);
   const recomendaciones = await recomendacionesTemas('temas de la asignatura');
 
-  const chart = new quickchart();
-  chart.setConfig({
-    type: 'bar',
-    data: {
-      labels: datos.map(d => d.indicador),
-      datasets: [{ label: '% sobre promedio', data: datos.map(d => d.porcentaje) }],
-    },
-  });
-
-  const chartImage = await chart.toBinary();
+  const chartPath = await generarGraficoBarras(
+    datos.map(d => d.indicador),
+    datos.map(d => d.porcentaje),
+    'grafico.png'
+  );
   const contenido = {
     asignatura,
     introduccion,
@@ -110,8 +99,7 @@ exports.generarInforme = async asignaturaId => {
     competencias,
     conclusion,
     recomendaciones,
-
-    chartImage,
+    chartPath,
   };
 
   const pdf = await generarPDFCompleto(contenido);
@@ -122,5 +110,6 @@ exports.generarInforme = async asignaturaId => {
   if (!fs.existsSync(outDir)) fs.mkdirSync(outDir);
   fs.writeFileSync(path.join(outDir, `${base}.pdf`), pdf);
   fs.writeFileSync(path.join(outDir, `${base}.docx`), docx);
+  if (fs.existsSync(chartPath)) fs.unlinkSync(chartPath);
   return { pdf, nombre: `${base}.pdf` };
 };
