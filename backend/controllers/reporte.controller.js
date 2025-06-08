@@ -13,3 +13,14 @@ exports.generarReporte = async (req, res) => {
     res.status(500).json({ message: 'Error al generar reporte' });
   }
 };
+
+exports.obtenerDistribucion = async (req, res) => {
+  const { asignaturaId } = req.params;
+  try {
+    const data = await ReporteService.obtenerDistribucionPorInstancia(asignaturaId);
+    res.json(data);
+  } catch (err) {
+    console.error('Error al obtener distribución:', err);
+    res.status(500).json({ message: 'Error al obtener distribución' });
+  }
+};
