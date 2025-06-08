@@ -162,8 +162,8 @@ function drawDistribucionTablePDF(doc, indicadores) {
   doc.moveDown();
 }
 
-function generarTablaResumenIndicadoresPDF(doc, instancia) {
-  drawCriteriaTablePDF(doc, instancia.criterios);
+function generarTablaResumenIndicadoresPDF(doc, criterios) {
+  drawCriteriaTablePDF(doc, criterios);
   doc.moveDown(0.5);
 }
 
@@ -175,11 +175,6 @@ function generarBloqueDesgloseIndicadoresPDF(doc, instancia) {
     doc.text(`• Mínimo Puntaje Obtenido: ${d.minimo}`);
     doc.text(`• Puntaje Promedio: ${d.promedio}`);
     doc.text(`• % de Alumnos sobre el Promedio: ${d.porcentaje}%`);
-    if (Array.isArray(d.niveles)) {
-      d.niveles.forEach(n => {
-        doc.text(`${n.nombre}: ${n.cantidad} (${n.porcentaje}%)`);
-      });
-    }
     doc.text(instancia.analisis[idx] || '', { align: 'justify' });
     doc.moveDown();
   });
@@ -199,7 +194,17 @@ function generarTablaCriteriosPorIndicadorPDF(doc, instancia) {
 
 function generarConclusionPDF(doc, instancia) {
   if (instancia.conclusion) {
-    doc.text(instancia.conclusion);
+    doc.font('Helvetica-Bold').text('Conclusiones');
+    doc.font('Helvetica').text(instancia.conclusion, { align: 'justify' });
+    doc.moveDown();
+  }
+}
+
+function generarRecomendacionesPDF(doc, instancia) {
+  if (Array.isArray(instancia.recomendaciones) && instancia.recomendaciones.length) {
+    doc.font('Helvetica-Bold').text('Recomendaciones');
+    doc.font('Helvetica');
+    instancia.recomendaciones.forEach(r => doc.text(`\u2022 ${r}`));
     doc.moveDown();
   }
 }
@@ -288,8 +293,8 @@ function buildDistribucionTableDOCX(indicadores) {
   });
 }
 
-function generarTablaResumenIndicadoresDOCX(instancia) {
-  return buildCriteriaTableDOCX(instancia.criterios);
+function generarTablaResumenIndicadoresDOCX(criterios) {
+  return buildCriteriaTableDOCX(criterios);
 }
 
 function generarBloqueDesgloseIndicadoresDOCX(instancia) {
@@ -313,11 +318,6 @@ function generarBloqueDesgloseIndicadoresDOCX(instancia) {
     parts.push(
       new Paragraph({ bullet: { level: 0 }, children: [new TextRun(`% de Alumnos sobre el Promedio: ${c.porcentaje}%`)] })
     );
-    if (Array.isArray(c.niveles)) {
-      c.niveles.forEach(n => {
-        parts.push(new Paragraph({ children: [new TextRun(`${n.nombre}: ${n.cantidad} (${n.porcentaje}%)`)] }));
-      });
-    }
     parts.push(new Paragraph({ children: [new TextRun(instancia.analisis[idx] || '')] }));
   });
   return parts;
@@ -339,7 +339,23 @@ function generarTablaCriteriosPorIndicadorDOCX(instancia) {
 }
 
 function generarConclusionDOCX(instancia) {
-  return new Paragraph({ children: [new TextRun(instancia.conclusion || '')] });
+  if (!instancia.conclusion) return [];
+  return [
+    new Paragraph({ heading: HeadingLevel.HEADING_3, children: [new TextRun('Conclusiones')] }),
+    new Paragraph({ children: [new TextRun(instancia.conclusion)] }),
+  ];
+}
+
+function generarRecomendacionesDOCX(instancia) {
+  if (!Array.isArray(instancia.recomendaciones) || !instancia.recomendaciones.length) {
+    return [];
+  }
+  return [
+    new Paragraph({ heading: HeadingLevel.HEADING_3, children: [new TextRun('Recomendaciones')] }),
+    ...instancia.recomendaciones.map(r =>
+      new Paragraph({ bullet: { level: 0 }, children: [new TextRun(r)] })
+    ),
+  ];
 }
 
 // Genera un PDF básico a partir del contenido entregado
@@ -364,6 +380,7 @@ exports.generarPDF = contenido => {
     doc.fontSize(14).text(intro.relevancia.titulo);
     doc.fontSize(12).text(intro.relevancia.texto, { align: 'justify' });
     doc.moveDown();
+    generarTablaResumenIndicadoresPDF(doc, contenido.resumenIndicadores);
     doc.fontSize(12).text(contenido.conclusion, { align: 'justify' });
 
     doc.end();
@@ -459,11 +476,11 @@ exports.generarPDFCompleto = contenido => {
           : `Instancia Evaluativa ${num}`;
         doc.fontSize(14).text(titulo, { underline: true });
         doc.moveDown(0.5);
-        generarTablaResumenIndicadoresPDF(doc, inst);
         generarBloqueDesgloseIndicadoresPDF(doc, inst);
         generarGraficoDesempenoPDF(doc, contenido.graficos && contenido.graficos[num]);
-        generarTablaCriteriosPorIndicadorPDF(doc, inst);
         generarConclusionPDF(doc, inst);
+        generarRecomendacionesPDF(doc, inst);
+        generarTablaCriteriosPorIndicadorPDF(doc, inst);
       });
 
 
@@ -561,12 +578,12 @@ exports.generarDOCXCompleto = async contenido => {
       instanciasParagraphs.push(
         new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun(titulo)] })
       );
-      instanciasParagraphs.push(generarTablaResumenIndicadoresDOCX(inst));
       instanciasParagraphs.push(...generarBloqueDesgloseIndicadoresDOCX(inst));
       const graf = generarGraficoDesempenoDOCX(contenido.graficos && contenido.graficos[num]);
       if (graf) instanciasParagraphs.push(graf);
+      instanciasParagraphs.push(...generarConclusionDOCX(inst));
+      instanciasParagraphs.push(...generarRecomendacionesDOCX(inst));
       instanciasParagraphs.push(generarTablaCriteriosPorIndicadorDOCX(inst));
-      instanciasParagraphs.push(generarConclusionDOCX(inst));
     });
 
   const grafParags = Object.entries(contenido.graficos || {})
@@ -601,13 +618,14 @@ exports.generarDOCXCompleto = async contenido => {
           }),
           new Paragraph({
             heading: HeadingLevel.HEADING_3,
-            children: [new TextRun(contenido.introduccion.relevancia.titulo)],
-          }),
-          new Paragraph({
-            alignment: AlignmentType.JUSTIFIED,
-            children: [new TextRun(contenido.introduccion.relevancia.texto)],
-          }),
-          ...instanciasParagraphs,
+          children: [new TextRun(contenido.introduccion.relevancia.titulo)],
+        }),
+        new Paragraph({
+          alignment: AlignmentType.JUSTIFIED,
+          children: [new TextRun(contenido.introduccion.relevancia.texto)],
+        }),
+        generarTablaResumenIndicadoresDOCX(contenido.resumenIndicadores),
+        ...instanciasParagraphs,
           new Paragraph({
             heading: HeadingLevel.HEADING_2,
             children: [new TextRun('Cumplimiento por Competencia')],
