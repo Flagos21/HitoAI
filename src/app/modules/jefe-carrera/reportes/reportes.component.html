@@ -1,0 +1,17 @@
+<div class="d-flex">
+  <app-sidebar [rol]="'Jefe de Carrera'"></app-sidebar>
+  <div class="flex-grow-1 p-4">
+    <h2>Reportes por Asignatura</h2>
+    <table class="table">
+      <thead>
+        <tr><th>Asignatura</th><th>Acciones</th></tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let a of asignaturas">
+          <td>{{a.Nombre}}</td>
+          <td><button class="btn btn-primary" (click)="generar(a.ID_Asignatura)">Generar Informe</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
