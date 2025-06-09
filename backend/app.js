@@ -18,7 +18,6 @@ app.use('/api/contenido', require('./routes/contenido.routes'));
 app.use('/api/aplicacion', require('./routes/aplicacion.routes'));
 app.use('/api/evaluacion', require('./routes/evaluacion.routes'));
 app.use('/api/rol', require('./routes/rol.routes'));
-app.use('/api/mensaje', require('./routes/mensaje.routes'));
 app.use('/api/reporte', require('./routes/reporte.routes'));
 app.use('/api/informe', require('./routes/informe.routes'));
 
