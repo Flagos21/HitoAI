@@ -3,7 +3,6 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UsuarioService } from '../../services/usuario.service';
-import { MensajeService } from '../../services/mensaje.service';
 import { ThemeService } from '../../services/theme.service';
 import { cleanRut, validarRut } from '../../utils/rut';
 
@@ -21,13 +20,9 @@ export class LoginComponent {
   };
   mensajeError = '';
   mostrarClave = false;
-  mostrarOlvido = false;
-  rutOlvido = '';
-  mensajeSolicitud = '';
 
   constructor(
     private usuarioService: UsuarioService,
-    private mensajeService: MensajeService,
     private router: Router,
     public themeService: ThemeService
   ) {}
@@ -65,24 +60,6 @@ export class LoginComponent {
     this.mostrarClave = !this.mostrarClave;
   }
 
-  enviarSolicitud() {
-    if (!this.rutOlvido) return;
-
-    const rut = cleanRut(this.rutOlvido);
-    this.mensajeService.solicitarReinicio(rut).subscribe({
-      next: () => {
-        this.mensajeSolicitud = 'Solicitud enviada';
-        this.rutOlvido = '';
-        this.mostrarOlvido = false;
-        setTimeout(() => (this.mensajeSolicitud = ''), 3000);
-      },
-      error: () => {
-        this.mensajeError = 'No se pudo enviar la solicitud';
-        setTimeout(() => (this.mensajeError = ''), 3000);
-      }
-
-    });
-  }
 
   toggleTheme() {
     this.themeService.toggleDarkMode();
