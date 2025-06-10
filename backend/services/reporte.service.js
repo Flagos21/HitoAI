@@ -78,29 +78,46 @@ exports.obtenerDistribucionPorInstancia = asignaturaId => {
       if (err) return reject(err);
 
       const instancias = {};
-      for (const r of rows) {
+      // Agrupar información de conteos y porcentajes por indicador
+      rows.forEach(r => {
         if (!instancias[r.instancia]) instancias[r.instancia] = {};
         if (!instancias[r.instancia][r.indicadorId]) {
           instancias[r.instancia][r.indicadorId] = {
             indicador: r.indicador,
-            criterios: [],
-            total: r.total,
+            rangos: {},
+            porcentajes: {},
+            orden: [],
           };
         }
+
+        const data = instancias[r.instancia][r.indicadorId];
+        data.rangos[r.criterio] = r.cantidad;
         const porcentaje = r.total ? Math.round((r.cantidad / r.total) * 100) : 0;
-        instancias[r.instancia][r.indicadorId].criterios.push({
-          nombre: r.criterio,
-          rMin: r.rMin,
-          rMax: r.rMax,
-          cantidad: r.cantidad,
-          porcentaje,
-        });
-      }
+        data.porcentajes[r.criterio] = porcentaje;
+        data.orden.push({ nombre: r.criterio, rMax: r.rMax });
+      });
 
       const resultado = {};
-      for (const [instancia, inds] of Object.entries(instancias)) {
-        resultado[instancia] = Object.values(inds);
+      for (const [instancia, indicadores] of Object.entries(instancias)) {
+        resultado[instancia] = [];
+        for (const ind of Object.values(indicadores)) {
+          // Ordenar rangos por rMax desc
+          const orden = ind.orden
+            .sort((a, b) => b.rMax - a.rMax)
+            .map(o => o.nombre);
+
+          const filaAbs = { criterio: ind.indicador };
+          const filaPct = { criterio: `${ind.indicador} (%)` };
+
+          orden.forEach(n => {
+            filaAbs[n] = ind.rangos[n] || 0;
+            filaPct[n] = ind.porcentajes[n] || 0;
+          });
+
+          resultado[instancia].push(filaAbs, filaPct);
+        }
       }
+
       resolve(resultado);
     });
   });
