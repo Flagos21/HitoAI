@@ -620,20 +620,21 @@ exports.generarPDFCompleto = contenido => {
 
     doc.fontSize(14).text('Cumplimiento por Competencia', { underline: true });
     doc.moveDown();
-    contenido.competencias.forEach(c => {
-      doc.text(`${c.ID_Competencia} - Ideal: ${c.puntaje_ideal} Promedio: ${c.puntaje_promedio} Cumplimiento: ${c.cumplimiento}%`);
-      if (contenido.recomendacionesComp) {
-        const idx = contenido.competencias.findIndex(co => co.ID_Competencia === c.ID_Competencia);
-        if (contenido.recomendacionesComp[idx]) {
-          doc.text(`Recomendación: ${contenido.recomendacionesComp[idx]}`);
-        }
+    contenido.competencias.forEach((c, idx) => {
+      doc.text(
+        `${c.ID_Competencia} - Ideal: ${c.puntaje_ideal} Promedio: ${c.puntaje_promedio} Cumplimiento: ${c.cumplimiento}%`
+      );
+      if (contenido.recomendacionesComp && contenido.recomendacionesComp[idx]) {
+        doc.text(`Recomendación: ${contenido.recomendacionesComp[idx]}`);
       }
     });
 
     doc.moveDown();
-    doc.text(contenido.conclusion);
+    doc.font('Helvetica-Bold').text('Conclusiones Generales');
+    doc.font('Helvetica').text(contenido.conclusion, { align: 'justify' });
     doc.moveDown();
-    doc.text(contenido.recomendaciones);
+    doc.font('Helvetica-Bold').text('Recomendaciones Generales');
+    doc.font('Helvetica').text(contenido.recomendaciones, { align: 'justify' });
 
     doc.end();
   });
@@ -771,11 +772,13 @@ exports.generarDOCXCompleto = async contenido => {
             children: [new TextRun('Cumplimiento por Competencia')],
           }),
           compTable,
-          ...(contenido.recomendacionesComp || []).map(
-            t => new Paragraph({ children: [new TextRun(t)] })
+          ...(contenido.recomendacionesComp || []).map(t =>
+            new Paragraph({ children: [new TextRun(`Recomendación: ${t}`)] })
           ),
           ...grafParags,
+          new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun('Conclusiones Generales')] }),
           new Paragraph({ children: [new TextRun(contenido.conclusion)] }),
+          new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun('Recomendaciones Generales')] }),
           new Paragraph({ children: [new TextRun(contenido.recomendaciones)] })
         ]
       }

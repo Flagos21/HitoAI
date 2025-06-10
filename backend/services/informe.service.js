@@ -26,8 +26,10 @@ function query(sql, params = []) {
 async function obtenerDatosIndicadores(asignaturaId) {
   const sql = `
       SELECT
-        ev.Nombre AS evaluacion,
+        ev.ID_Evaluacion AS evaluacionId,
         ev.N_Instancia AS instancia,
+        ev.Nombre AS evaluacion,
+        i.ID_Indicador AS indicadorId,
         i.Descripcion AS indicador,
         i.Puntaje_Max AS puntajeMax,
         MAX(a.Obtenido) AS maximo,

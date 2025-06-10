@@ -92,18 +92,39 @@ async function generarGraficoTorta(labels, datos, nombreArchivo = 'torta.png') {
 }
 
 async function generarGraficoLineas(labels, datos, nombreArchivo = 'lineas.png') {
+  const wrappedLabels = labels.map(l => l.match(/.{1,15}/g)?.join('\n') || l);
   const config = {
     type: 'bar',
     data: {
-      labels,
+      labels: wrappedLabels,
       datasets: [
         {
-          label: 'Cumplimiento %',
+          label: 'Cumplimiento (%)',
           data: datos,
-          backgroundColor: 'rgba(153, 102, 255, 0.6)'
-        }
-      ]
-    }
+          backgroundColor: 'rgba(0,123,255,0.8)',
+        },
+      ],
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 100,
+          ticks: { stepSize: 10 },
+          title: { display: true, text: 'Cumplimiento (%)' },
+        },
+        x: { title: { display: true, text: 'Competencias' } },
+      },
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          color: '#ffffff',
+          anchor: 'center',
+          align: 'center',
+          formatter: v => `${v}%`,
+        },
+      },
+    },
   };
   const buffer = await chartJSNodeCanvas.renderToBuffer(config);
   const dir = path.join(__dirname, '..', 'public', 'img');
