@@ -989,7 +989,6 @@ exports.generarDOCXCompleto = async contenido => {
   });
 
   const doc = new Document({
-    properties: props,
     sections: [
       {
         headers: { default: header },
