@@ -51,7 +51,7 @@ exports.generarReporte = async asignaturaId => {
   return pdf;
 };
 
-// Distribución de puntajes por instancia e indicador
+// Distribución de puntajes y promedios por instancia e indicador
 exports.obtenerDistribucionPorInstancia = asignaturaId => {
   const sql = `
     SELECT
@@ -63,16 +63,12 @@ exports.obtenerDistribucionPorInstancia = asignaturaId => {
       c.R_Max AS rMax,
       SUM(a.Obtenido BETWEEN c.R_Min AND c.R_Max) AS cantidad,
       COUNT(a.ID_Aplicacion) AS total,
-      ROUND(AVG(CASE WHEN a.Obtenido BETWEEN c.R_Min AND c.R_Max THEN a.Obtenido END), 1) AS promedio,
-      ROUND(
-        AVG(CASE WHEN a.Obtenido BETWEEN c.R_Min AND c.R_Max THEN a.Obtenido END) / i.Puntaje_Max * 100,
-        1
-      ) AS promedioPct
+      ROUND(AVG(CASE WHEN a.Obtenido BETWEEN c.R_Min AND c.R_Max THEN a.Obtenido END), 1) AS promedio
     FROM evaluacion ev
-    JOIN aplicacion a ON ev.ID_Evaluacion = a.evaluacion_ID_Evaluacion
-    JOIN inscripcion ins ON ins.ID_Inscripcion = a.inscripcion_ID_Inscripcion
-    JOIN indicador i ON i.ID_Indicador = a.indicador_ID_Indicador
-    JOIN criterio c ON c.indicador_ID_Indicador = i.ID_Indicador
+      JOIN aplicacion a ON ev.ID_Evaluacion = a.evaluacion_ID_Evaluacion
+      JOIN inscripcion ins ON ins.ID_Inscripcion = a.inscripcion_ID_Inscripcion
+      JOIN indicador i ON i.ID_Indicador = a.indicador_ID_Indicador
+      JOIN criterio c ON c.indicador_ID_Indicador = i.ID_Indicador
     WHERE ins.asignatura_ID_Asignatura = ?
     GROUP BY ev.N_Instancia, i.ID_Indicador, c.ID_Criterio
     ORDER BY ev.N_Instancia, i.ID_Indicador, c.R_Max DESC
@@ -83,45 +79,42 @@ exports.obtenerDistribucionPorInstancia = asignaturaId => {
       if (err) return reject(err);
 
       const instancias = {};
-      // Agrupar información de promedios y porcentajes por indicador
+      // Organizar datos por instancia e indicador
       rows.forEach(r => {
         if (!instancias[r.instancia]) instancias[r.instancia] = {};
         if (!instancias[r.instancia][r.indicadorId]) {
           instancias[r.instancia][r.indicadorId] = {
             indicador: r.indicador,
-            promedios: {},
-            porcentajes: {},
-            orden: [],
+            valores: [],
           };
         }
 
-        const data = instancias[r.instancia][r.indicadorId];
-        data.promedios[r.criterio] = r.promedio || 0;
-        const porcentaje = r.total ? Math.round((r.cantidad / r.total) * 100) : 0;
-        data.porcentajes[r.criterio] = porcentaje;
-        data.orden.push({ nombre: r.criterio, rMax: r.rMax });
+        const porcentaje = r.total
+          ? Math.round((r.cantidad / r.total) * 1000) / 10
+          : null;
+
+        instancias[r.instancia][r.indicadorId].valores.push({
+          criterio: r.criterio,
+          promedio: r.cantidad ? Number(r.promedio) : null,
+          porcentaje,
+          orden: r.rMax,
+        });
       });
 
-      const resultado = {};
-      for (const [instancia, indicadores] of Object.entries(instancias)) {
-        resultado[instancia] = [];
-        for (const ind of Object.values(indicadores)) {
-          // Ordenar rangos por rMax desc
-          const orden = ind.orden
-            .sort((a, b) => b.rMax - a.rMax)
-            .map(o => o.nombre);
-
-          const filaProm = { criterio: ind.indicador };
-          const filaPct = { criterio: `${ind.indicador} (%)` };
-
-          orden.forEach(n => {
-            filaProm[n] = ind.promedios[n] || 0;
-            filaPct[n] = ind.porcentajes[n] || 0;
-          });
-
-          resultado[instancia].push(filaProm, filaPct);
-        }
-      }
+      // Transformar al formato solicitado
+      const resultado = Object.keys(instancias).map(instancia => ({
+        instancia: Number(instancia),
+        resultados: Object.values(instancias[instancia]).map(ind => ({
+          indicador: ind.indicador,
+          valores: ind.valores
+            .sort((a, b) => b.orden - a.orden)
+            .map(v => ({
+              criterio: v.criterio,
+              promedio: v.promedio,
+              porcentaje: v.porcentaje,
+            })),
+        })),
+      }));
 
       resolve(resultado);
     });
