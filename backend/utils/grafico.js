@@ -106,6 +106,7 @@ async function generarGraficoLineas(labels, datos, nombreArchivo = 'lineas.png')
       ],
     },
     options: {
+      indexAxis: 'x',
       scales: {
         y: {
           beginAtZero: true,
