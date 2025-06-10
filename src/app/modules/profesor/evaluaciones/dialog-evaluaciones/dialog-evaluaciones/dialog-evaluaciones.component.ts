@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { EvaluacionService } from '../../../../../services/evaluacion.service';
+import { AplicacionService } from '../../../../../services/aplicacion.service';
+import { InscripcionService } from '../../../../../services/inscripcion.service';
 import { DialogCrearEvaluacionComponent } from '../../dialog-crear-evaluacion/dialog-crear-evaluacion/dialog-crear-evaluacion.component';
 import { MainEvaluacionDetalleComponent } from '../../main-evaluacion-detalle/main-evaluacion-detalle/main-evaluacion-detalle.component';
 
@@ -17,6 +19,7 @@ export class DialogEvaluacionesComponent implements OnInit {
   @Input() asignatura: any;
 
   evaluaciones: any[] = [];
+  totalEstudiantes = 0;
   accionConfirmada: number | null = null;
   mensajeExito = '';
   mensajeError = '';
@@ -25,19 +28,39 @@ export class DialogEvaluacionesComponent implements OnInit {
   constructor(
     public modal: NgbActiveModal,
     private modalService: NgbModal,
-    private evaluacionService: EvaluacionService
+    private evaluacionService: EvaluacionService,
+    private aplicacionService: AplicacionService,
+    private inscripcionService: InscripcionService
   ) {}
 
   ngOnInit(): void {
-    this.cargarEvaluaciones();
+    this.inscripcionService
+      .obtenerPorAsignatura(this.asignatura.ID_Asignatura)
+      .subscribe(est => {
+        this.totalEstudiantes = est.length;
+        this.cargarEvaluaciones();
+      });
   }
 
   cargarEvaluaciones() {
-    this.evaluacionService.obtenerPorAsignatura(this.asignatura.ID_Asignatura).subscribe(data => {
-      this.evaluaciones = data;
-    }, error => {
-      console.error('Error al cargar evaluaciones:', error);
-    });
+    this.evaluacionService
+      .obtenerPorAsignatura(this.asignatura.ID_Asignatura)
+      .subscribe(
+        (data) => {
+          this.evaluaciones = data;
+          for (const eva of this.evaluaciones) {
+            this.aplicacionService
+              .obtenerAplicados(eva.ID_Evaluacion, this.asignatura.ID_Asignatura)
+              .subscribe((ids) => {
+                eva.completada =
+                  this.totalEstudiantes > 0 && ids.length >= this.totalEstudiantes;
+              });
+          }
+        },
+        (error) => {
+          console.error('Error al cargar evaluaciones:', error);
+        }
+      );
   }
 
   abrirDialogCrearEvaluacion() {
