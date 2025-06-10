@@ -1,21 +1,50 @@
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const fs = require('fs');
 const path = require('path');
+const ChartDataLabels = require('chartjs-plugin-datalabels');
 
-const width = 800;
-const height = 400;
-const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height });
+const width = 900;
+const height = 500;
+const chartCallback = ChartJS => {
+  ChartJS.register(ChartDataLabels);
+};
+const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height, chartCallback });
 
 async function generarGraficoBarras(labels, datos, nombreArchivo = 'grafico.png') {
+  const wrappedLabels = labels.map(l => l.match(/.{1,15}/g)?.join('\n') || l);
+
   const config = {
     type: 'bar',
     data: {
-      labels,
+      labels: wrappedLabels,
       datasets: [{
         label: 'Alumnos sobre promedio (%)',
         data: datos,
-        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+        backgroundColor: 'rgba(0,123,255,0.8)',
       }],
+    },
+    options: {
+      indexAxis: 'x',
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 100,
+          ticks: { stepSize: 10 },
+          title: { display: true, text: '% de Alumnos' },
+        },
+        x: {
+          title: { display: true, text: 'Indicadores' },
+        },
+      },
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          color: '#ffffff',
+          anchor: 'center',
+          align: 'center',
+          formatter: v => `${v}%`,
+        },
+      },
     },
   };
 
