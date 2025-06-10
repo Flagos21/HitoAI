@@ -17,20 +17,6 @@ async function generarGraficoBarras(labels, datos, nombreArchivo = 'grafico.png'
         backgroundColor: 'rgba(54, 162, 235, 0.6)',
       }],
     },
-    options: {
-      scales: {
-        y: {
-          beginAtZero: true,
-          max: 100,
-          ticks: { stepSize: 10 },
-          title: { display: true, text: '% de Alumnos' },
-        },
-        x: {
-          title: { display: true, text: 'Indicadores' },
-        },
-      },
-      plugins: { legend: { display: false } },
-    },
   };
 
   const buffer = await chartJSNodeCanvas.renderToBuffer(config);
