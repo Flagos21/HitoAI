@@ -646,6 +646,22 @@ exports.generarPDFCompleto = contenido => {
         generarRecomendacionesPDF(doc, inst);
       });
 
+    doc.moveDown();
+    doc.fontSize(14).text('Promedio por Criterio', { underline: true });
+    doc.moveDown(0.5);
+    Object.keys(contenido.instancias)
+      .sort((a, b) => a - b)
+      .forEach(num => {
+        const inst = contenido.instancias[num];
+        const idx = Number(num) - 1;
+        const titulo = ordinales[idx]
+          ? `${ordinales[idx]} Instancia Evaluativa`
+          : `Instancia Evaluativa ${num}`;
+        doc.fontSize(14).text(titulo, { underline: true });
+        doc.moveDown(0.5);
+        generarTablaPromediosPorCriterioPDF(doc, inst);
+      });
+
 
     if (contenido.graficos) {
       Object.entries(contenido.graficos)
@@ -749,6 +765,23 @@ exports.generarDOCXCompleto = async contenido => {
       instanciasParagraphs.push(...generarRecomendacionesDOCX(inst));
     });
 
+  const promedioParagraphs = [
+    new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun('Promedio por Criterio')] })
+  ];
+  Object.keys(contenido.instancias)
+    .sort((a, b) => a - b)
+    .forEach(num => {
+      const inst = contenido.instancias[num];
+      const idx = Number(num) - 1;
+      const titulo = ordinales[idx]
+        ? `${ordinales[idx]} Instancia Evaluativa`
+        : `Instancia Evaluativa ${num}`;
+      promedioParagraphs.push(
+        new Paragraph({ heading: HeadingLevel.HEADING_3, children: [new TextRun(titulo)] })
+      );
+      promedioParagraphs.push(generarTablaPromediosPorCriterioDOCX(inst));
+    });
+
   const grafParags = Object.entries(contenido.graficos || {})
     .filter(([k, p]) => isNaN(Number(k)) && p && fs.existsSync(p))
     .map(([_, p]) =>
@@ -789,6 +822,7 @@ exports.generarDOCXCompleto = async contenido => {
         }),
         generarTablaResumenIndicadoresDOCX(contenido.resumenIndicadores),
         ...instanciasParagraphs,
+        ...promedioParagraphs,
           new Paragraph({
             heading: HeadingLevel.HEADING_2,
             children: [new TextRun('Cumplimiento por Competencia')],

@@ -4,8 +4,8 @@ const path = require('path');
 let ChartDataLabels;
 try {
   ChartDataLabels = require('chartjs-plugin-datalabels');
-} catch (err) {
-  console.warn('chartjs-plugin-datalabels not installed, skipping');
+
+} catch {
   ChartDataLabels = null;
 }
 
