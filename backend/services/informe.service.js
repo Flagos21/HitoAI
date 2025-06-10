@@ -3,7 +3,6 @@ const fs = require('fs');
 const path = require('path');
 const {
   generarGraficoBarras,
-  generarGraficoTorta,
   generarGraficoLineas,
 } = require('../utils/grafico');
 const {
@@ -13,6 +12,7 @@ const {
   conclusionCriterios,
   recomendacionesTemas,
   recomendacionesCompetencia,
+  analisisCompetencia,
   recomendacionesGenerales,
 } = require('../utils/openai');
 const { generarPDFCompleto, generarDOCXCompleto } = require('../utils/reportGenerator');
@@ -209,16 +209,53 @@ exports.generarInforme = async asignaturaId => {
         nombre: d.evaluacion,
         criterios: [],
         analisis: [],
+        competencias: {},
       };
     }
     instancias[d.instancia].criterios.push(d);
     instancias[d.instancia].analisis.push(analisis[idx]);
+
+    const comp = instancias[d.instancia].competencias[d.competencia] || {
+      puntajeIdeal: 0,
+      promedios: [],
+    };
+    comp.puntajeIdeal += d.puntajeMax;
+    comp.promedios.push(d.promedio);
+    instancias[d.instancia].competencias[d.competencia] = comp;
   });
 
   for (const i of Object.values(instancias)) {
     const resumen = i.criterios.map(c => c.indicador).join(', ');
     i.conclusion = await conclusionCriterios(resumen);
     i.recomendaciones = [await recomendacionesTemas(resumen)];
+
+    i.competenciasResumen = [];
+    for (const [comp, datos] of Object.entries(i.competencias)) {
+      const promedio =
+        Math.round((datos.promedios.reduce((a, b) => a + b, 0) / datos.promedios.length) * 10) / 10;
+      const cumplimiento = Math.round((promedio / datos.puntajeIdeal) * 100);
+      i.competenciasResumen.push({
+        competencia: comp,
+        puntajeIdeal: datos.puntajeIdeal,
+        promedio,
+        cumplimiento,
+      });
+    }
+    i.competenciasAnalisis = await Promise.all(
+      i.competenciasResumen.map(c =>
+        analisisCompetencia({
+          competencia: c.competencia,
+          puntajeIdeal: c.puntajeIdeal,
+          promedio: c.promedio,
+          cumplimiento: c.cumplimiento,
+        })
+      )
+    );
+    i.recomendacionesCompetencias = await Promise.all(
+      i.competenciasResumen.map(c =>
+        recomendacionesCompetencia(c.competencia, c.cumplimiento)
+      )
+    );
   }
 
   // totalNiveles ya calculado al agregar rubricas
@@ -232,16 +269,13 @@ exports.generarInforme = async asignaturaId => {
 
   const recomendaciones = await recomendacionesGenerales('temas de la asignatura');
 
+  const resumenTemasFinal = [...new Set(datos.map(d => d.indicador))].join(', ');
+  const recomendacionesTemasFinal = await recomendacionesTemas(resumenTemasFinal);
+
   const barrasPath = await generarGraficoBarras(
     datos.map(d => d.indicador),
     datos.map(d => d.porcentaje),
     'barras.png'
-  );
-
-  const tortaPath = await generarGraficoTorta(
-    Object.keys(totalNiveles),
-    Object.values(totalNiveles),
-    'niveles.png'
   );
 
   const compPath = await generarGraficoLineas(
@@ -272,7 +306,8 @@ exports.generarInforme = async asignaturaId => {
     recomendacionesComp,
     conclusion,
     recomendaciones,
-    graficos: { barrasPath, tortaPath, compPath, ...graficosInstancias },
+    recomendacionesTemasFinal,
+    graficos: { barrasPath, compPath, ...graficosInstancias },
   };
 
   let pdf = Buffer.from('');
@@ -296,7 +331,7 @@ exports.generarInforme = async asignaturaId => {
   if (pdf.length) fs.writeFileSync(path.join(outDir, `${base}.pdf`), pdf);
 
   if (docx.length) fs.writeFileSync(path.join(outDir, `${base}.docx`), docx);
-  const archivosGraficos = [barrasPath, tortaPath, compPath, ...Object.values(graficosInstancias)];
+  const archivosGraficos = [barrasPath, compPath, ...Object.values(graficosInstancias)];
   archivosGraficos.forEach(p => {
     if (fs.existsSync(p)) fs.unlinkSync(p);
   });
