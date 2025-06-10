@@ -111,9 +111,33 @@ async function obtenerRubricas(asignaturaId) {
   return query(sql, [asignaturaId]);
 }
 
+async function obtenerPromediosCriterio(asignaturaId) {
+  const sql = `
+      SELECT
+        ev.ID_Evaluacion AS evaluacionId,
+        ev.N_Instancia AS instancia,
+        i.ID_Indicador AS indicadorId,
+        i.Descripcion AS indicador,
+        c.Nombre AS criterio,
+        c.R_Min AS rMin,
+        c.R_Max AS rMax,
+        ROUND(AVG(a.Obtenido), 1) AS promedio,
+        ROUND(AVG(a.Obtenido) / i.Puntaje_Max * 100, 1) AS porcentaje
+      FROM criterio c
+      JOIN indicador i ON i.ID_Indicador = c.indicador_ID_Indicador
+      JOIN aplicacion a ON a.indicador_ID_Indicador = i.ID_Indicador
+      JOIN evaluacion ev ON ev.ID_Evaluacion = a.evaluacion_ID_Evaluacion
+      JOIN inscripcion ins ON ins.ID_Inscripcion = a.inscripcion_ID_Inscripcion
+      WHERE ins.asignatura_ID_Asignatura = ?
+        AND a.Obtenido BETWEEN c.R_Min AND c.R_Max
+      GROUP BY ev.ID_Evaluacion, i.ID_Indicador, c.ID_Criterio;`;
+  return query(sql, [asignaturaId]);
+}
+
 exports.generarInforme = async asignaturaId => {
   const datos = await obtenerDatosIndicadores(asignaturaId);
   const rubricas = await obtenerRubricas(asignaturaId);
+  const promedios = await obtenerPromediosCriterio(asignaturaId);
   const competencias = await obtenerCompetencias(asignaturaId);
   const asignatura = await obtenerAsignatura(asignaturaId);
 
@@ -146,6 +170,22 @@ exports.generarInforme = async asignaturaId => {
       porcentaje: Math.round((r.cantidad / r.total) * 1000) / 10,
     });
   });
+
+  const promedioMap = {};
+  promedios.forEach(p => {
+    const key = `${p.evaluacionId}-${p.indicadorId}`;
+    if (!promedioMap[key]) promedioMap[key] = [];
+    promedioMap[key].push({
+      nombre: p.criterio,
+      rMin: p.rMin,
+      rMax: p.rMax,
+      promedio: p.promedio,
+      porcentaje: p.porcentaje,
+    });
+  });
+  Object.keys(promedioMap).forEach(k => {
+    promedioMap[k].sort((a, b) => b.rMax - a.rMax);
+  });
   // Ordenar criterios de cada indicador por rango máximo descendente
   Object.keys(rubricaMap).forEach(k => {
     rubricaMap[k].sort((a, b) => b.rMax - a.rMax);
@@ -157,6 +197,7 @@ exports.generarInforme = async asignaturaId => {
   datos.forEach((d, idx) => {
     const key = `${d.evaluacionId}-${d.indicadorId}`;
     d.niveles = rubricaMap[key] || [];
+    d.promedios = promedioMap[key] || [];
     d.niveles.forEach(n => {
       totalNiveles[n.nombre] = (totalNiveles[n.nombre] || 0) + n.cantidad;
     });

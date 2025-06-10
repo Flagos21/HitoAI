@@ -218,6 +218,11 @@ function generarTablaCriteriosPorIndicadorPDF(doc, instancia) {
   doc.moveDown(0.5);
 }
 
+function generarTablaPromediosPorCriterioPDF(doc, instancia) {
+  drawPromedioTablePDF(doc, instancia.criterios);
+  doc.moveDown(0.5);
+}
+
 function generarConclusionPDF(doc, instancia) {
   if (instancia.conclusion) {
     doc.font('Helvetica-Bold').text('Conclusiones');
@@ -319,6 +324,131 @@ function buildDistribucionTableDOCX(indicadores) {
   });
 }
 
+function drawPromedioTablePDF(doc, indicadores) {
+  const levelMap = {};
+  indicadores.forEach(i => {
+    (i.promedios || []).forEach(p => {
+      if (!levelMap[p.nombre]) levelMap[p.nombre] = p.rMax;
+    });
+  });
+  const niveles = Object.entries(levelMap)
+    .sort((a, b) => b[1] - a[1])
+    .map(([n]) => n);
+  const defaults = { 3: ['Alto', 'Medio', 'Bajo'], 4: ['Excelente', 'Alto', 'Medio', 'Insuficiente'] };
+  const headersNiveles = defaults[niveles.length] || niveles;
+  const count = headersNiveles.length;
+  const widths = [180, ...Array(count * 2).fill(50)];
+  const headers = [
+    'Indicador',
+    ...headersNiveles,
+    ...headersNiveles.map(n => `${n} (%)`),
+  ];
+
+  const startX = doc.x;
+  const rowHeight = 20;
+  let y = doc.y;
+  doc.font('Helvetica-Bold');
+  headers.forEach((h, i) => {
+    const x = startX + widths.slice(0, i).reduce((a, b) => a + b, 0);
+    doc.rect(x, y, widths[i], rowHeight).stroke();
+    doc.text(h, x, y + 5, { width: widths[i], align: 'center' });
+  });
+  y += rowHeight;
+  doc.font('Helvetica');
+  indicadores.forEach(ind => {
+    let x = startX;
+    doc.rect(x, y, widths[0], rowHeight).stroke();
+    doc.text(ind.indicador, x, y + 5, { width: widths[0], align: 'center' });
+    x += widths[0];
+    headersNiveles.forEach((n, idx) => {
+      const p = (ind.promedios || []).find(l => l.nombre === n);
+      doc.rect(x, y, widths[idx + 1], rowHeight).stroke();
+      doc.text(p ? String(p.promedio) : '-', x, y + 5, { width: widths[idx + 1], align: 'center' });
+      x += widths[idx + 1];
+    });
+    headersNiveles.forEach((n, idx) => {
+      const p = (ind.promedios || []).find(l => l.nombre === n);
+      const val = p ? `${p.porcentaje}%` : '-';
+      doc.rect(x, y, widths[count + idx + 1], rowHeight).stroke();
+      doc.text(val, x, y + 5, { width: widths[count + idx + 1], align: 'center' });
+      x += widths[count + idx + 1];
+    });
+    y += rowHeight;
+  });
+  doc.moveDown();
+}
+
+function buildPromedioTableDOCX(indicadores) {
+  const levelMap = {};
+  indicadores.forEach(i => {
+    (i.promedios || []).forEach(p => {
+      if (!levelMap[p.nombre] || p.rMax > levelMap[p.nombre]) {
+        levelMap[p.nombre] = p.rMax;
+      }
+    });
+  });
+  const niveles = Object.entries(levelMap)
+    .sort((a, b) => b[1] - a[1])
+    .map(([n]) => n);
+  const defaults = { 3: ['Alto', 'Medio', 'Bajo'], 4: ['Excelente', 'Alto', 'Medio', 'Insuficiente'] };
+  const headersNiveles = defaults[niveles.length] || niveles;
+
+  const headerCells = [
+    'Indicador',
+    ...headersNiveles,
+    ...headersNiveles.map(n => `${n} (%)`),
+  ].map(t =>
+    new TableCell({
+      children: [
+        new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: t, bold: true })] }),
+      ],
+    })
+  );
+
+  const rows = indicadores.map(ind =>
+    new TableRow({
+      children: [
+        new TableCell({
+          children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun(ind.indicador)] })],
+        }),
+        ...headersNiveles.map(n =>
+          new TableCell({
+            children: [
+              new Paragraph({
+                alignment: AlignmentType.CENTER,
+                children: [new TextRun(String((ind.promedios || []).find(p => p.nombre === n)?.promedio || '-'))],
+              }),
+            ],
+          })
+        ),
+        ...headersNiveles.map(n =>
+          new TableCell({
+            children: [
+              new Paragraph({
+                alignment: AlignmentType.CENTER,
+                children: [new TextRun(((ind.promedios || []).find(p => p.nombre === n)?.porcentaje ?? '-') + '%')],
+              }),
+            ],
+          })
+        ),
+      ],
+    })
+  );
+
+  return new Table({
+    rows: [new TableRow({ children: headerCells }), ...rows],
+    width: { size: 100, type: WidthType.PERCENTAGE },
+    borders: {
+      top: { style: BorderStyle.SINGLE, size: 1, color: '000000' },
+      bottom: { style: BorderStyle.SINGLE, size: 1, color: '000000' },
+      left: { style: BorderStyle.SINGLE, size: 1, color: '000000' },
+      right: { style: BorderStyle.SINGLE, size: 1, color: '000000' },
+      insideH: { style: BorderStyle.SINGLE, size: 1, color: '000000' },
+      insideV: { style: BorderStyle.SINGLE, size: 1, color: '000000' },
+    },
+  });
+}
+
 function generarTablaResumenIndicadoresDOCX(criterios) {
   return buildCriteriaTableDOCX(criterios);
 }
@@ -362,6 +492,10 @@ function generarGraficoDesempenoDOCX(path) {
 
 function generarTablaCriteriosPorIndicadorDOCX(instancia) {
   return buildDistribucionTableDOCX(instancia.criterios);
+}
+
+function generarTablaPromediosPorCriterioDOCX(instancia) {
+  return buildPromedioTableDOCX(instancia.criterios);
 }
 
 function generarConclusionDOCX(instancia) {
@@ -506,6 +640,7 @@ exports.generarPDFCompleto = contenido => {
         doc.fontSize(14).text(titulo, { underline: true });
         doc.moveDown(0.5);
         generarBloqueDesgloseIndicadoresPDF(doc, inst);
+        generarTablaPromediosPorCriterioPDF(doc, inst);
         generarGraficoDesempenoPDF(doc, contenido.graficos && contenido.graficos[num]);
         generarConclusionPDF(doc, inst);
         generarRecomendacionesPDF(doc, inst);
@@ -607,6 +742,7 @@ exports.generarDOCXCompleto = async contenido => {
         new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun(titulo)] })
       );
       instanciasParagraphs.push(...generarBloqueDesgloseIndicadoresDOCX(inst));
+      instanciasParagraphs.push(generarTablaPromediosPorCriterioDOCX(inst));
       const graf = generarGraficoDesempenoDOCX(contenido.graficos && contenido.graficos[num]);
       if (graf) instanciasParagraphs.push(graf);
       instanciasParagraphs.push(...generarConclusionDOCX(inst));
