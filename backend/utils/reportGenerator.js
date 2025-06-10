@@ -783,16 +783,24 @@ exports.generarPDFCompleto = contenido => {
           : `Instancia Evaluativa ${num}`;
         doc.fontSize(14).text(titulo, { underline: true });
         doc.moveDown(0.5);
+        // B. Desglose por indicador
         generarBloqueDesgloseIndicadoresPDF(doc, inst);
-        generarTablaCompetenciasInstanciaPDF(doc, inst);
-        generarAnalisisCompetenciasPDF(doc, inst);
-        generarRecomendacionesCompetenciasPDF(doc, inst);
+        // C. Gráfico por instancia
         generarGraficoDesempenoPDF(doc, contenido.graficos && contenido.graficos[num]);
+        // D. Conclusiones de instancia
         generarConclusionPDF(doc, inst);
+        // E. Recomendaciones generales de instancia
         generarRecomendacionesPDF(doc, inst);
+        // F. Tabla de desempeño por criterio (rúbrica)
         doc.fontSize(14).text('Promedio por Criterio', { underline: true });
         doc.moveDown(0.5);
         generarTablaPromediosPorCriterioPDF(doc, inst);
+        // G. Tabla de cumplimiento por competencia
+        generarTablaCompetenciasInstanciaPDF(doc, inst);
+        // H. Análisis por competencia
+        generarAnalisisCompetenciasPDF(doc, inst);
+        // I. Recomendaciones por competencia
+        generarRecomendacionesCompetenciasPDF(doc, inst);
       });
 
 
@@ -896,18 +904,26 @@ exports.generarDOCXCompleto = async contenido => {
       instanciasParagraphs.push(
         new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun(titulo)] })
       );
+      // B. Desglose por indicador
       instanciasParagraphs.push(...generarBloqueDesgloseIndicadoresDOCX(inst));
-      instanciasParagraphs.push(generarTablaCompetenciasInstanciaDOCX(inst));
-      instanciasParagraphs.push(...generarAnalisisCompetenciasDOCX(inst));
-      instanciasParagraphs.push(...generarRecomendacionesCompetenciasDOCX(inst));
+      // C. Gráfico por instancia
       const graf = generarGraficoDesempenoDOCX(contenido.graficos && contenido.graficos[num]);
       if (graf) instanciasParagraphs.push(graf);
+      // D. Conclusiones de instancia
       instanciasParagraphs.push(...generarConclusionDOCX(inst));
+      // E. Recomendaciones generales de instancia
       instanciasParagraphs.push(...generarRecomendacionesDOCX(inst));
+      // F. Tabla de desempeño por criterio (rúbrica)
       instanciasParagraphs.push(
         new Paragraph({ heading: HeadingLevel.HEADING_3, children: [new TextRun('Promedio por Criterio')] })
       );
       instanciasParagraphs.push(generarTablaPromediosPorCriterioDOCX(inst));
+      // G. Tabla de cumplimiento por competencia
+      instanciasParagraphs.push(generarTablaCompetenciasInstanciaDOCX(inst));
+      // H. Análisis por competencia
+      instanciasParagraphs.push(...generarAnalisisCompetenciasDOCX(inst));
+      // I. Recomendaciones por competencia
+      instanciasParagraphs.push(...generarRecomendacionesCompetenciasDOCX(inst));
     });
 
   const grafParags = Object.entries(contenido.graficos || {})
