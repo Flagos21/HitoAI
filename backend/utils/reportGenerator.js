@@ -23,7 +23,9 @@ let Document,
   BorderStyle,
   Header,
   Footer,
-  ShadingType;
+  ShadingType,
+  Chart,
+  ChartType;
 try {
   ({
     Document,
@@ -599,15 +601,32 @@ function generarBloqueDesgloseIndicadoresDOCX(instancia) {
   return parts;
 }
 
-function generarGraficoDesempenoDOCX(path) {
-  if (path && fs.existsSync(path)) {
-    return new Paragraph({
-      children: [
-        new ImageRun({ data: fs.readFileSync(path), transformation: { width: 500, height: 250 } }),
-      ],
-    });
-  }
-  return null;
+function buildBarChart(labels, values) {
+  if (!Chart) return null;
+  return new Chart({
+    type: ChartType.BAR,
+    width: 500,
+    height: 250,
+    legend: { position: 'none' },
+    axes: {
+      category: { title: 'Indicadores' },
+      value: { min: 0, max: 100, title: '% de Alumnos' },
+    },
+    series: [
+      {
+        name: 'Alumnos sobre promedio (%)',
+        labels,
+        values,
+        color: '4472C4',
+      },
+    ],
+  });
+}
+
+function generarGraficoDesempenoDOCX(labels, values) {
+  const chart = buildBarChart(labels, values);
+  if (!chart) return null;
+  return new Paragraph({ children: [chart] });
 }
 
 function generarTablaCriteriosPorIndicadorDOCX(instancia) {
@@ -913,7 +932,10 @@ exports.generarDOCXCompleto = async contenido => {
       // B. Desglose por indicador
       instanciasParagraphs.push(...generarBloqueDesgloseIndicadoresDOCX(inst));
       // C. Gráfico por instancia
-      const graf = generarGraficoDesempenoDOCX(contenido.graficos && contenido.graficos[num]);
+      const graf = generarGraficoDesempenoDOCX(
+        inst.criterios.map(c => c.indicador),
+        inst.criterios.map(c => c.porcentaje)
+      );
       if (graf) instanciasParagraphs.push(graf);
       // D. Conclusiones de instancia
       instanciasParagraphs.push(...generarConclusionDOCX(inst));
@@ -932,18 +954,21 @@ exports.generarDOCXCompleto = async contenido => {
       instanciasParagraphs.push(...generarRecomendacionesCompetenciasDOCX(inst));
     });
 
-  const grafParags = Object.entries(contenido.graficos || {})
-    .filter(([k, p]) => isNaN(Number(k)) && p && fs.existsSync(p))
-    .map(([_, p]) =>
-      new Paragraph({
-        children: [
-          new ImageRun({
-            data: fs.readFileSync(p),
-            transformation: { width: 500, height: 250 },
-          }),
-        ],
-      })
+  const grafParags = [];
+  if (Array.isArray(contenido.datos) && contenido.datos.length) {
+    const g = generarGraficoDesempenoDOCX(
+      contenido.datos.map(d => d.indicador),
+      contenido.datos.map(d => d.porcentaje)
     );
+    if (g) grafParags.push(g);
+  }
+  if (Array.isArray(contenido.competencias) && contenido.competencias.length) {
+    const g = generarGraficoDesempenoDOCX(
+      contenido.competencias.map(c => c.ID_Competencia),
+      contenido.competencias.map(c => c.cumplimiento)
+    );
+    if (g) grafParags.push(g);
+  }
 
   const header = new Header({
     children: [
