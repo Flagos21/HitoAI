@@ -21,7 +21,9 @@ let Document,
   AlignmentType,
   WidthType,
   BorderStyle,
-  DocumentProperties;
+  Header,
+  Footer,
+  ShadingType;
 try {
   ({
     Document,
@@ -36,7 +38,9 @@ try {
     AlignmentType,
     WidthType,
     BorderStyle,
-    DocumentProperties,
+    Header,
+    Footer,
+    ShadingType,
   } = require('docx'));
 } catch (err) {
   console.warn(
@@ -941,17 +945,55 @@ exports.generarDOCXCompleto = async contenido => {
       })
     );
 
-  const props = new DocumentProperties();
-  props.title = 'Universidad Adventista de Chile';
-  props.creator = 'ingenieria civil informática';
-  props.lastModifiedBy = 'Fabian Pavez';
-  props.created = new Date('2024-07-09T14:26:00Z');
-  props.modified = new Date('2025-06-10T22:29:00Z');
+  const header = new Header({
+    children: [
+      new Paragraph({
+        shading: { type: ShadingType.CLEAR, color: 'auto', fill: '4472C4' },
+        alignment: AlignmentType.CENTER,
+        children: [
+          new TextRun({
+            text: 'UNIVERSIDAD ADVENTISTA DE CHILE',
+            color: 'FFFFFF',
+            bold: true,
+          }),
+        ],
+      }),
+    ],
+  });
+
+  const footer = new Footer({
+    children: [
+      new Paragraph({
+        shading: { type: ShadingType.CLEAR, color: 'auto', fill: '4472C4' },
+        alignment: AlignmentType.JUSTIFIED,
+        children: [
+          new TextRun({
+            text: 'Universidad Adventista de Chile',
+            color: 'FFFFFF',
+            size: 18,
+          }),
+        ],
+      }),
+      new Paragraph({
+        shading: { type: ShadingType.CLEAR, color: 'auto', fill: '4472C4' },
+        alignment: AlignmentType.RIGHT,
+        children: [
+          new TextRun({
+            text: 'ingenieria civil informática',
+            color: 'FFFFFF',
+            size: 18,
+          }),
+        ],
+      }),
+    ],
+  });
 
   const doc = new Document({
     properties: props,
     sections: [
       {
+        headers: { default: header },
+        footers: { default: footer },
         children: [
           new Paragraph({
             heading: HeadingLevel.HEADING_1,
