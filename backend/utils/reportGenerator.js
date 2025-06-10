@@ -327,9 +327,9 @@ function buildDistribucionTableDOCX(indicadores) {
 function drawPromedioTablePDF(doc, indicadores) {
   const levelMap = {};
   indicadores.forEach(ind => {
-    (ind.promedios || []).forEach(p => {
-      if (!levelMap[p.nombre] || p.rMax > levelMap[p.nombre]) {
-        levelMap[p.nombre] = p.rMax;
+    (ind.niveles || []).forEach(n => {
+      if (!levelMap[n.nombre] || n.rMax > levelMap[n.nombre]) {
+        levelMap[n.nombre] = n.rMax;
       }
     });
   });
@@ -338,37 +338,57 @@ function drawPromedioTablePDF(doc, indicadores) {
     .map(([n]) => n);
 
   const startX = doc.x;
-  const widths = [180, ...niveles.map(() => 60)];
-  const headers = ['Criterio', ...niveles.map(n => `${n} (%)`)];
+  const widths = [180, ...niveles.map(() => 50), ...niveles.map(() => 60)];
+  const headers = [
+    'Indicador',
+    ...niveles,
+    ...niveles.map(n => `${n} (%)`),
+  ];
 
+  const rowHeight = 20;
+  let y = doc.y;
   doc.font('Helvetica-Bold');
   headers.forEach((h, i) => {
     const x = startX + widths.slice(0, i).reduce((a, b) => a + b, 0);
-    doc.text(h, x, doc.y, { width: widths[i], align: i === 0 ? 'left' : 'center' });
+    doc.rect(x, y, widths[i], rowHeight).stroke();
+    doc.text(h, x, y + 5, { width: widths[i], align: 'center' });
   });
-  doc.moveDown();
-
+  y += rowHeight;
   doc.font('Helvetica');
+
   indicadores.forEach(ind => {
     let x = startX;
-    doc.text(ind.indicador, x, doc.y, { width: widths[0] });
+    doc.rect(x, y, widths[0], rowHeight).stroke();
+    doc.text(ind.indicador, x, y + 5, { width: widths[0], align: 'center' });
     x += widths[0];
     niveles.forEach((n, idx) => {
       const p = (ind.promedios || []).find(l => l.nombre === n);
-      const val = p ? String(p.porcentaje) : '';
-      doc.text(val, x, doc.y, { width: widths[idx + 1], align: 'center' });
+      const val = p ? String(p.promedio) : '-';
+      doc.rect(x, y, widths[idx + 1], rowHeight).stroke();
+      doc.text(val, x, y + 5, { width: widths[idx + 1], align: 'center' });
       x += widths[idx + 1];
     });
-    doc.moveDown();
+    niveles.forEach((n, idx) => {
+      const q = (ind.niveles || []).find(l => l.nombre === n);
+      const pct = q ? `${q.porcentaje}%` : '-';
+      doc.rect(x, y, widths[niveles.length + idx + 1], rowHeight).stroke();
+      doc.text(pct, x, y + 5, {
+        width: widths[niveles.length + idx + 1],
+        align: 'center',
+      });
+      x += widths[niveles.length + idx + 1];
+    });
+    y += rowHeight;
   });
+  doc.moveDown();
 }
 
 function buildPromedioTableDOCX(indicadores) {
   const levelMap = {};
   indicadores.forEach(ind => {
-    (ind.promedios || []).forEach(p => {
-      if (!levelMap[p.nombre] || p.rMax > levelMap[p.nombre]) {
-        levelMap[p.nombre] = p.rMax;
+    (ind.niveles || []).forEach(n => {
+      if (!levelMap[n.nombre] || n.rMax > levelMap[n.nombre]) {
+        levelMap[n.nombre] = n.rMax;
       }
     });
   });
@@ -376,29 +396,47 @@ function buildPromedioTableDOCX(indicadores) {
     .sort((a, b) => b[1] - a[1])
     .map(([n]) => n);
 
-  const header = new TableRow({
-    children: ['Criterio', ...niveles.map(n => `${n} (%)`)].map(t =>
-      new TableCell({
-        children: [
-          new Paragraph({
-            alignment: AlignmentType.CENTER,
-            children: [new TextRun({ text: t, bold: true })],
-          }),
-        ],
-      })
-    ),
-  });
+  const headerCells = [
+    'Indicador',
+    ...niveles,
+    ...niveles.map(n => `${n} (%)`),
+  ].map(t =>
+    new TableCell({
+      children: [
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          children: [new TextRun({ text: t, bold: true })],
+        }),
+      ],
+    })
+  );
 
   const rows = indicadores.map(ind =>
     new TableRow({
       children: [
-        new TableCell({ children: [new Paragraph({ children: [new TextRun(ind.indicador)] })] }),
+        new TableCell({
+          children: [
+            new Paragraph({
+              alignment: AlignmentType.CENTER,
+              children: [new TextRun(ind.indicador)],
+            }),
+          ],
+        }),
         ...niveles.map(n => {
           const p = (ind.promedios || []).find(l => l.nombre === n);
-          const val = p ? String(p.porcentaje) : '';
+          const val = p ? String(p.promedio) : '-';
           return new TableCell({
             children: [
               new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun(val)] }),
+            ],
+          });
+        }),
+        ...niveles.map(n => {
+          const q = (ind.niveles || []).find(l => l.nombre === n);
+          const pct = q ? `${q.porcentaje}%` : '-';
+          return new TableCell({
+            children: [
+              new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun(pct)] }),
             ],
           });
         }),
@@ -407,7 +445,7 @@ function buildPromedioTableDOCX(indicadores) {
   );
 
   return new Table({
-    rows: [header, ...rows],
+    rows: [new TableRow({ children: headerCells }), ...rows],
     width: { size: 100, type: WidthType.PERCENTAGE },
     borders: {
       top: { style: BorderStyle.SINGLE, size: 1, color: '000000' },
