@@ -20,7 +20,8 @@ let Document,
   ImageRun,
   AlignmentType,
   WidthType,
-  BorderStyle;
+  BorderStyle,
+  DocumentProperties;
 try {
   ({
     Document,
@@ -35,6 +36,7 @@ try {
     AlignmentType,
     WidthType,
     BorderStyle,
+    DocumentProperties,
   } = require('docx'));
 } catch (err) {
   console.warn(
@@ -939,7 +941,15 @@ exports.generarDOCXCompleto = async contenido => {
       })
     );
 
+  const props = new DocumentProperties();
+  props.title = 'Universidad Adventista de Chile';
+  props.creator = 'ingenieria civil informática';
+  props.lastModifiedBy = 'Fabian Pavez';
+  props.created = new Date('2024-07-09T14:26:00Z');
+  props.modified = new Date('2025-06-10T22:29:00Z');
+
   const doc = new Document({
+    properties: props,
     sections: [
       {
         children: [
