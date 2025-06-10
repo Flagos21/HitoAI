@@ -652,20 +652,7 @@ exports.generarPDFCompleto = contenido => {
         generarGraficoDesempenoPDF(doc, contenido.graficos && contenido.graficos[num]);
         generarConclusionPDF(doc, inst);
         generarRecomendacionesPDF(doc, inst);
-      });
-
-    doc.moveDown();
-    doc.fontSize(14).text('Promedio por Criterio', { underline: true });
-    doc.moveDown(0.5);
-    Object.keys(contenido.instancias)
-      .sort((a, b) => a - b)
-      .forEach(num => {
-        const inst = contenido.instancias[num];
-        const idx = Number(num) - 1;
-        const titulo = ordinales[idx]
-          ? `${ordinales[idx]} Instancia Evaluativa`
-          : `Instancia Evaluativa ${num}`;
-        doc.fontSize(14).text(titulo, { underline: true });
+        doc.fontSize(14).text('Promedio por Criterio', { underline: true });
         doc.moveDown(0.5);
         generarTablaPromediosPorCriterioPDF(doc, inst);
       });
@@ -771,23 +758,10 @@ exports.generarDOCXCompleto = async contenido => {
       if (graf) instanciasParagraphs.push(graf);
       instanciasParagraphs.push(...generarConclusionDOCX(inst));
       instanciasParagraphs.push(...generarRecomendacionesDOCX(inst));
-    });
-
-  const promedioParagraphs = [
-    new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun('Promedio por Criterio')] })
-  ];
-  Object.keys(contenido.instancias)
-    .sort((a, b) => a - b)
-    .forEach(num => {
-      const inst = contenido.instancias[num];
-      const idx = Number(num) - 1;
-      const titulo = ordinales[idx]
-        ? `${ordinales[idx]} Instancia Evaluativa`
-        : `Instancia Evaluativa ${num}`;
-      promedioParagraphs.push(
-        new Paragraph({ heading: HeadingLevel.HEADING_3, children: [new TextRun(titulo)] })
+      instanciasParagraphs.push(
+        new Paragraph({ heading: HeadingLevel.HEADING_3, children: [new TextRun('Promedio por Criterio')] })
       );
-      promedioParagraphs.push(generarTablaPromediosPorCriterioDOCX(inst));
+      instanciasParagraphs.push(generarTablaPromediosPorCriterioDOCX(inst));
     });
 
   const grafParags = Object.entries(contenido.graficos || {})
@@ -830,7 +804,6 @@ exports.generarDOCXCompleto = async contenido => {
         }),
         generarTablaResumenIndicadoresDOCX(contenido.resumenIndicadores),
         ...instanciasParagraphs,
-        ...promedioParagraphs,
           new Paragraph({
             heading: HeadingLevel.HEADING_2,
             children: [new TextRun('Cumplimiento por Competencia')],
