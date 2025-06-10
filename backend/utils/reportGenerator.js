@@ -640,6 +640,7 @@ exports.generarPDFCompleto = contenido => {
         doc.fontSize(14).text(titulo, { underline: true });
         doc.moveDown(0.5);
         generarBloqueDesgloseIndicadoresPDF(doc, inst);
+        generarTablaPromediosPorCriterioPDF(doc, inst);
         generarGraficoDesempenoPDF(doc, contenido.graficos && contenido.graficos[num]);
         generarConclusionPDF(doc, inst);
         generarRecomendacionesPDF(doc, inst);
@@ -757,6 +758,7 @@ exports.generarDOCXCompleto = async contenido => {
         new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun(titulo)] })
       );
       instanciasParagraphs.push(...generarBloqueDesgloseIndicadoresDOCX(inst));
+      instanciasParagraphs.push(generarTablaPromediosPorCriterioDOCX(inst));
       const graf = generarGraficoDesempenoDOCX(contenido.graficos && contenido.graficos[num]);
       if (graf) instanciasParagraphs.push(graf);
       instanciasParagraphs.push(...generarConclusionDOCX(inst));
