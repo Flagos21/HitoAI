@@ -20,7 +20,10 @@ let Document,
   ImageRun,
   AlignmentType,
   WidthType,
-  BorderStyle;
+  BorderStyle,
+  Header,
+  Footer,
+  ShadingType;
 try {
   ({
     Document,
@@ -35,6 +38,9 @@ try {
     AlignmentType,
     WidthType,
     BorderStyle,
+    Header,
+    Footer,
+    ShadingType,
   } = require('docx'));
 } catch (err) {
   console.warn(
@@ -939,9 +945,54 @@ exports.generarDOCXCompleto = async contenido => {
       })
     );
 
+  const header = new Header({
+    children: [
+      new Paragraph({
+        shading: { type: ShadingType.CLEAR, color: 'auto', fill: '4472C4' },
+        alignment: AlignmentType.CENTER,
+        children: [
+          new TextRun({
+            text: 'UNIVERSIDAD ADVENTISTA DE CHILE',
+            color: 'FFFFFF',
+            bold: true,
+          }),
+        ],
+      }),
+    ],
+  });
+
+  const footer = new Footer({
+    children: [
+      new Paragraph({
+        shading: { type: ShadingType.CLEAR, color: 'auto', fill: '4472C4' },
+        alignment: AlignmentType.JUSTIFIED,
+        children: [
+          new TextRun({
+            text: 'Universidad Adventista de Chile',
+            color: 'FFFFFF',
+            size: 18,
+          }),
+        ],
+      }),
+      new Paragraph({
+        shading: { type: ShadingType.CLEAR, color: 'auto', fill: '4472C4' },
+        alignment: AlignmentType.RIGHT,
+        children: [
+          new TextRun({
+            text: 'ingenieria civil informática',
+            color: 'FFFFFF',
+            size: 18,
+          }),
+        ],
+      }),
+    ],
+  });
+
   const doc = new Document({
     sections: [
       {
+        headers: { default: header },
+        footers: { default: footer },
         children: [
           new Paragraph({
             heading: HeadingLevel.HEADING_1,
