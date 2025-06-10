@@ -1,20 +1,12 @@
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const fs = require('fs');
 const path = require('path');
-let ChartDataLabels;
-try {
-  ChartDataLabels = require('chartjs-plugin-datalabels');
-} catch (err) {
-  console.warn('chartjs-plugin-datalabels not installed, skipping');
-  ChartDataLabels = null;
-}
+const ChartDataLabels = require('chartjs-plugin-datalabels');
 
 const width = 900;
 const height = 500;
 const chartCallback = ChartJS => {
-  if (ChartDataLabels) {
-    ChartJS.register(ChartDataLabels);
-  }
+  ChartJS.register(ChartDataLabels);
 };
 const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height, chartCallback });
 
