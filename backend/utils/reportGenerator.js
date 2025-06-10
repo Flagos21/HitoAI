@@ -240,6 +240,36 @@ function generarRecomendacionesPDF(doc, instancia) {
   }
 }
 
+function generarTablaCompetenciasInstanciaPDF(doc, instancia) {
+  drawCompetenciaTablePDF(doc, instancia.competenciasResumen || []);
+  doc.moveDown();
+}
+
+function generarAnalisisCompetenciasPDF(doc, instancia) {
+  (instancia.competenciasResumen || []).forEach((c, idx) => {
+    doc.font('Helvetica-Bold').text(c.competencia);
+    doc.font('Helvetica');
+    doc.text(`Puntaje Ideal: ${c.puntajeIdeal}`);
+    doc.text(`Promedio: ${c.promedio}`);
+    doc.text(`% Cumplimiento: ${c.cumplimiento}%`);
+    if (instancia.competenciasAnalisis && instancia.competenciasAnalisis[idx]) {
+      doc.text(instancia.competenciasAnalisis[idx], { align: 'justify' });
+    }
+    doc.moveDown();
+  });
+}
+
+function generarRecomendacionesCompetenciasPDF(doc, instancia) {
+  if (Array.isArray(instancia.recomendacionesCompetencias) && instancia.recomendacionesCompetencias.length) {
+    doc.font('Helvetica-Bold').text('Recomendaciones pedagógicas por competencia');
+    doc.font('Helvetica');
+    instancia.competenciasResumen.forEach((c, idx) => {
+      doc.text(`\u2022 ${c.competencia}: ${instancia.recomendacionesCompetencias[idx]}`);
+    });
+    doc.moveDown();
+  }
+}
+
 function buildDistribucionTableDOCX(indicadores) {
   const levelMap = {};
   indicadores.forEach(i => {
@@ -383,6 +413,45 @@ function drawPromedioTablePDF(doc, indicadores) {
   doc.moveDown();
 }
 
+function drawCompetenciaTablePDF(doc, resumen) {
+  const startX = doc.x;
+  const widths = [140, 80, 80, 80];
+  const headers = ['Competencia', 'Ideal', 'Promedio', '% Cumpl.'];
+  doc.font('Helvetica-Bold');
+  headers.forEach((h, i) => {
+    const x = startX + widths.slice(0, i).reduce((a, b) => a + b, 0);
+    doc.text(h, x, doc.y, { width: widths[i], align: 'center' });
+  });
+  doc.moveDown();
+  doc.font('Helvetica');
+  let totalIdeal = 0;
+  let totalProm = 0;
+  resumen.forEach(r => {
+    let x = startX;
+    doc.text(r.competencia, x, doc.y, { width: widths[0], align: 'center' });
+    x += widths[0];
+    doc.text(String(r.puntajeIdeal), x, doc.y, { width: widths[1], align: 'center' });
+    x += widths[1];
+    doc.text(String(r.promedio), x, doc.y, { width: widths[2], align: 'center' });
+    x += widths[2];
+    doc.text(`${r.cumplimiento}%`, x, doc.y, { width: widths[3], align: 'center' });
+    doc.moveDown();
+    totalIdeal += r.puntajeIdeal;
+    totalProm += r.promedio;
+  });
+  const totalCumpl = totalIdeal ? Math.round((totalProm / totalIdeal) * 100) : 0;
+  doc.font('Helvetica-Bold');
+  let x = startX;
+  doc.text('Total', x, doc.y, { width: widths[0], align: 'center' });
+  x += widths[0];
+  doc.text(String(totalIdeal), x, doc.y, { width: widths[1], align: 'center' });
+  x += widths[1];
+  doc.text(String(Math.round(totalProm * 10) / 10), x, doc.y, { width: widths[2], align: 'center' });
+  x += widths[2];
+  doc.text(`${totalCumpl}%`, x, doc.y, { width: widths[3], align: 'center' });
+  doc.moveDown();
+}
+
 function buildPromedioTableDOCX(indicadores) {
   const levelMap = {};
   indicadores.forEach(ind => {
@@ -458,6 +527,42 @@ function buildPromedioTableDOCX(indicadores) {
   });
 }
 
+function buildCompetenciaTableDOCX(resumen) {
+  const header = new TableRow({
+    children: ['Competencia', 'Ideal', 'Promedio', '% Cumpl.'].map(t =>
+      new TableCell({
+        children: [new Paragraph({ children: [new TextRun({ text: t, bold: true })] })],
+      })
+    ),
+  });
+  let totalIdeal = 0;
+  let totalProm = 0;
+  const rows = resumen.map(r => {
+    totalIdeal += r.puntajeIdeal;
+    totalProm += r.promedio;
+    return new TableRow({
+      children: [
+        r.competencia,
+        String(r.puntajeIdeal),
+        String(r.promedio),
+        `${r.cumplimiento}%`,
+      ].map(t => new TableCell({ children: [new Paragraph({ children: [new TextRun(String(t))] })] })),
+    });
+  });
+  const totalCumpl = totalIdeal ? Math.round((totalProm / totalIdeal) * 100) : 0;
+  rows.push(
+    new TableRow({
+      children: [
+        'Total',
+        String(totalIdeal),
+        String(Math.round(totalProm * 10) / 10),
+        `${totalCumpl}%`,
+      ].map(t => new TableCell({ children: [new Paragraph({ children: [new TextRun(String(t))], bold: true })] })),
+    })
+  );
+  return new Table({ rows: [header, ...rows] });
+}
+
 function generarTablaResumenIndicadoresDOCX(criterios) {
   return buildCriteriaTableDOCX(criterios);
 }
@@ -523,6 +628,36 @@ function generarRecomendacionesDOCX(instancia) {
     new Paragraph({ heading: HeadingLevel.HEADING_3, children: [new TextRun('Recomendaciones')] }),
     ...instancia.recomendaciones.map(r =>
       new Paragraph({ bullet: { level: 0 }, children: [new TextRun(r)] })
+    ),
+  ];
+}
+
+function generarTablaCompetenciasInstanciaDOCX(instancia) {
+  return buildCompetenciaTableDOCX(instancia.competenciasResumen || []);
+}
+
+function generarAnalisisCompetenciasDOCX(instancia) {
+  const parts = [];
+  (instancia.competenciasResumen || []).forEach((c, idx) => {
+    parts.push(new Paragraph({ heading: HeadingLevel.HEADING_4, children: [new TextRun(c.competencia)] }));
+    parts.push(new Paragraph({ children: [new TextRun(`Puntaje Ideal: ${c.puntajeIdeal}`)] }));
+    parts.push(new Paragraph({ children: [new TextRun(`Promedio: ${c.promedio}`)] }));
+    parts.push(new Paragraph({ children: [new TextRun(`% Cumplimiento: ${c.cumplimiento}%`)] }));
+    if (instancia.competenciasAnalisis && instancia.competenciasAnalisis[idx]) {
+      parts.push(new Paragraph({ alignment: AlignmentType.JUSTIFIED, children: [new TextRun(instancia.competenciasAnalisis[idx])] }));
+    }
+  });
+  return parts;
+}
+
+function generarRecomendacionesCompetenciasDOCX(instancia) {
+  if (!Array.isArray(instancia.recomendacionesCompetencias) || !instancia.recomendacionesCompetencias.length) {
+    return [];
+  }
+  return [
+    new Paragraph({ heading: HeadingLevel.HEADING_4, children: [new TextRun('Recomendaciones pedagógicas por competencia')] }),
+    ...instancia.competenciasResumen.map((c, idx) =>
+      new Paragraph({ bullet: { level: 0 }, children: [new TextRun(`${c.competencia}: ${instancia.recomendacionesCompetencias[idx]}`)] })
     ),
   ];
 }
@@ -649,6 +784,9 @@ exports.generarPDFCompleto = contenido => {
         doc.fontSize(14).text(titulo, { underline: true });
         doc.moveDown(0.5);
         generarBloqueDesgloseIndicadoresPDF(doc, inst);
+        generarTablaCompetenciasInstanciaPDF(doc, inst);
+        generarAnalisisCompetenciasPDF(doc, inst);
+        generarRecomendacionesCompetenciasPDF(doc, inst);
         generarGraficoDesempenoPDF(doc, contenido.graficos && contenido.graficos[num]);
         generarConclusionPDF(doc, inst);
         generarRecomendacionesPDF(doc, inst);
@@ -686,6 +824,11 @@ exports.generarPDFCompleto = contenido => {
     doc.moveDown();
     doc.font('Helvetica-Bold').text('Recomendaciones Generales');
     doc.font('Helvetica').text(contenido.recomendaciones, { align: 'justify' });
+    if (contenido.recomendacionesTemasFinal) {
+      doc.moveDown();
+      doc.font('Helvetica-Bold').text('Recomendaciones por tema');
+      doc.font('Helvetica').text(contenido.recomendacionesTemasFinal, { align: 'justify' });
+    }
 
     doc.end();
   });
@@ -754,6 +897,9 @@ exports.generarDOCXCompleto = async contenido => {
         new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun(titulo)] })
       );
       instanciasParagraphs.push(...generarBloqueDesgloseIndicadoresDOCX(inst));
+      instanciasParagraphs.push(generarTablaCompetenciasInstanciaDOCX(inst));
+      instanciasParagraphs.push(...generarAnalisisCompetenciasDOCX(inst));
+      instanciasParagraphs.push(...generarRecomendacionesCompetenciasDOCX(inst));
       const graf = generarGraficoDesempenoDOCX(contenido.graficos && contenido.graficos[num]);
       if (graf) instanciasParagraphs.push(graf);
       instanciasParagraphs.push(...generarConclusionDOCX(inst));
@@ -816,7 +962,13 @@ exports.generarDOCXCompleto = async contenido => {
           new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun('Conclusiones Generales')] }),
           new Paragraph({ children: [new TextRun(contenido.conclusion)] }),
           new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun('Recomendaciones Generales')] }),
-          new Paragraph({ children: [new TextRun(contenido.recomendaciones)] })
+          new Paragraph({ children: [new TextRun(contenido.recomendaciones)] }),
+          ...(contenido.recomendacionesTemasFinal
+            ? [
+                new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun('Recomendaciones por tema')] }),
+                new Paragraph({ children: [new TextRun(contenido.recomendacionesTemasFinal)] }),
+              ]
+            : [])
         ]
       }
     ]

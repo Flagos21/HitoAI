@@ -98,6 +98,11 @@ exports.recomendacionesCompetencia = (competencia, cumplimiento) => {
   return safe(prompt, `Recomendaciones para ${competencia}`);
 };
 
+exports.analisisCompetencia = ({ competencia, puntajeIdeal, promedio, cumplimiento }) => {
+  const prompt = `Redacta un analisis pedagogico de la competencia ${competencia}. Puntaje ideal ${puntajeIdeal}, promedio ${promedio} y cumplimiento ${cumplimiento} por ciento.`;
+  return safe(prompt, `Analisis de la competencia ${competencia}`);
+};
+
 exports.recomendacionesGenerales = temas => {
   const prompt = `Entrega recomendaciones generales para reforzar los siguientes temas: ${temas}.`;
   return safe(prompt, `Recomendaciones para ${temas}`);
