@@ -22,6 +22,11 @@ export class EstudianteService {
     return this.http.get<Estudiante[]>(`${this.apiUrl}/no-inscritos`);
   }
 
+  // Obtener estudiantes no inscritos en una asignatura específica
+  obtenerDisponibles(asignaturaId: string): Observable<Estudiante[]> {
+    return this.http.get<Estudiante[]>(`${this.apiUrl}/disponibles/${asignaturaId}`);
+  }
+
   // Crear estudiante
   crear(estudiante: Estudiante): Observable<any> {
     return this.http.post(`${this.apiUrl}/crear`, estudiante);

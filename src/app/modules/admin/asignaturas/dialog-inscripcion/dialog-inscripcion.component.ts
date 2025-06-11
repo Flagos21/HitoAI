@@ -30,11 +30,11 @@ export class DialogInscripcionComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.cargarEstudiantesNoInscritos();
+    this.cargarEstudiantesDisponibles();
   }
 
-  cargarEstudiantesNoInscritos() {
-    this.estudianteService.obtenerNoInscritos().subscribe(data => {
+  cargarEstudiantesDisponibles() {
+    this.estudianteService.obtenerDisponibles(this.asignatura.ID_Asignatura).subscribe(data => {
       this.estudiantes = data.map(e => ({ ...e, seleccionado: false }));
     });
   }
