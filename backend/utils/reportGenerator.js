@@ -630,6 +630,20 @@ function generarGraficoDesempenoDOCX(labels, values) {
   return new Paragraph({ children: [chart] });
 }
 
+function generarGraficoDistribucionNivelesDOCX(instancia) {
+  const nivelMap = {};
+  instancia.criterios.forEach(c => {
+    (c.niveles || []).forEach(n => {
+      if (!nivelMap[n.nombre]) nivelMap[n.nombre] = 0;
+      nivelMap[n.nombre] += n.porcentaje || 0;
+    });
+  });
+  const labels = Object.keys(nivelMap);
+  if (!labels.length) return null;
+  const values = labels.map(l => nivelMap[l] / instancia.criterios.length);
+  return generarGraficoDesempenoDOCX(labels, values);
+}
+
 function generarTablaCriteriosPorIndicadorDOCX(instancia) {
   return buildDistribucionTableDOCX(instancia.criterios);
 }
@@ -944,20 +958,13 @@ exports.generarDOCXCompleto = async contenido => {
         inst.criterios.map(c => c.porcentaje)
       );
       if (graf) instanciasParagraphs.push(graf);
-      // D. Conclusiones de instancia
-      instanciasParagraphs.push(...generarConclusionDOCX(inst));
-      // E. Recomendaciones generales de instancia
-      instanciasParagraphs.push(...generarRecomendacionesDOCX(inst));
-      // F. Tabla de desempeño por criterio (rúbrica)
-      instanciasParagraphs.push(
-        new Paragraph({ style: 'ListParagraph', children: [new TextRun('Promedio por Criterio')] })
-      );
-      instanciasParagraphs.push(generarTablaPromediosPorCriterioDOCX(inst));
-      // G. Tabla de cumplimiento por competencia
+      // D. Tabla de distribución de niveles por criterio
+      instanciasParagraphs.push(generarTablaCriteriosPorIndicadorDOCX(inst));
+      const grafNivel = generarGraficoDistribucionNivelesDOCX(inst);
+      if (grafNivel) instanciasParagraphs.push(grafNivel);
+      // E. Análisis, conclusiones y recomendaciones por competencia
       instanciasParagraphs.push(generarTablaCompetenciasInstanciaDOCX(inst));
-      // H. Análisis por competencia
       instanciasParagraphs.push(...generarAnalisisCompetenciasDOCX(inst));
-      // I. Recomendaciones por competencia
       instanciasParagraphs.push(...generarRecomendacionesCompetenciasDOCX(inst));
     });
 
