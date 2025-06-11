@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { EstudianteService } from '../../../../services/estudiante.service';
 import { Estudiante } from '../../../../models';
+import { cleanRut, validarRut } from '../../../../utils/rut';
 
 
 @Component({
@@ -57,6 +58,14 @@ export class DialogFormEstudianteComponent implements OnInit {
       return;
     }
 
+    const rut = cleanRut(this.estudiante.ID_Estudiante);
+    if (!validarRut(rut)) {
+      this.mensajeError = 'RUT inválido';
+      setTimeout(() => this.mensajeError = '', 3000);
+      return;
+    }
+    this.estudiante.ID_Estudiante = rut;
+
     if (!this.accionConfirmada) {
       this.accionConfirmada = 'crear';
       return;
@@ -75,6 +84,14 @@ export class DialogFormEstudianteComponent implements OnInit {
       setTimeout(() => this.mensajeError = '', 3000);
       return;
     }
+
+    const rut = cleanRut(this.estudiante.ID_Estudiante);
+    if (!validarRut(rut)) {
+      this.mensajeError = 'RUT inválido';
+      setTimeout(() => this.mensajeError = '', 3000);
+      return;
+    }
+    this.estudiante.ID_Estudiante = rut;
 
     if (!this.accionConfirmada) {
       this.accionConfirmada = 'actualizar';

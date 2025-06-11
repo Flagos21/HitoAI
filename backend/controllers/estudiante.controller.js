@@ -12,6 +12,11 @@ exports.getNoInscritos = async (req, res) => {
   res.json(data);
 };
 
+exports.getDisponiblesPorAsignatura = async (req, res) => {
+  const data = await EstudianteService.getDisponiblesPorAsignatura(req.params.id);
+  res.json(data);
+};
+
 exports.crear = async (req, res) => {
   await EstudianteService.crear(req.body);
   res.status(201).json({ message: 'Estudiante creado' });
