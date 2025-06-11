@@ -274,13 +274,13 @@ exports.generarInforme = async asignaturaId => {
 
   const barrasPath = await generarGraficoBarras(
     datos.map(d => d.indicador),
-    datos.map(d => d.porcentaje),
+    datos.map(d => Number(d.porcentaje) || 0),
     'barras.png'
   );
 
   const compPath = await generarGraficoLineas(
     competencias.map(c => c.ID_Competencia),
-    competencias.map(c => c.cumplimiento),
+    competencias.map(c => Number(c.cumplimiento) || 0),
     'competencias.png'
   );
 
@@ -288,7 +288,7 @@ exports.generarInforme = async asignaturaId => {
   for (const [num, inst] of Object.entries(instancias)) {
     graficosInstancias[num] = await generarGraficoBarras(
       inst.criterios.map(c => c.indicador),
-      inst.criterios.map(c => c.porcentaje),
+      inst.criterios.map(c => Number(c.porcentaje) || 0),
       `instancia_${num}.png`
     );
   }
