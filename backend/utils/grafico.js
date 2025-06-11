@@ -19,6 +19,7 @@ const chartCallback = ChartJS => {
 const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height, chartCallback });
 
 async function generarGraficoBarras(labels, datos, nombreArchivo = 'grafico.png') {
+  datos = datos.map(d => Number(d) || 0);
   const wrappedLabels = labels.map(l => l.match(/.{1,15}/g)?.join('\n') || l);
 
   const config = {
@@ -92,6 +93,7 @@ async function generarGraficoTorta(labels, datos, nombreArchivo = 'torta.png') {
 }
 
 async function generarGraficoLineas(labels, datos, nombreArchivo = 'lineas.png') {
+  datos = datos.map(d => Number(d) || 0);
   const wrappedLabels = labels.map(l => l.match(/.{1,15}/g)?.join('\n') || l);
   const config = {
     type: 'bar',
