@@ -605,7 +605,7 @@ function generarBloqueDesgloseIndicadoresDOCX(instancia) {
 function buildBarChart(labels, values) {
   if (!Chart) return null;
   return new Chart({
-    type: ChartType.BAR,
+    type: ChartType.COLUMN,
     width: 500,
     height: 250,
     legend: { position: 'none' },
@@ -624,13 +624,23 @@ function buildBarChart(labels, values) {
   });
 }
 
-function generarGraficoDesempenoDOCX(labels, values) {
+function generarGraficoDesempenoDOCX(labels, values, imgPath) {
+  if (imgPath && fs.existsSync(imgPath)) {
+    return new Paragraph({
+      children: [
+        new ImageRun({
+          data: fs.readFileSync(imgPath),
+          transformation: { width: 500, height: 250 },
+        }),
+      ],
+    });
+  }
   const chart = buildBarChart(labels, values);
   if (!chart) return null;
   return new Paragraph({ children: [chart] });
 }
 
-function generarGraficoDistribucionNivelesDOCX(instancia) {
+function generarGraficoDistribucionNivelesDOCX(instancia, imgPath) {
   const nivelMap = {};
   instancia.criterios.forEach(c => {
     (c.niveles || []).forEach(n => {
@@ -641,7 +651,7 @@ function generarGraficoDistribucionNivelesDOCX(instancia) {
   const labels = Object.keys(nivelMap);
   if (!labels.length) return null;
   const values = labels.map(l => nivelMap[l] / instancia.criterios.length);
-  return generarGraficoDesempenoDOCX(labels, values);
+  return generarGraficoDesempenoDOCX(labels, values, imgPath);
 }
 
 function generarTablaCriteriosPorIndicadorDOCX(instancia) {
@@ -955,7 +965,8 @@ exports.generarDOCXCompleto = async contenido => {
       // C. Gráfico por instancia
       const graf = generarGraficoDesempenoDOCX(
         inst.criterios.map(c => c.indicador),
-        inst.criterios.map(c => c.porcentaje)
+        inst.criterios.map(c => c.porcentaje),
+        contenido.graficos && contenido.graficos[num]
       );
       if (graf) instanciasParagraphs.push(graf);
       // D. Tabla de distribución de niveles por criterio
@@ -972,14 +983,16 @@ exports.generarDOCXCompleto = async contenido => {
   if (Array.isArray(contenido.datos) && contenido.datos.length) {
     const g = generarGraficoDesempenoDOCX(
       contenido.datos.map(d => d.indicador),
-      contenido.datos.map(d => d.porcentaje)
+      contenido.datos.map(d => d.porcentaje),
+      contenido.graficos && contenido.graficos.barrasPath
     );
     if (g) grafParags.push(g);
   }
   if (Array.isArray(contenido.competencias) && contenido.competencias.length) {
     const g = generarGraficoDesempenoDOCX(
       contenido.competencias.map(c => c.ID_Competencia),
-      contenido.competencias.map(c => c.cumplimiento)
+      contenido.competencias.map(c => c.cumplimiento),
+      contenido.graficos && contenido.graficos.compPath
     );
     if (g) grafParags.push(g);
   }
