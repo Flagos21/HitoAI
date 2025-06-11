@@ -23,7 +23,6 @@ let Document,
   Header,
   Footer,
   ShadingType,
-  DocumentProperties,
   Chart,
   ChartType;
 try {
@@ -42,7 +41,6 @@ try {
     Header,
     Footer,
     ShadingType,
-    DocumentProperties,
     Chart,
     ChartType,
   } = require('docx'));
@@ -1022,17 +1020,15 @@ exports.generarDOCXCompleto = async contenido => {
     ],
   });
 
-  const props = new DocumentProperties({
-    title: 'Universidad Adventista de Chile',
-    creator: 'ingenieria civil informática',
-    lastModifiedBy: 'Fabian Pavez',
-    lastPrinted: new Date('2024-07-12T16:57:00Z'),
-    created: new Date('2024-07-09T14:26:00Z'),
-    modified: new Date('2025-06-10T22:29:00Z'),
-  });
-
   const doc = new Document({
-    properties: props,
+    properties: {
+      title: 'Universidad Adventista de Chile',
+      creator: 'ingenieria civil informática',
+      lastModifiedBy: 'Fabian Pavez',
+      lastPrinted: new Date('2024-07-12T16:57:00Z'),
+      created: new Date('2024-07-09T14:26:00Z'),
+      modified: new Date('2025-06-10T22:29:00Z'),
+    },
     sections: [
       {
         headers: { default: header },
