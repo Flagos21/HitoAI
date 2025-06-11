@@ -12,7 +12,6 @@ const fs = require('fs');
 let Document,
   Packer,
   Paragraph,
-  HeadingLevel,
   Table,
   TableRow,
   TableCell,
@@ -32,7 +31,6 @@ try {
     Document,
     Packer,
     Paragraph,
-    HeadingLevel,
     Table,
     TableRow,
     TableCell,
@@ -584,7 +582,8 @@ function generarBloqueDesgloseIndicadoresDOCX(instancia) {
   instancia.criterios.forEach((c, idx) => {
     parts.push(
       new Paragraph({
-        heading: HeadingLevel.HEADING_3,
+        style: 'ListParagraph',
+        bullet: { level: 0 },
         children: [new TextRun(c.indicador)],
       })
     );
@@ -644,7 +643,7 @@ function generarTablaPromediosPorCriterioDOCX(instancia) {
 function generarConclusionDOCX(instancia) {
   if (!instancia.conclusion) return [];
   return [
-    new Paragraph({ heading: HeadingLevel.HEADING_3, children: [new TextRun('Conclusiones')] }),
+    new Paragraph({ style: 'ListParagraph', bullet: { level: 0 }, children: [new TextRun('Conclusiones')] }),
     new Paragraph({ children: [new TextRun(instancia.conclusion)] }),
   ];
 }
@@ -654,7 +653,7 @@ function generarRecomendacionesDOCX(instancia) {
     return [];
   }
   return [
-    new Paragraph({ heading: HeadingLevel.HEADING_3, children: [new TextRun('Recomendaciones')] }),
+    new Paragraph({ style: 'ListParagraph', bullet: { level: 0 }, children: [new TextRun('Recomendaciones')] }),
     ...instancia.recomendaciones.map(r =>
       new Paragraph({ bullet: { level: 0 }, children: [new TextRun(r)] })
     ),
@@ -668,7 +667,13 @@ function generarTablaCompetenciasInstanciaDOCX(instancia) {
 function generarAnalisisCompetenciasDOCX(instancia) {
   const parts = [];
   (instancia.competenciasResumen || []).forEach((c, idx) => {
-    parts.push(new Paragraph({ heading: HeadingLevel.HEADING_4, children: [new TextRun(c.competencia)] }));
+    parts.push(
+      new Paragraph({
+        style: 'ListParagraph',
+        bullet: { level: 0 },
+        children: [new TextRun(c.competencia)],
+      })
+    );
     parts.push(new Paragraph({ children: [new TextRun(`Puntaje Ideal: ${c.puntajeIdeal}`)] }));
     parts.push(new Paragraph({ children: [new TextRun(`Promedio: ${c.promedio}`)] }));
     parts.push(new Paragraph({ children: [new TextRun(`% Cumplimiento: ${c.cumplimiento}%`)] }));
@@ -684,7 +689,7 @@ function generarRecomendacionesCompetenciasDOCX(instancia) {
     return [];
   }
   return [
-    new Paragraph({ heading: HeadingLevel.HEADING_4, children: [new TextRun('Recomendaciones pedagógicas por competencia')] }),
+    new Paragraph({ style: 'ListParagraph', bullet: { level: 0 }, children: [new TextRun('Recomendaciones pedagógicas por competencia')] }),
     ...instancia.competenciasResumen.map((c, idx) =>
       new Paragraph({ bullet: { level: 0 }, children: [new TextRun(`${c.competencia}: ${instancia.recomendacionesCompetencias[idx]}`)] })
     ),
@@ -730,17 +735,17 @@ exports.generarDOCX = async contenido => {
       {
         children: [
           new Paragraph({
-            heading: HeadingLevel.HEADING_1,
+            style: 'ListParagraph',
             alignment: AlignmentType.CENTER,
             children: [new TextRun('INFORME DE ASIGNATURA')],
           }),
           new Paragraph({
-            heading: HeadingLevel.HEADING_2,
+            style: 'ListParagraph',
             alignment: AlignmentType.CENTER,
             children: [new TextRun(contenido.datos.Nombre)],
           }),
           new Paragraph({
-            heading: HeadingLevel.HEADING_3,
+            style: 'ListParagraph',
             children: [new TextRun(contenido.introduccion.objetivo.titulo)],
           }),
           new Paragraph({
@@ -749,7 +754,7 @@ exports.generarDOCX = async contenido => {
             children: [new TextRun(contenido.introduccion.objetivo.texto)],
           }),
           new Paragraph({
-            heading: HeadingLevel.HEADING_3,
+            style: 'ListParagraph',
             children: [new TextRun(contenido.introduccion.relevancia.titulo)],
           }),
           new Paragraph({
@@ -931,7 +936,7 @@ exports.generarDOCXCompleto = async contenido => {
         ? `${ordinales[idx]} Instancia Evaluativa`
         : `Instancia Evaluativa ${num}`;
       instanciasParagraphs.push(
-        new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun(titulo)] })
+        new Paragraph({ style: 'ListParagraph', children: [new TextRun(titulo)] })
       );
       // B. Desglose por indicador
       instanciasParagraphs.push(...generarBloqueDesgloseIndicadoresDOCX(inst));
@@ -947,7 +952,7 @@ exports.generarDOCXCompleto = async contenido => {
       instanciasParagraphs.push(...generarRecomendacionesDOCX(inst));
       // F. Tabla de desempeño por criterio (rúbrica)
       instanciasParagraphs.push(
-        new Paragraph({ heading: HeadingLevel.HEADING_3, children: [new TextRun('Promedio por Criterio')] })
+        new Paragraph({ style: 'ListParagraph', children: [new TextRun('Promedio por Criterio')] })
       );
       instanciasParagraphs.push(generarTablaPromediosPorCriterioDOCX(inst));
       // G. Tabla de cumplimiento por competencia
@@ -1034,12 +1039,12 @@ exports.generarDOCXCompleto = async contenido => {
         footers: { default: footer },
         children: [
           new Paragraph({
-            heading: HeadingLevel.HEADING_1,
+            style: 'ListParagraph',
             alignment: AlignmentType.CENTER,
             children: [new TextRun('INFORME DE ASIGNATURA INTEGRADORA DE SABERES I')],
           }),
           new Paragraph({
-            heading: HeadingLevel.HEADING_3,
+            style: 'ListParagraph',
             children: [new TextRun(contenido.introduccion.objetivo.titulo)],
           }),
           new Paragraph({
@@ -1047,9 +1052,9 @@ exports.generarDOCXCompleto = async contenido => {
             children: [new TextRun(contenido.introduccion.objetivo.texto)],
           }),
           new Paragraph({
-            heading: HeadingLevel.HEADING_3,
-          children: [new TextRun(contenido.introduccion.relevancia.titulo)],
-        }),
+            style: 'ListParagraph',
+            children: [new TextRun(contenido.introduccion.relevancia.titulo)],
+          }),
         new Paragraph({
           alignment: AlignmentType.JUSTIFIED,
           children: [new TextRun(contenido.introduccion.relevancia.texto)],
@@ -1057,7 +1062,7 @@ exports.generarDOCXCompleto = async contenido => {
         generarTablaResumenIndicadoresDOCX(contenido.resumenIndicadores),
         ...instanciasParagraphs,
           new Paragraph({
-            heading: HeadingLevel.HEADING_2,
+            style: 'ListParagraph',
             children: [new TextRun('Cumplimiento por Competencia')],
           }),
           compTable,
@@ -1065,13 +1070,13 @@ exports.generarDOCXCompleto = async contenido => {
             new Paragraph({ children: [new TextRun(`Recomendación: ${t}`)] })
           ),
           ...grafParags,
-          new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun('Conclusiones Generales')] }),
+          new Paragraph({ style: 'ListParagraph', children: [new TextRun('Conclusiones Generales')] }),
           new Paragraph({ children: [new TextRun(contenido.conclusion)] }),
-          new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun('Recomendaciones Generales')] }),
+          new Paragraph({ style: 'ListParagraph', children: [new TextRun('Recomendaciones Generales')] }),
           new Paragraph({ children: [new TextRun(contenido.recomendaciones)] }),
           ...(contenido.recomendacionesTemasFinal
             ? [
-                new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun('Recomendaciones por tema')] }),
+                new Paragraph({ style: 'ListParagraph', children: [new TextRun('Recomendaciones por tema')] }),
                 new Paragraph({ children: [new TextRun(contenido.recomendacionesTemasFinal)] }),
               ]
             : [])
