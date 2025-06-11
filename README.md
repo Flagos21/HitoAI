@@ -133,6 +133,10 @@ npm install chartjs-node-canvas@latest
 
 ```
 
+Without these packages the report generator will skip chart creation. If your
+generated PDF or Word files are missing graphs, verify that `pdfkit`, `docx`
+and `chartjs-node-canvas` are installed correctly.
+
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
