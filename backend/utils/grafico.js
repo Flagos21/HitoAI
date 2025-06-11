@@ -19,18 +19,48 @@ const chartCallback = ChartJS => {
 const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height, chartCallback });
 
 async function generarGraficoBarras(labels, datos, nombreArchivo = 'grafico.png') {
-  datos = datos.map(d => Number(d) || 0);
+  const colorMap = {
+    Excelente: 'rgba(75, 192, 192, 0.8)',
+    Aceptable: 'rgba(255, 205, 86, 0.8)',
+    Insuficiente: 'rgba(255, 99, 132, 0.8)',
+  };
+  const defaultColors = [
+    colorMap.Excelente,
+    colorMap.Aceptable,
+    colorMap.Insuficiente,
+    'rgba(0,123,255,0.8)',
+  ];
+
   const wrappedLabels = labels.map(l => l.match(/.{1,15}/g)?.join('\n') || l);
+
+  let datasets = [];
+
+  if (Array.isArray(datos) && typeof datos[0] === 'number') {
+    datasets.push({
+      label: 'Alumnos sobre promedio (%)',
+      data: datos.map(d => Number(d) || 0),
+      backgroundColor: defaultColors[3],
+    });
+  } else if (Array.isArray(datos)) {
+    datasets = datos.map((ds, idx) => {
+      const label = ds.label || `Serie ${idx + 1}`;
+      const data = (ds.data || []).map(d => Number(d) || 0);
+      const bg = ds.backgroundColor || ds.color || colorMap[label] || defaultColors[idx % defaultColors.length];
+      return { label, data, backgroundColor: bg };
+    });
+  } else if (typeof datos === 'object' && datos !== null) {
+    datasets = Object.entries(datos).map(([label, data], idx) => ({
+      label,
+      data: (data || []).map(d => Number(d) || 0),
+      backgroundColor: colorMap[label] || defaultColors[idx % defaultColors.length],
+    }));
+  }
 
   const config = {
     type: 'bar',
     data: {
       labels: wrappedLabels,
-      datasets: [{
-        label: 'Alumnos sobre promedio (%)',
-        data: datos,
-        backgroundColor: 'rgba(0,123,255,0.8)',
-      }],
+      datasets,
     },
     options: {
       indexAxis: 'x',
@@ -46,7 +76,7 @@ async function generarGraficoBarras(labels, datos, nombreArchivo = 'grafico.png'
         },
       },
       plugins: {
-        legend: { display: false },
+        legend: { display: datasets.length > 1 },
         datalabels: {
           color: '#ffffff',
           anchor: 'center',
