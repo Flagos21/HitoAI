@@ -1,4 +1,11 @@
-const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
+let ChartJSNodeCanvas;
+try {
+  ({ ChartJSNodeCanvas } = require('chartjs-node-canvas'));
+} catch (err) {
+  console.warn(
+    'chartjs-node-canvas module not found. Run "npm install" in the backend directory to enable chart generation.'
+  );
+}
 const fs = require('fs');
 const path = require('path');
 let ChartDataLabels;
@@ -16,9 +23,12 @@ const chartCallback = ChartJS => {
     ChartJS.register(ChartDataLabels);
   }
 };
-const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height, chartCallback });
+const chartJSNodeCanvas = ChartJSNodeCanvas
+  ? new ChartJSNodeCanvas({ width, height, chartCallback })
+  : null;
 
 async function generarGraficoBarras(labels, datos, nombreArchivo = 'grafico.png') {
+  if (!chartJSNodeCanvas) return null;
   const colorMap = {
     Excelente: 'rgba(75, 192, 192, 0.8)',
     Aceptable: 'rgba(255, 205, 86, 0.8)',
@@ -98,6 +108,7 @@ async function generarGraficoBarras(labels, datos, nombreArchivo = 'grafico.png'
 }
 
 async function generarGraficoTorta(labels, datos, nombreArchivo = 'torta.png') {
+  if (!chartJSNodeCanvas) return null;
   const config = {
     type: 'pie',
     data: {
@@ -123,6 +134,7 @@ async function generarGraficoTorta(labels, datos, nombreArchivo = 'torta.png') {
 }
 
 async function generarGraficoLineas(labels, datos, nombreArchivo = 'lineas.png') {
+  if (!chartJSNodeCanvas) return null;
   datos = datos.map(d => Number(d) || 0);
   const wrappedLabels = labels.map(l => l.match(/.{1,15}/g)?.join('\n') || l);
   const config = {
