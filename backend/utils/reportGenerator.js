@@ -977,7 +977,7 @@ exports.generarDOCXCompleto = async contenido => {
         alignment: AlignmentType.CENTER,
         children: [
           new TextRun({
-            text: 'UNIVERSIDAD ADVENTISTA DE CHILE',
+            text: 'Universidad Adventista de Chile',
             color: 'FFFFFF',
             bold: true,
           }),
