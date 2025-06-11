@@ -5,12 +5,13 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { EstudianteService } from '../../../../services/estudiante.service';
 import { InscripcionService } from '../../../../services/inscripcion.service';
 import { Asignatura, Estudiante, Inscripcion } from '../../../../models';
+import { RutFormatPipe } from '../../../../pipes/rut-format.pipe';
 
 
 @Component({
   selector: 'app-dialog-inscripcion',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RutFormatPipe],
   templateUrl: './dialog-inscripcion.component.html',
   styleUrls: ['./dialog-inscripcion.component.css']
 })

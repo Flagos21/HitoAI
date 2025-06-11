@@ -5,11 +5,12 @@ import { UsuarioService } from '../../../../services/usuario.service';
 import { Usuario } from '../../../../models';
 import { SidebarComponent } from '../../../../shared/components/sidebar/sidebar.component';
 import { DialogUsuarioComponent } from '../dialog-usuario/dialog-usuario.component';
+import { RutFormatPipe } from '../../../../pipes/rut-format.pipe';
 
 @Component({
   selector: 'app-main-usuarios',
   standalone: true,
-  imports: [CommonModule, NgbModalModule, SidebarComponent],
+  imports: [CommonModule, NgbModalModule, SidebarComponent, RutFormatPipe],
   templateUrl: './main-usuarios.component.html',
   styleUrls: ['./main-usuarios.component.css']
 })

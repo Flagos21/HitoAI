@@ -26,7 +26,7 @@
           [checked]="seleccionados.has(est.ID_Estudiante)"
           (change)="toggleSeleccion(est.ID_Estudiante)"
         />
-        {{ est.Nombre }} {{ est.Apellido }} <span class="text-muted">({{ est.ID_Estudiante }})</span>
+        {{ est.Nombre }} {{ est.Apellido }} <span class="text-muted">({{ est.ID_Estudiante | rutFormat }})</span>
       </div>
       <span *ngIf="bloqueados.has(est.ID_Estudiante)" class="badge bg-secondary">En un grupo</span>
     </li>

@@ -8,12 +8,13 @@ import { InscripcionService } from '../../../../services/inscripcion.service';
 import { UsuarioService } from '../../../../services/usuario.service';
 
 import { Asignatura, Carrera, Usuario, Estudiante } from '../../../../models';
+import { RutFormatPipe } from '../../../../pipes/rut-format.pipe';
 
 
 @Component({
   selector: 'app-dialog-asignatura',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RutFormatPipe],
   templateUrl: './dialog-asignatura.component.html',
   styleUrls: ['./dialog-asignatura.component.css']
 })
