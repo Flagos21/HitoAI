@@ -91,7 +91,7 @@
 
   <!-- Vista solo lectura -->
   <div *ngIf="modo === 'ver'">
-    <p><strong>RUT:</strong> {{ estudiante.ID_Estudiante }}</p>
+    <p><strong>RUT:</strong> {{ estudiante.ID_Estudiante | rutFormat }}</p>
     <p><strong>Nombre:</strong> {{ estudiante.Nombre }}</p>
     <p><strong>Apellido:</strong> {{ estudiante.Apellido }}</p>
     <p><strong>Año de Ingreso:</strong> {{ estudiante.Anio_Ingreso }}</p>

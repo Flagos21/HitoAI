@@ -43,7 +43,11 @@ exports.cargarCSV = async (req, res) => {
   fs.createReadStream(archivo.path)
     .pipe(csv())
     .on('data', (row) => {
-      const rut = row?.ID_Estudiante?.toString().replace(/\./g, '').trim();
+      const rut = row?.ID_Estudiante
+        ?.toString()
+        .replace(/\./g, '')
+        .replace(/-/g, '')
+        .trim();
       const nombre = row?.Nombre?.trim();
       const apellido = row?.Apellido?.trim();
       const anio = parseInt(row?.Anio_Ingreso, 10);

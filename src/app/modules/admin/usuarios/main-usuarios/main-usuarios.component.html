@@ -29,7 +29,7 @@
             </thead>
             <tbody>
               <tr *ngFor="let u of grupo.usuarios">
-                <td>{{ u.ID_Usuario }}</td>
+                <td>{{ u.ID_Usuario | rutFormat }}</td>
                 <td>{{ u.Nombre }}</td>
                 <td class="text-end">
                   <div class="dropdown">

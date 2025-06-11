@@ -5,11 +5,12 @@ import { AplicacionService } from '../../../../../services/aplicacion.service';
 import { InscripcionService } from '../../../../../services/inscripcion.service';
 import { Estudiante } from '../../../../../models';
 import { FormsModule } from '@angular/forms';
+import { RutFormatPipe } from '../../../../../pipes/rut-format.pipe';
 
 @Component({
   selector: 'app-dialog-grupos-evaluacion',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RutFormatPipe],
   templateUrl: './dialog-grupos-evaluacion.component.html'
 })
 export class DialogGruposEvaluacionComponent implements OnInit {

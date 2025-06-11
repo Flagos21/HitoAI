@@ -5,12 +5,13 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { EstudianteService } from '../../../../services/estudiante.service';
 import { Estudiante } from '../../../../models';
 import { cleanRut, validarRut } from '../../../../utils/rut';
+import { RutFormatPipe } from '../../../../pipes/rut-format.pipe';
 
 
 @Component({
   selector: 'app-dialog-form-estudiante',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RutFormatPipe],
   templateUrl: './dialog-form-estudiante.component.html',
   styleUrls: ['./dialog-form-estudiante.component.css']
 })
