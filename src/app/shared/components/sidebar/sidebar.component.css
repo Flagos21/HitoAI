@@ -1,0 +1,35 @@
+.text-navbar {
+  color: #0073E6 !important;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  display: block;
+  text-decoration: none;
+  transition: background-color 0.3s, color 0.3s;
+  border-radius: 4px;
+}
+
+.text-navbar:hover {
+  color: #ffffff !important;
+  background-color: #003366;
+}
+
+.text-navbar:focus {
+  outline: none;
+  background-color: #0051A2;
+  color: #ffffff !important;
+}
+
+.text-navbar.active {
+  background-color: #0062C4;
+  color: #ffffff !important;
+}
+
+.btn-outline-light {
+  color: #ffffff;
+  border-color: #ffffff;
+}
+
+body.dark-mode .text-navbar {
+  color: #ffffff !important;
+}
+

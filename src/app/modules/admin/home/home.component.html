@@ -1,0 +1,15 @@
+<div class="d-flex">
+  <!-- Sidebar fijo -->
+  <div style="position: sticky; top: 0; align-self: flex-start; z-index: 100;">
+    <app-sidebar [rol]="rolUsuario"></app-sidebar>
+  </div>
+
+  <!-- Contenido principal -->
+  <div class="flex-grow-1 p-4" style="background-color: #f4f6fa; min-height: 100vh">
+    <div class="d-flex justify-content-between align-items-start flex-wrap mb-4 gap-2">
+      <h3 class="fw-bold text-nowrap" style="color: #002f5d">
+        <i class="bi bi-person-gear me-2"></i>Panel de Administración
+      </h3>
+    </div>
+  </div>
+</div>

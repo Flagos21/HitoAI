@@ -1,0 +1,41 @@
+<div class="modal-header">
+  <h5 class="modal-title text-primary">
+    <i class="bi bi-person-plus me-2"></i> Crear Grupo de Evaluación
+  </h5>
+  <button type="button" class="btn-close" (click)="cancelar()"></button>
+</div>
+
+<div class="modal-body">
+  <p class="text-muted small mb-3">
+    Selecciona uno o más estudiantes para conformar un nuevo grupo de evaluación.
+  </p>
+
+  <div *ngIf="mensajeError" class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ mensajeError }}
+  </div>
+
+  <div *ngIf="estudiantes.length === 0" class="alert alert-info">No hay estudiantes inscritos.</div>
+
+  <ul class="list-group small">
+    <li *ngFor="let est of estudiantes" class="list-group-item d-flex justify-content-between align-items-center">
+      <div>
+        <input
+          type="checkbox"
+          class="form-check-input me-2"
+          [disabled]="bloqueados.has(est.ID_Estudiante)"
+          [checked]="seleccionados.has(est.ID_Estudiante)"
+          (change)="toggleSeleccion(est.ID_Estudiante)"
+        />
+        {{ est.Nombre }} {{ est.Apellido }} <span class="text-muted">({{ est.ID_Estudiante }})</span>
+      </div>
+      <span *ngIf="bloqueados.has(est.ID_Estudiante)" class="badge bg-secondary">En un grupo</span>
+    </li>
+  </ul>
+</div>
+
+<div class="modal-footer">
+  <button class="btn btn-success" (click)="confirmar()">
+    <i class="bi bi-check-circle me-1"></i> Confirmar
+  </button>
+  <button class="btn btn-secondary" (click)="cancelar()">Cancelar</button>
+</div>
