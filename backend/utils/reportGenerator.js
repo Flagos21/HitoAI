@@ -50,38 +50,23 @@ try {
   );
 }
 
-const ordinales = [
-  'Primera',
-  'Segunda',
-  'Tercera',
-  'Cuarta',
-  'Quinta',
-  'Sexta',
-  'Séptima',
-  'Octava',
-  'Novena',
-  'Décima',
-];
-
 function drawCriteriaTablePDF(doc, criterios) {
   const startX = doc.x;
-  const widths = [150, 40, 40, 50, 70, 70, 80];
-  const headers = [
-    'Criterio',
-    'Max',
-    'Min',
-    'Prom',
-    '%>Prom',
-    'Comp.',
-    'Instancia',
-  ];
+  const widths = [180, 40, 40, 50, 70, 80];
+  const headers = ['Criterio', 'Max', 'Min', 'Prom', '%>Prom', 'Comp.'];
   doc.font('Helvetica-Bold');
   headers.forEach((h, i) => {
     const x = startX + widths.slice(0, i).reduce((a, b) => a + b, 0);
     doc.text(h, x, doc.y, { width: widths[i] });
   });
   doc.moveDown();
+  let current = null;
   criterios.forEach(c => {
+    if (c.instancia !== current) {
+      current = c.instancia;
+      doc.font('Helvetica-Bold').text(`Instancia ${current}`, startX);
+      doc.moveDown(0.2);
+    }
     doc.font('Helvetica');
     let x = startX;
     doc.text(c.indicador, x, doc.y, { width: widths[0] });
@@ -95,37 +80,44 @@ function drawCriteriaTablePDF(doc, criterios) {
     doc.text(`${c.porcentaje}%`, x, doc.y, { width: widths[4] });
     x += widths[4];
     doc.text(c.competencia, x, doc.y, { width: widths[5] });
-    x += widths[5];
-    const nombreInstancia =
-      ordinales[c.instancia - 1] || `Instancia ${c.instancia}`;
-    doc.text(nombreInstancia, x, doc.y, { width: widths[6] });
     doc.moveDown();
   });
 }
 
 function buildCriteriaTableDOCX(criterios) {
   const header = new TableRow({
-    children: [
-      'Criterio',
-      'Max',
-      'Min',
-      'Prom',
-      '%>Prom',
-      'Comp.',
-      'Instancia',
-    ].map(t =>
+    children: ['Criterio', 'Max', 'Min', 'Prom', '%>Prom', 'Comp.'].map(t =>
       new TableCell({
         children: [
-          new Paragraph({ children: [new TextRun({ text: t, bold: true })] }),
+          new Paragraph({
+            children: [new TextRun({ text: t, bold: true })],
+          }),
         ],
       })
     ),
   });
 
   const rows = [header];
+  let current = null;
   criterios.forEach(c => {
-    const nombreInstancia =
-      ordinales[c.instancia - 1] || `Instancia ${c.instancia}`;
+    if (c.instancia !== current) {
+      current = c.instancia;
+      rows.push(
+        new TableRow({
+          children: [
+            new TableCell({
+              columnSpan: 6,
+              children: [
+                new Paragraph({
+                  children: [new TextRun({ text: `Instancia ${current}`, bold: true })],
+                }),
+              ],
+            }),
+          ],
+        })
+      );
+    }
+
     rows.push(
       new TableRow({
         children: [
@@ -135,7 +127,6 @@ function buildCriteriaTableDOCX(criterios) {
           String(c.promedio),
           `${c.porcentaje}%`,
           c.competencia,
-          nombreInstancia,
         ].map(t =>
           new TableCell({
             children: [new Paragraph({ children: [new TextRun(String(t))] })],
@@ -825,6 +816,19 @@ exports.generarPDFCompleto = contenido => {
     generarTablaResumenIndicadoresPDF(doc, contenido.resumenIndicadores);
     doc.moveDown();
 
+    const ordinales = [
+      'Primera',
+      'Segunda',
+      'Tercera',
+      'Cuarta',
+      'Quinta',
+      'Sexta',
+      'Séptima',
+      'Octava',
+      'Novena',
+      'Décima',
+    ];
+
     Object.keys(contenido.instancias)
       .sort((a, b) => a - b)
       .forEach(num => {
@@ -900,6 +904,18 @@ exports.generarDOCXCompleto = async contenido => {
     return Promise.reject(new Error('docx not installed'));
   }
 
+  const ordinales = [
+    'Primera',
+    'Segunda',
+    'Tercera',
+    'Cuarta',
+    'Quinta',
+    'Sexta',
+    'Séptima',
+    'Octava',
+    'Novena',
+    'Décima',
+  ];
 
   const compTable = new Table({
     rows: [
