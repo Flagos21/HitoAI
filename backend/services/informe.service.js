@@ -45,13 +45,14 @@ async function obtenerDatosIndicadores(asignaturaId) {
           1
         ) AS porcentaje,
         COUNT(*) AS total,
-        c.ID_Competencia AS competencia
+        GROUP_CONCAT(DISTINCT rc.competencia_ID_Competencia
+          ORDER BY rc.competencia_ID_Competencia SEPARATOR ' + ') AS competencia
       FROM aplicacion a
       JOIN evaluacion ev ON ev.ID_Evaluacion = a.evaluacion_ID_Evaluacion
       JOIN indicador i ON i.ID_Indicador = a.indicador_ID_Indicador
       JOIN ra r ON r.ID_RA = i.ra_ID_RA
-      JOIN ra_competencia rc ON rc.ra_ID_RA = r.ID_RA
-      JOIN competencia c ON c.ID_Competencia = rc.competencia_ID_Competencia
+      LEFT JOIN ra_competencia rc ON rc.ra_ID_RA = r.ID_RA
+      LEFT JOIN competencia c ON c.ID_Competencia = rc.competencia_ID_Competencia
       JOIN inscripcion ins ON ins.ID_Inscripcion = a.inscripcion_ID_Inscripcion
       WHERE ins.asignatura_ID_Asignatura = ?
       GROUP BY ev.ID_Evaluacion, i.ID_Indicador;`;
@@ -215,13 +216,17 @@ exports.generarInforme = async asignaturaId => {
     instancias[d.instancia].criterios.push(d);
     instancias[d.instancia].analisis.push(analisis[idx]);
 
-    const comp = instancias[d.instancia].competencias[d.competencia] || {
-      puntajeIdeal: 0,
-      promedios: [],
-    };
-    comp.puntajeIdeal += d.puntajeMax;
-    comp.promedios.push(d.promedio);
-    instancias[d.instancia].competencias[d.competencia] = comp;
+    const claves = String(d.competencia || '').split(/\s*\+\s*/).filter(Boolean);
+    if (!claves.length) claves.push('Desconocida');
+    claves.forEach(c => {
+      const comp = instancias[d.instancia].competencias[c] || {
+        puntajeIdeal: 0,
+        promedios: [],
+      };
+      comp.puntajeIdeal += d.puntajeMax;
+      comp.promedios.push(d.promedio);
+      instancias[d.instancia].competencias[c] = comp;
+    });
   });
 
   for (const i of Object.values(instancias)) {
