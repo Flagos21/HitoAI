@@ -46,13 +46,18 @@ async function obtenerDatosIndicadores(asignaturaId) {
         ) AS porcentaje,
         COUNT(*) AS total,
         GROUP_CONCAT(DISTINCT rc.competencia_ID_Competencia
-          ORDER BY rc.competencia_ID_Competencia SEPARATOR ' + ') AS competencia
+          ORDER BY rc.competencia_ID_Competencia SEPARATOR ' + ') AS competencia,
+        r.Nombre AS raNombre,
+        r.Descripcion AS raDescripcion,
+        ct.Nucleo_Tematico AS nucleo,
+        ct.Descripcion AS contenido
       FROM aplicacion a
       JOIN evaluacion ev ON ev.ID_Evaluacion = a.evaluacion_ID_Evaluacion
       JOIN indicador i ON i.ID_Indicador = a.indicador_ID_Indicador
       JOIN ra r ON r.ID_RA = i.ra_ID_RA
       LEFT JOIN ra_competencia rc ON rc.ra_ID_RA = r.ID_RA
       LEFT JOIN competencia c ON c.ID_Competencia = rc.competencia_ID_Competencia
+      JOIN contenido ct ON ct.ID_Contenido = i.contenido_ID_Contenido
       JOIN inscripcion ins ON ins.ID_Inscripcion = a.inscripcion_ID_Inscripcion
       WHERE ins.asignatura_ID_Asignatura = ?
       GROUP BY ev.ID_Evaluacion, i.ID_Indicador;`;
@@ -156,6 +161,12 @@ exports.generarInforme = async asignaturaId => {
         min: d.minimo,
         promedio: d.promedio,
         porcentaje: d.porcentaje,
+        raNombre: d.raNombre,
+        raDescripcion: d.raDescripcion,
+        contenidoNucleo: d.nucleo,
+        contenidoDescripcion: d.contenido,
+        asignaturaNombre: asignatura.Nombre,
+        carreraNombre: asignatura.Carrera,
       })
     )
   );
@@ -231,8 +242,18 @@ exports.generarInforme = async asignaturaId => {
 
   for (const i of Object.values(instancias)) {
     const resumen = i.criterios.map(c => c.indicador).join(', ');
-    i.conclusion = await conclusionCriterios(resumen);
-    i.recomendaciones = [await recomendacionesTemas(resumen)];
+    i.conclusion = await conclusionCriterios({
+      resumen,
+      asignaturaNombre: asignatura.Nombre,
+      carreraNombre: asignatura.Carrera,
+    });
+    i.recomendaciones = [
+      await recomendacionesTemas(
+        resumen,
+        asignatura.Nombre,
+        asignatura.Carrera
+      ),
+    ];
 
     i.competenciasResumen = [];
     for (const [comp, datos] of Object.entries(i.competencias)) {
@@ -253,12 +274,19 @@ exports.generarInforme = async asignaturaId => {
           puntajeIdeal: c.puntajeIdeal,
           promedio: c.promedio,
           cumplimiento: c.cumplimiento,
+          asignaturaNombre: asignatura.Nombre,
+          carreraNombre: asignatura.Carrera,
         })
       )
     );
     i.recomendacionesCompetencias = await Promise.all(
       i.competenciasResumen.map(c =>
-        recomendacionesCompetencia(c.competencia, c.cumplimiento)
+        recomendacionesCompetencia(
+          c.competencia,
+          c.cumplimiento,
+          asignatura.Nombre,
+          asignatura.Carrera
+        )
       )
     );
   }
@@ -266,16 +294,35 @@ exports.generarInforme = async asignaturaId => {
   // totalNiveles ya calculado al agregar rubricas
 
   const resumenComp = competencias.map(c => `${c.ID_Competencia}: ${c.cumplimiento}%`).join(', ');
-  const conclusion = await conclusionCompetencias(resumenComp);
+  const conclusion = await conclusionCompetencias({
+    resumen: resumenComp,
+    asignaturaNombre: asignatura.Nombre,
+    carreraNombre: asignatura.Carrera,
+  });
 
   const recomendacionesComp = await Promise.all(
-    competencias.map(c => recomendacionesCompetencia(c.ID_Competencia, c.cumplimiento))
+    competencias.map(c =>
+      recomendacionesCompetencia(
+        c.ID_Competencia,
+        c.cumplimiento,
+        asignatura.Nombre,
+        asignatura.Carrera
+      )
+    )
   );
 
-  const recomendaciones = await recomendacionesGenerales('temas de la asignatura');
+  const recomendaciones = await recomendacionesGenerales(
+    'temas de la asignatura',
+    asignatura.Nombre,
+    asignatura.Carrera
+  );
 
   const resumenTemasFinal = [...new Set(datos.map(d => d.indicador))].join(', ');
-  const recomendacionesTemasFinal = await recomendacionesTemas(resumenTemasFinal);
+  const recomendacionesTemasFinal = await recomendacionesTemas(
+    resumenTemasFinal,
+    asignatura.Nombre,
+    asignatura.Carrera
+  );
 
   const barrasPath = await generarGraficoBarras(
     datos.map(d => d.indicador),
