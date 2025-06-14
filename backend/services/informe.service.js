@@ -49,15 +49,15 @@ async function obtenerDatosIndicadores(asignaturaId) {
           ORDER BY rc.competencia_ID_Competencia SEPARATOR ' + ') AS competencia,
         r.Nombre AS raNombre,
         r.Descripcion AS raDescripcion,
-        ct.Nucleo_Tematico AS nucleo,
-        ct.Descripcion AS contenido
+        contenido.Nucleo_Tematico AS contenidoNucleo,
+        contenido.Descripcion AS contenidoDescripcion
       FROM aplicacion a
       JOIN evaluacion ev ON ev.ID_Evaluacion = a.evaluacion_ID_Evaluacion
       JOIN indicador i ON i.ID_Indicador = a.indicador_ID_Indicador
       JOIN ra r ON r.ID_RA = i.ra_ID_RA
       LEFT JOIN ra_competencia rc ON rc.ra_ID_RA = r.ID_RA
       LEFT JOIN competencia c ON c.ID_Competencia = rc.competencia_ID_Competencia
-      JOIN contenido ct ON ct.ID_Contenido = i.contenido_ID_Contenido
+      JOIN contenido contenido ON contenido.ID_Contenido = i.contenido_ID_Contenido
       JOIN inscripcion ins ON ins.ID_Inscripcion = a.inscripcion_ID_Inscripcion
       WHERE ins.asignatura_ID_Asignatura = ?
       GROUP BY ev.ID_Evaluacion, i.ID_Indicador;`;
@@ -163,8 +163,8 @@ exports.generarInforme = async asignaturaId => {
         porcentaje: d.porcentaje,
         raNombre: d.raNombre,
         raDescripcion: d.raDescripcion,
-        contenidoNucleo: d.nucleo,
-        contenidoDescripcion: d.contenido,
+        contenidoNucleo: d.contenidoNucleo,
+        contenidoDescripcion: d.contenidoDescripcion,
         asignaturaNombre: asignatura.Nombre,
         carreraNombre: asignatura.Carrera,
       })
