@@ -698,6 +698,71 @@ function generarRecomendacionesCompetenciasDOCX(instancia) {
   ];
 }
 
+function drawRATablePDF(doc, resumen) {
+  const startX = doc.x;
+  const widths = [250, 80];
+  const headers = ['Resultado de Aprendizaje', 'Promedio'];
+  doc.font('Helvetica-Bold');
+  headers.forEach((h, i) => {
+    const x = startX + widths.slice(0, i).reduce((a, b) => a + b, 0);
+    doc.text(h, x, doc.y, { width: widths[i], align: 'center' });
+  });
+  doc.moveDown();
+  doc.font('Helvetica');
+  resumen.forEach(r => {
+    let x = startX;
+    doc.text(r.ra, x, doc.y, { width: widths[0], align: 'center' });
+    x += widths[0];
+    doc.text(String(r.promedio), x, doc.y, { width: widths[1], align: 'center' });
+    doc.moveDown();
+  });
+}
+
+function buildRATableDOCX(resumen) {
+  const header = new TableRow({
+    children: ['Resultado de Aprendizaje', 'Promedio'].map(t =>
+      new TableCell({
+        children: [
+          new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: t, bold: true })] }),
+        ],
+      })
+    ),
+  });
+  const rows = resumen.map(r =>
+    new TableRow({
+      children: [
+        new TableCell({ children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun(r.ra)] })] }),
+        new TableCell({ children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun(String(r.promedio))] })] }),
+      ],
+    })
+  );
+  return new Table({ rows: [header, ...rows] });
+}
+
+function generarConclusionRAPDF(doc, instancia) {
+  if (Array.isArray(instancia.raConclusiones) && instancia.raConclusiones.length) {
+    doc.font('Helvetica-Bold').text('Conclusiones por RA');
+    doc.font('Helvetica');
+    instancia.raConclusiones.forEach((c, idx) => {
+      const nombre = instancia.raResumen && instancia.raResumen[idx] ? instancia.raResumen[idx].ra : '';
+      doc.text(`• ${nombre}: ${c}`);
+    });
+    doc.moveDown();
+  }
+}
+
+function generarConclusionRADOCX(instancia) {
+  if (!Array.isArray(instancia.raConclusiones) || !instancia.raConclusiones.length) {
+    return [];
+  }
+  const parts = [new Paragraph({ style: 'ListParagraph', bullet: { level: 0 }, children: [new TextRun('Conclusiones por RA')] })];
+  instancia.raConclusiones.forEach((c, idx) => {
+    const nombre = instancia.raResumen && instancia.raResumen[idx] ? instancia.raResumen[idx].ra : '';
+    parts.push(new Paragraph({ bullet: { level: 0 }, children: [new TextRun(`${nombre}: ${c}`)] }));
+  });
+  return parts;
+}
+
 // Genera un PDF básico a partir del contenido entregado
 exports.generarPDF = contenido => {
   if (!PDFDocument) {
@@ -831,6 +896,12 @@ exports.generarPDFCompleto = contenido => {
         doc.fontSize(14).text('Promedio por Criterio', { underline: true });
         doc.moveDown(0.5);
         generarTablaPromediosPorCriterioPDF(doc, inst);
+        if (inst.raResumen && inst.raResumen.length) {
+          doc.fontSize(14).text('Resultados por RA', { underline: true });
+          doc.moveDown(0.5);
+          drawRATablePDF(doc, inst.raResumen);
+          generarConclusionRAPDF(doc, inst);
+        }
         // G. Tabla de cumplimiento por competencia
         generarTablaCompetenciasInstanciaPDF(doc, inst);
         // H. Análisis por competencia
@@ -953,6 +1024,10 @@ exports.generarDOCXCompleto = async contenido => {
       instanciasParagraphs.push(generarTablaCriteriosPorIndicadorDOCX(inst));
       const grafNivel = generarGraficoDistribucionNivelesDOCX(inst);
       if (grafNivel) instanciasParagraphs.push(grafNivel);
+      if (inst.raResumen && inst.raResumen.length) {
+        instanciasParagraphs.push(buildRATableDOCX(inst.raResumen));
+        instanciasParagraphs.push(...generarConclusionRADOCX(inst));
+      }
       // E. Análisis, conclusiones y recomendaciones por competencia
       instanciasParagraphs.push(generarTablaCompetenciasInstanciaDOCX(inst));
       instanciasParagraphs.push(...generarAnalisisCompetenciasDOCX(inst));

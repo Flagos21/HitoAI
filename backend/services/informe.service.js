@@ -10,6 +10,7 @@ const {
   analizarCriterio,
   conclusionCompetencias,
   conclusionCriterios,
+  conclusionRA,
   recomendacionesTemas,
   recomendacionesCompetencia,
   analisisCompetencia,
@@ -222,10 +223,21 @@ exports.generarInforme = async asignaturaId => {
         criterios: [],
         analisis: [],
         competencias: {},
+        raMap: {},
       };
     }
     instancias[d.instancia].criterios.push(d);
     instancias[d.instancia].analisis.push(analisis[idx]);
+
+    const ra = instancias[d.instancia].raMap[d.raNombre] || {
+      raNombre: d.raNombre,
+      raDescripcion: d.raDescripcion,
+      sum: 0,
+      count: 0,
+    };
+    ra.sum += Number(d.promedio);
+    ra.count += 1;
+    instancias[d.instancia].raMap[d.raNombre] = ra;
 
     const claves = String(d.competencia || '').split(/\s*\+\s*/).filter(Boolean);
     if (!claves.length) claves.push('Desconocida');
@@ -289,6 +301,24 @@ exports.generarInforme = async asignaturaId => {
         )
       )
     );
+
+    i.raResumen = Object.values(i.raMap || {}).map(r => ({
+      ra: r.raNombre,
+      descripcion: r.raDescripcion,
+      promedio: Math.round((r.sum / r.count) * 10) / 10,
+    }));
+    i.raConclusiones = await Promise.all(
+      i.raResumen.map(r =>
+        conclusionRA({
+          raNombre: r.ra,
+          raDescripcion: r.descripcion,
+          promedio: r.promedio,
+          asignaturaNombre: asignatura.Nombre,
+          carreraNombre: asignatura.Carrera,
+        })
+      )
+    );
+    delete i.raMap;
   }
 
   // totalNiveles ya calculado al agregar rubricas

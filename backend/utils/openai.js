@@ -122,3 +122,14 @@ exports.recomendacionesGenerales = (temas, asignaturaNombre, carreraNombre) => {
   return safe(prompt, `Recomendaciones para ${temas}`);
 };
 
+exports.conclusionRA = ({
+  raNombre,
+  raDescripcion,
+  promedio,
+  asignaturaNombre,
+  carreraNombre,
+}) => {
+  const prompt = `En la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}, redacta una breve conclusión pedagógica sobre el resultado de aprendizaje "${raNombre}" (${raDescripcion}). El puntaje promedio de sus indicadores es ${promedio}.`;
+  return safe(prompt, `Conclusión de ${raNombre}: ${promedio}`);
+};
+
