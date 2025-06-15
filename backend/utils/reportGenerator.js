@@ -896,12 +896,13 @@ exports.generarPDFCompleto = contenido => {
         doc.fontSize(14).text('Promedio por Criterio', { underline: true });
         doc.moveDown(0.5);
         generarTablaPromediosPorCriterioPDF(doc, inst);
-        if (inst.raResumen && inst.raResumen.length) {
-          doc.fontSize(14).text('Resultados por RA', { underline: true });
-          doc.moveDown(0.5);
-          drawRATablePDF(doc, inst.raResumen);
-          generarConclusionRAPDF(doc, inst);
-        }
+        // Se omite la generación de tablas y conclusiones por Resultado de Aprendizaje
+        // if (inst.raResumen && inst.raResumen.length) {
+        //   doc.fontSize(14).text('Resultados por RA', { underline: true });
+        //   doc.moveDown(0.5);
+        //   drawRATablePDF(doc, inst.raResumen);
+        //   generarConclusionRAPDF(doc, inst);
+        // }
         // G. Tabla de cumplimiento por competencia
         generarTablaCompetenciasInstanciaPDF(doc, inst);
         // H. Análisis por competencia
@@ -1024,10 +1025,11 @@ exports.generarDOCXCompleto = async contenido => {
       instanciasParagraphs.push(generarTablaCriteriosPorIndicadorDOCX(inst));
       const grafNivel = generarGraficoDistribucionNivelesDOCX(inst);
       if (grafNivel) instanciasParagraphs.push(grafNivel);
-      if (inst.raResumen && inst.raResumen.length) {
-        instanciasParagraphs.push(buildRATableDOCX(inst.raResumen));
-        instanciasParagraphs.push(...generarConclusionRADOCX(inst));
-      }
+      // Se omite la generación de tablas y conclusiones por Resultado de Aprendizaje
+      // if (inst.raResumen && inst.raResumen.length) {
+      //   instanciasParagraphs.push(buildRATableDOCX(inst.raResumen));
+      //   instanciasParagraphs.push(...generarConclusionRADOCX(inst));
+      // }
       // E. Análisis, conclusiones y recomendaciones por competencia
       instanciasParagraphs.push(generarTablaCompetenciasInstanciaDOCX(inst));
       instanciasParagraphs.push(...generarAnalisisCompetenciasDOCX(inst));
