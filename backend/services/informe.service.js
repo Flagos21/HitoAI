@@ -237,15 +237,15 @@ exports.generarInforme = async asignaturaId => {
       .split(/\s*\+\s*/)
       .filter(Boolean);
     if (!claves.length) claves.push('Desconocida');
-    const peso = 1 / claves.length;
     claves.forEach(c => {
       const comp = instancias[d.instancia].competencias[c] || {
         puntajeIdeal: 0,
         promedioSum: 0,
       };
-      comp.puntajeIdeal += d.puntajeMax * d.total * peso;
+      // Count the full indicator score for each associated competencia
+      comp.puntajeIdeal += d.puntajeMax * d.total;
       if (typeof d.promedio === 'number') {
-        comp.promedioSum += d.promedio * d.total * peso;
+        comp.promedioSum += d.promedio * d.total;
       }
       instancias[d.instancia].competencias[c] = comp;
     });
