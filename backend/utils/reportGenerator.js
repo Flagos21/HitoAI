@@ -18,6 +18,7 @@ let Document,
   TextRun,
   ImageRun,
   AlignmentType,
+  HeadingLevel,
   WidthType,
   BorderStyle,
   Header,
@@ -35,9 +36,10 @@ try {
     TableCell,
     TextRun,
     ImageRun,
-    AlignmentType,
-    WidthType,
-    BorderStyle,
+  AlignmentType,
+  HeadingLevel,
+  WidthType,
+  BorderStyle,
     Header,
     Footer,
     ShadingType,
@@ -848,14 +850,14 @@ exports.generarPDFCompleto = contenido => {
     doc.on('data', c => chunks.push(c));
     doc.on('end', () => resolve(Buffer.concat(chunks)));
 
-    doc.fontSize(18).text('INFORME DE ASIGNATURA INTEGRADORA DE SABERES I', { align: 'center' });
+    doc.fontSize(18).font('Helvetica-Bold').text('INFORME DE ASIGNATURA INTEGRADORA DE SABERES I', { align: 'center' });
     doc.moveDown();
     const intro = contenido.introduccion;
-    doc.fontSize(14).text(intro.objetivo.titulo);
-    doc.fontSize(12).text(intro.objetivo.texto, { align: 'justify' });
+    doc.fontSize(14).font('Helvetica-Bold').text(intro.objetivo.titulo);
+    doc.fontSize(12).font('Helvetica').text(intro.objetivo.texto, { align: 'justify' });
     doc.moveDown();
-    doc.fontSize(14).text(intro.relevancia.titulo);
-    doc.fontSize(12).text(intro.relevancia.texto, { align: 'justify' });
+    doc.fontSize(14).font('Helvetica-Bold').text(intro.relevancia.titulo);
+    doc.fontSize(12).font('Helvetica').text(intro.relevancia.texto, { align: 'justify' });
     doc.moveDown();
 
     generarTablaResumenIndicadoresPDF(doc, contenido.resumenIndicadores);
@@ -1112,33 +1114,39 @@ exports.generarDOCXCompleto = async contenido => {
         footers: { default: footer },
         children: [
           new Paragraph({
-            style: 'ListParagraph',
+            heading: HeadingLevel.HEADING_1,
             alignment: AlignmentType.CENTER,
             children: [new TextRun('INFORME DE ASIGNATURA INTEGRADORA DE SABERES I')],
+            spacing: { after: 200 },
           }),
           new Paragraph({
-            style: 'ListParagraph',
+            heading: HeadingLevel.HEADING_2,
             children: [new TextRun(contenido.introduccion.objetivo.titulo)],
           }),
           new Paragraph({
             alignment: AlignmentType.JUSTIFIED,
+            spacing: { after: 200 },
             children: [new TextRun(contenido.introduccion.objetivo.texto)],
           }),
           new Paragraph({
-            style: 'ListParagraph',
+            heading: HeadingLevel.HEADING_2,
             children: [new TextRun(contenido.introduccion.relevancia.titulo)],
           }),
-        new Paragraph({
-          alignment: AlignmentType.JUSTIFIED,
-          children: [new TextRun(contenido.introduccion.relevancia.texto)],
-        }),
-        generarTablaResumenIndicadoresDOCX(contenido.resumenIndicadores),
-        ...instanciasParagraphs,
+          new Paragraph({
+            alignment: AlignmentType.JUSTIFIED,
+            spacing: { after: 200 },
+            children: [new TextRun(contenido.introduccion.relevancia.texto)],
+          }),
+          generarTablaResumenIndicadoresDOCX(contenido.resumenIndicadores),
+          new Paragraph({}),
+          ...instanciasParagraphs,
+          new Paragraph({}),
           new Paragraph({
             style: 'ListParagraph',
             children: [new TextRun('Cumplimiento por Competencia')],
           }),
           compTable,
+          new Paragraph({}),
           ...(contenido.recomendacionesComp || []).map(t =>
             new Paragraph({ children: [new TextRun(`Recomendación: ${t}`)] })
           ),
