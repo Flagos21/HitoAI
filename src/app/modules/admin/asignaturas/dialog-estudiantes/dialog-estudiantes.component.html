@@ -38,7 +38,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let est of estudiantes" style="cursor: pointer;">
-            <td>{{ est.ID_Estudiante }}</td>
+            <td>{{ est.ID_Estudiante | rutFormat }}</td>
             <td>{{ est.Nombre }}</td>
             <td>{{ est.Apellido }}</td>
             <td>{{ est.Anio_Ingreso }}</td>
