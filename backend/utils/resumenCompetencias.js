@@ -11,14 +11,13 @@ function calcularResumenCompetencias(datos) {
   datos.forEach(d => {
     const comps = parseCompetencias(d.competencias);
     if (!comps.length) comps.push('Desconocida');
-    const peso = 1 / comps.length;
     comps.forEach(c => {
       if (!map[c]) map[c] = { puntajeIdeal: 0, promedio: 0 };
       if (typeof d.puntaje_maximo === 'number') {
-        map[c].puntajeIdeal += d.puntaje_maximo * peso;
+        map[c].puntajeIdeal += d.puntaje_maximo;
       }
       if (typeof d.promedio_obtenido === 'number') {
-        map[c].promedio += d.promedio_obtenido * peso;
+        map[c].promedio += d.promedio_obtenido;
       }
     });
   });
