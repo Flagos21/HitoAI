@@ -47,6 +47,12 @@ To start the backend API, change into the `backend/` directory and run:
 npm start
 ```
 
+To run the backend unit tests use:
+
+```bash
+npm test
+```
+
 ## Code scaffolding
 
 Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
