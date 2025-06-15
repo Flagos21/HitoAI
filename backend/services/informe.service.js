@@ -65,22 +65,37 @@ async function obtenerDatosIndicadores(asignaturaId) {
   return query(sql, [asignaturaId]);
 }
 
-async function obtenerCompetencias(asignaturaId) {
-  const sql = `
-      SELECT
-        c.ID_Competencia,
-        SUM(i.Puntaje_Max) AS puntaje_ideal,
-        ROUND(SUM(a.Obtenido) / COUNT(DISTINCT ins.ID_Inscripcion), 1) AS puntaje_promedio,
-        ROUND((SUM(a.Obtenido) / COUNT(DISTINCT ins.ID_Inscripcion)) / SUM(i.Puntaje_Max) * 100, 1) AS cumplimiento
-      FROM aplicacion a
-      JOIN indicador i ON i.ID_Indicador = a.indicador_ID_Indicador
-      JOIN ra r ON r.ID_RA = i.ra_ID_RA
-      JOIN ra_competencia rc ON rc.ra_ID_RA = r.ID_RA
-      JOIN competencia c ON c.ID_Competencia = rc.competencia_ID_Competencia
-      JOIN inscripcion ins ON ins.ID_Inscripcion = a.inscripcion_ID_Inscripcion
-      WHERE ins.asignatura_ID_Asignatura = ?
-      GROUP BY c.ID_Competencia;`;
-  return query(sql, [asignaturaId]);
+
+function calcularCompetencias(datos) {
+  const map = {};
+  datos.forEach(d => {
+    const comps = String(d.competencia || '')
+      .split(/\s*\+\s*/)
+      .filter(Boolean);
+    if (!comps.length) comps.push('Desconocida');
+    const peso = 1 / comps.length;
+    comps.forEach(c => {
+      const obj = map[c] || { puntaje: 0, promedio: 0, peso: 0 };
+      obj.puntaje += d.puntajeMax * peso;
+      if (typeof d.promedio === 'number') {
+        obj.promedio += d.promedio * peso;
+        obj.peso += peso;
+      }
+      map[c] = obj;
+    });
+  });
+  return Object.entries(map).map(([ID_Competencia, v]) => {
+    const prom = v.peso ? Math.round((v.promedio / v.peso) * 10) / 10 : 0;
+    const cumplimiento = v.puntaje
+      ? Math.round((prom / v.puntaje) * 1000) / 10
+      : 0;
+    return {
+      ID_Competencia,
+      puntaje_ideal: Math.round(v.puntaje * 10) / 10,
+      puntaje_promedio: prom,
+      cumplimiento,
+    };
+  });
 }
 
 async function obtenerAsignatura(id) {
@@ -147,7 +162,7 @@ exports.generarInforme = async asignaturaId => {
   const datos = await obtenerDatosIndicadores(asignaturaId);
   const rubricas = await obtenerRubricas(asignaturaId);
   const promedios = await obtenerPromediosCriterio(asignaturaId);
-  const competencias = await obtenerCompetencias(asignaturaId);
+  const competencias = calcularCompetencias(datos);
   const asignatura = await obtenerAsignatura(asignaturaId);
 
   const introduccion = await crearIntroduccion(asignatura.Nombre, asignatura.Carrera);
@@ -228,15 +243,22 @@ exports.generarInforme = async asignaturaId => {
     instancias[d.instancia].criterios.push(d);
     instancias[d.instancia].analisis.push(analisis[idx]);
 
-    const claves = String(d.competencia || '').split(/\s*\+\s*/).filter(Boolean);
+    const claves = String(d.competencia || '')
+      .split(/\s*\+\s*/)
+      .filter(Boolean);
     if (!claves.length) claves.push('Desconocida');
+    const peso = 1 / claves.length;
     claves.forEach(c => {
       const comp = instancias[d.instancia].competencias[c] || {
         puntajeIdeal: 0,
-        promedios: [],
+        promedioSum: 0,
+        pesoTotal: 0,
       };
-      comp.puntajeIdeal += d.puntajeMax;
-      comp.promedios.push(d.promedio);
+      comp.puntajeIdeal += d.puntajeMax * peso;
+      if (typeof d.promedio === 'number') {
+        comp.promedioSum += d.promedio * peso;
+        comp.pesoTotal += peso;
+      }
       instancias[d.instancia].competencias[c] = comp;
     });
   });
@@ -258,12 +280,15 @@ exports.generarInforme = async asignaturaId => {
 
     i.competenciasResumen = [];
     for (const [comp, datos] of Object.entries(i.competencias)) {
-      const promedio =
-        Math.round((datos.promedios.reduce((a, b) => a + b, 0) / datos.promedios.length) * 10) / 10;
-      const cumplimiento = Math.round((promedio / datos.puntajeIdeal) * 100);
+      const promedio = datos.pesoTotal
+        ? Math.round((datos.promedioSum / datos.pesoTotal) * 10) / 10
+        : 0;
+      const cumplimiento = datos.puntajeIdeal
+        ? Math.round((promedio / datos.puntajeIdeal) * 100)
+        : 0;
       i.competenciasResumen.push({
         competencia: comp,
-        puntajeIdeal: datos.puntajeIdeal,
+        puntajeIdeal: Math.round(datos.puntajeIdeal * 10) / 10,
         promedio,
         cumplimiento,
       });
