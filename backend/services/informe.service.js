@@ -17,6 +17,9 @@ const {
   recomendacionesGenerales,
 } = require('../utils/openai');
 const { generarPDFCompleto, generarDOCXCompleto } = require('../utils/reportGenerator');
+const {
+  calcularResumenCompetencias,
+} = require('../utils/resumenCompetencias');
 
 function query(sql, params = []) {
   return new Promise((resolve, reject) => {
@@ -66,43 +69,6 @@ async function obtenerDatosIndicadores(asignaturaId) {
 }
 
 
-function calcularCompetencias(datos) {
-  const map = {};
-  let totalEstudiantes = 0;
-  datos.forEach(d => {
-    if (d.total > totalEstudiantes) totalEstudiantes = d.total;
-    const comps = String(d.competencia || '')
-      .split(/\s*\+\s*/)
-      .filter(Boolean);
-    if (!comps.length) comps.push('Desconocida');
-    const peso = 1 / comps.length;
-    comps.forEach(c => {
-      const obj = map[c] || { idealTotal: 0, scoreTotal: 0 };
-      obj.idealTotal += d.puntajeMax * d.total * peso;
-      if (typeof d.promedio === 'number') {
-        obj.scoreTotal += d.promedio * d.total * peso;
-      }
-      map[c] = obj;
-    });
-  });
-  return Object.entries(map).map(([ID_Competencia, v]) => {
-    const puntajeIdeal = totalEstudiantes
-      ? Math.round((v.idealTotal / totalEstudiantes) * 10) / 10
-      : 0;
-    const promedio = totalEstudiantes
-      ? Math.round((v.scoreTotal / totalEstudiantes) * 10) / 10
-      : 0;
-    const cumplimiento = puntajeIdeal
-      ? Math.round((promedio / puntajeIdeal) * 100)
-      : 0;
-    return {
-      ID_Competencia,
-      puntaje_ideal: puntajeIdeal,
-      puntaje_promedio: promedio,
-      cumplimiento,
-    };
-  });
-}
 
 async function obtenerAsignatura(id) {
   const sql = `
@@ -168,7 +134,21 @@ exports.generarInforme = async asignaturaId => {
   const datos = await obtenerDatosIndicadores(asignaturaId);
   const rubricas = await obtenerRubricas(asignaturaId);
   const promedios = await obtenerPromediosCriterio(asignaturaId);
-  const competencias = calcularCompetencias(datos);
+  const competenciasResumen = calcularResumenCompetencias(
+    datos.map(d => ({
+      puntaje_maximo: d.puntajeMax,
+      promedio_obtenido: d.promedio,
+      competencias: d.competencia,
+    }))
+  );
+  const competencias = competenciasResumen
+    .filter(c => c.competencia !== 'Total')
+    .map(c => ({
+      ID_Competencia: c.competencia,
+      puntaje_ideal: c.puntajeIdeal,
+      puntaje_promedio: c.promedio,
+      cumplimiento: c.cumplimiento,
+    }));
   const asignatura = await obtenerAsignatura(asignaturaId);
 
   const introduccion = await crearIntroduccion(asignatura.Nombre, asignatura.Carrera);
