@@ -18,6 +18,7 @@ let Document,
   TextRun,
   ImageRun,
   AlignmentType,
+  HeadingLevel,
   WidthType,
   BorderStyle,
   Header,
@@ -35,9 +36,10 @@ try {
     TableCell,
     TextRun,
     ImageRun,
-    AlignmentType,
-    WidthType,
-    BorderStyle,
+  AlignmentType,
+  HeadingLevel,
+  WidthType,
+  BorderStyle,
     Header,
     Footer,
     ShadingType,
@@ -52,75 +54,55 @@ try {
 
 function drawCriteriaTablePDF(doc, criterios) {
   const startX = doc.x;
-  const widths = [180, 40, 40, 50, 70, 80];
-  const headers = ['Criterio', 'Max', 'Min', 'Prom', '%>Prom', 'Comp.'];
+  const widths = [100, 180, 40, 40, 50, 70, 80];
+  const headers = ['Instancia', 'Criterio', 'Max', 'Min', 'Prom', '%>Prom', 'Comp.'];
   doc.font('Helvetica-Bold');
   headers.forEach((h, i) => {
     const x = startX + widths.slice(0, i).reduce((a, b) => a + b, 0);
     doc.text(h, x, doc.y, { width: widths[i] });
   });
   doc.moveDown();
-  let current = null;
+  doc.font('Helvetica');
   criterios.forEach(c => {
-    if (c.instancia !== current) {
-      current = c.instancia;
-      doc.font('Helvetica-Bold').text(`Instancia ${current}`, startX);
-      doc.moveDown(0.2);
-    }
-    doc.font('Helvetica');
     let x = startX;
-    doc.text(c.indicador, x, doc.y, { width: widths[0] });
+    const nombreInst = c.evaluacion || `Instancia ${c.instancia}`;
+    doc.text(nombreInst, x, doc.y, { width: widths[0] });
     x += widths[0];
-    doc.text(String(c.maximo), x, doc.y, { width: widths[1] });
+    doc.text(c.indicador, x, doc.y, { width: widths[1] });
     x += widths[1];
-    doc.text(String(c.minimo), x, doc.y, { width: widths[2] });
+    doc.text(String(c.maximo), x, doc.y, { width: widths[2] });
     x += widths[2];
-    doc.text(String(c.promedio), x, doc.y, { width: widths[3] });
+    doc.text(String(c.minimo), x, doc.y, { width: widths[3] });
     x += widths[3];
-    doc.text(`${c.porcentaje}%`, x, doc.y, { width: widths[4] });
+    doc.text(String(c.promedio), x, doc.y, { width: widths[4] });
     x += widths[4];
-    doc.text(c.competencia, x, doc.y, { width: widths[5] });
+    doc.text(`${c.porcentaje}%`, x, doc.y, { width: widths[5] });
+    x += widths[5];
+    doc.text(c.competencia, x, doc.y, { width: widths[6] });
     doc.moveDown();
   });
 }
 
 function buildCriteriaTableDOCX(criterios) {
   const header = new TableRow({
-    children: ['Criterio', 'Max', 'Min', 'Prom', '%>Prom', 'Comp.'].map(t =>
-      new TableCell({
-        children: [
-          new Paragraph({
-            children: [new TextRun({ text: t, bold: true })],
-          }),
-        ],
-      })
+    children: ['Instancia', 'Criterio', 'Max', 'Min', 'Prom', '%>Prom', 'Comp.'].map(
+      t =>
+        new TableCell({
+          children: [
+            new Paragraph({
+              children: [new TextRun({ text: t, bold: true })],
+            }),
+          ],
+        })
     ),
   });
 
   const rows = [header];
-  let current = null;
   criterios.forEach(c => {
-    if (c.instancia !== current) {
-      current = c.instancia;
-      rows.push(
-        new TableRow({
-          children: [
-            new TableCell({
-              columnSpan: 6,
-              children: [
-                new Paragraph({
-                  children: [new TextRun({ text: `Instancia ${current}`, bold: true })],
-                }),
-              ],
-            }),
-          ],
-        })
-      );
-    }
-
     rows.push(
       new TableRow({
         children: [
+          c.evaluacion || `Instancia ${c.instancia}`,
           c.indicador,
           String(c.maximo),
           String(c.minimo),
@@ -718,6 +700,71 @@ function generarRecomendacionesCompetenciasDOCX(instancia) {
   ];
 }
 
+function drawRATablePDF(doc, resumen) {
+  const startX = doc.x;
+  const widths = [250, 80];
+  const headers = ['Resultado de Aprendizaje', 'Promedio'];
+  doc.font('Helvetica-Bold');
+  headers.forEach((h, i) => {
+    const x = startX + widths.slice(0, i).reduce((a, b) => a + b, 0);
+    doc.text(h, x, doc.y, { width: widths[i], align: 'center' });
+  });
+  doc.moveDown();
+  doc.font('Helvetica');
+  resumen.forEach(r => {
+    let x = startX;
+    doc.text(r.ra, x, doc.y, { width: widths[0], align: 'center' });
+    x += widths[0];
+    doc.text(String(r.promedio), x, doc.y, { width: widths[1], align: 'center' });
+    doc.moveDown();
+  });
+}
+
+function buildRATableDOCX(resumen) {
+  const header = new TableRow({
+    children: ['Resultado de Aprendizaje', 'Promedio'].map(t =>
+      new TableCell({
+        children: [
+          new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: t, bold: true })] }),
+        ],
+      })
+    ),
+  });
+  const rows = resumen.map(r =>
+    new TableRow({
+      children: [
+        new TableCell({ children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun(r.ra)] })] }),
+        new TableCell({ children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun(String(r.promedio))] })] }),
+      ],
+    })
+  );
+  return new Table({ rows: [header, ...rows] });
+}
+
+function generarConclusionRAPDF(doc, instancia) {
+  if (Array.isArray(instancia.raConclusiones) && instancia.raConclusiones.length) {
+    doc.font('Helvetica-Bold').text('Conclusiones por RA');
+    doc.font('Helvetica');
+    instancia.raConclusiones.forEach((c, idx) => {
+      const nombre = instancia.raResumen && instancia.raResumen[idx] ? instancia.raResumen[idx].ra : '';
+      doc.text(`• ${nombre}: ${c}`);
+    });
+    doc.moveDown();
+  }
+}
+
+function generarConclusionRADOCX(instancia) {
+  if (!Array.isArray(instancia.raConclusiones) || !instancia.raConclusiones.length) {
+    return [];
+  }
+  const parts = [new Paragraph({ style: 'ListParagraph', bullet: { level: 0 }, children: [new TextRun('Conclusiones por RA')] })];
+  instancia.raConclusiones.forEach((c, idx) => {
+    const nombre = instancia.raResumen && instancia.raResumen[idx] ? instancia.raResumen[idx].ra : '';
+    parts.push(new Paragraph({ bullet: { level: 0 }, children: [new TextRun(`${nombre}: ${c}`)] }));
+  });
+  return parts;
+}
+
 // Genera un PDF básico a partir del contenido entregado
 exports.generarPDF = contenido => {
   if (!PDFDocument) {
@@ -803,14 +850,14 @@ exports.generarPDFCompleto = contenido => {
     doc.on('data', c => chunks.push(c));
     doc.on('end', () => resolve(Buffer.concat(chunks)));
 
-    doc.fontSize(18).text('INFORME DE ASIGNATURA INTEGRADORA DE SABERES I', { align: 'center' });
+    doc.fontSize(18).font('Helvetica-Bold').text('INFORME DE ASIGNATURA INTEGRADORA DE SABERES I', { align: 'center' });
     doc.moveDown();
     const intro = contenido.introduccion;
-    doc.fontSize(14).text(intro.objetivo.titulo);
-    doc.fontSize(12).text(intro.objetivo.texto, { align: 'justify' });
+    doc.fontSize(14).font('Helvetica-Bold').text(intro.objetivo.titulo);
+    doc.fontSize(12).font('Helvetica').text(intro.objetivo.texto, { align: 'justify' });
     doc.moveDown();
-    doc.fontSize(14).text(intro.relevancia.titulo);
-    doc.fontSize(12).text(intro.relevancia.texto, { align: 'justify' });
+    doc.fontSize(14).font('Helvetica-Bold').text(intro.relevancia.titulo);
+    doc.fontSize(12).font('Helvetica').text(intro.relevancia.texto, { align: 'justify' });
     doc.moveDown();
 
     generarTablaResumenIndicadoresPDF(doc, contenido.resumenIndicadores);
@@ -851,6 +898,13 @@ exports.generarPDFCompleto = contenido => {
         doc.fontSize(14).text('Promedio por Criterio', { underline: true });
         doc.moveDown(0.5);
         generarTablaPromediosPorCriterioPDF(doc, inst);
+        // Se omite la generación de tablas y conclusiones por Resultado de Aprendizaje
+        // if (inst.raResumen && inst.raResumen.length) {
+        //   doc.fontSize(14).text('Resultados por RA', { underline: true });
+        //   doc.moveDown(0.5);
+        //   drawRATablePDF(doc, inst.raResumen);
+        //   generarConclusionRAPDF(doc, inst);
+        // }
         // G. Tabla de cumplimiento por competencia
         generarTablaCompetenciasInstanciaPDF(doc, inst);
         // H. Análisis por competencia
@@ -973,6 +1027,11 @@ exports.generarDOCXCompleto = async contenido => {
       instanciasParagraphs.push(generarTablaCriteriosPorIndicadorDOCX(inst));
       const grafNivel = generarGraficoDistribucionNivelesDOCX(inst);
       if (grafNivel) instanciasParagraphs.push(grafNivel);
+      // Se omite la generación de tablas y conclusiones por Resultado de Aprendizaje
+      // if (inst.raResumen && inst.raResumen.length) {
+      //   instanciasParagraphs.push(buildRATableDOCX(inst.raResumen));
+      //   instanciasParagraphs.push(...generarConclusionRADOCX(inst));
+      // }
       // E. Análisis, conclusiones y recomendaciones por competencia
       instanciasParagraphs.push(generarTablaCompetenciasInstanciaDOCX(inst));
       instanciasParagraphs.push(...generarAnalisisCompetenciasDOCX(inst));
@@ -1055,33 +1114,39 @@ exports.generarDOCXCompleto = async contenido => {
         footers: { default: footer },
         children: [
           new Paragraph({
-            style: 'ListParagraph',
+            heading: HeadingLevel.HEADING_1,
             alignment: AlignmentType.CENTER,
             children: [new TextRun('INFORME DE ASIGNATURA INTEGRADORA DE SABERES I')],
+            spacing: { after: 200 },
           }),
           new Paragraph({
-            style: 'ListParagraph',
+            heading: HeadingLevel.HEADING_2,
             children: [new TextRun(contenido.introduccion.objetivo.titulo)],
           }),
           new Paragraph({
             alignment: AlignmentType.JUSTIFIED,
+            spacing: { after: 200 },
             children: [new TextRun(contenido.introduccion.objetivo.texto)],
           }),
           new Paragraph({
-            style: 'ListParagraph',
+            heading: HeadingLevel.HEADING_2,
             children: [new TextRun(contenido.introduccion.relevancia.titulo)],
           }),
-        new Paragraph({
-          alignment: AlignmentType.JUSTIFIED,
-          children: [new TextRun(contenido.introduccion.relevancia.texto)],
-        }),
-        generarTablaResumenIndicadoresDOCX(contenido.resumenIndicadores),
-        ...instanciasParagraphs,
+          new Paragraph({
+            alignment: AlignmentType.JUSTIFIED,
+            spacing: { after: 200 },
+            children: [new TextRun(contenido.introduccion.relevancia.texto)],
+          }),
+          generarTablaResumenIndicadoresDOCX(contenido.resumenIndicadores),
+          new Paragraph({}),
+          ...instanciasParagraphs,
+          new Paragraph({}),
           new Paragraph({
             style: 'ListParagraph',
             children: [new TextRun('Cumplimiento por Competencia')],
           }),
           compTable,
+          new Paragraph({}),
           ...(contenido.recomendacionesComp || []).map(t =>
             new Paragraph({ children: [new TextRun(`Recomendación: ${t}`)] })
           ),

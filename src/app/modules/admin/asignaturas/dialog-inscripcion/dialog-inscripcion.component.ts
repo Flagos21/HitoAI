@@ -5,12 +5,13 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { EstudianteService } from '../../../../services/estudiante.service';
 import { InscripcionService } from '../../../../services/inscripcion.service';
 import { Asignatura, Estudiante, Inscripcion } from '../../../../models';
+import { RutFormatPipe } from '../../../../pipes/rut-format.pipe';
 
 
 @Component({
   selector: 'app-dialog-inscripcion',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RutFormatPipe],
   templateUrl: './dialog-inscripcion.component.html',
   styleUrls: ['./dialog-inscripcion.component.css']
 })
@@ -30,11 +31,11 @@ export class DialogInscripcionComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.cargarEstudiantesNoInscritos();
+    this.cargarEstudiantesDisponibles();
   }
 
-  cargarEstudiantesNoInscritos() {
-    this.estudianteService.obtenerNoInscritos().subscribe(data => {
+  cargarEstudiantesDisponibles() {
+    this.estudianteService.obtenerDisponibles(this.asignatura.ID_Asignatura).subscribe(data => {
       this.estudiantes = data.map(e => ({ ...e, seleccionado: false }));
     });
   }

@@ -10,12 +10,16 @@ const {
   analizarCriterio,
   conclusionCompetencias,
   conclusionCriterios,
+  conclusionRA,
   recomendacionesTemas,
   recomendacionesCompetencia,
   analisisCompetencia,
   recomendacionesGenerales,
 } = require('../utils/openai');
 const { generarPDFCompleto, generarDOCXCompleto } = require('../utils/reportGenerator');
+const {
+  calcularResumenCompetencias,
+} = require('../utils/resumenCompetencias');
 
 function query(sql, params = []) {
   return new Promise((resolve, reject) => {
@@ -45,36 +49,26 @@ async function obtenerDatosIndicadores(asignaturaId) {
           1
         ) AS porcentaje,
         COUNT(*) AS total,
-        c.ID_Competencia AS competencia
+        GROUP_CONCAT(DISTINCT rc.competencia_ID_Competencia
+          ORDER BY rc.competencia_ID_Competencia SEPARATOR ' + ') AS competencia,
+        r.Nombre AS raNombre,
+        r.Descripcion AS raDescripcion,
+        contenido.Nucleo_Tematico AS contenidoNucleo,
+        contenido.Descripcion AS contenidoDescripcion
       FROM aplicacion a
       JOIN evaluacion ev ON ev.ID_Evaluacion = a.evaluacion_ID_Evaluacion
       JOIN indicador i ON i.ID_Indicador = a.indicador_ID_Indicador
       JOIN ra r ON r.ID_RA = i.ra_ID_RA
-      JOIN ra_competencia rc ON rc.ra_ID_RA = r.ID_RA
-      JOIN competencia c ON c.ID_Competencia = rc.competencia_ID_Competencia
+      LEFT JOIN ra_competencia rc ON rc.ra_ID_RA = r.ID_RA
+      LEFT JOIN competencia c ON c.ID_Competencia = rc.competencia_ID_Competencia
+      JOIN contenido contenido ON contenido.ID_Contenido = i.contenido_ID_Contenido
       JOIN inscripcion ins ON ins.ID_Inscripcion = a.inscripcion_ID_Inscripcion
       WHERE ins.asignatura_ID_Asignatura = ?
       GROUP BY ev.ID_Evaluacion, i.ID_Indicador;`;
   return query(sql, [asignaturaId]);
 }
 
-async function obtenerCompetencias(asignaturaId) {
-  const sql = `
-      SELECT
-        c.ID_Competencia,
-        SUM(i.Puntaje_Max) AS puntaje_ideal,
-        ROUND(SUM(a.Obtenido) / COUNT(DISTINCT ins.ID_Inscripcion), 1) AS puntaje_promedio,
-        ROUND((SUM(a.Obtenido) / COUNT(DISTINCT ins.ID_Inscripcion)) / SUM(i.Puntaje_Max) * 100, 1) AS cumplimiento
-      FROM aplicacion a
-      JOIN indicador i ON i.ID_Indicador = a.indicador_ID_Indicador
-      JOIN ra r ON r.ID_RA = i.ra_ID_RA
-      JOIN ra_competencia rc ON rc.ra_ID_RA = r.ID_RA
-      JOIN competencia c ON c.ID_Competencia = rc.competencia_ID_Competencia
-      JOIN inscripcion ins ON ins.ID_Inscripcion = a.inscripcion_ID_Inscripcion
-      WHERE ins.asignatura_ID_Asignatura = ?
-      GROUP BY c.ID_Competencia;`;
-  return query(sql, [asignaturaId]);
-}
+
 
 async function obtenerAsignatura(id) {
   const sql = `
@@ -140,7 +134,21 @@ exports.generarInforme = async asignaturaId => {
   const datos = await obtenerDatosIndicadores(asignaturaId);
   const rubricas = await obtenerRubricas(asignaturaId);
   const promedios = await obtenerPromediosCriterio(asignaturaId);
-  const competencias = await obtenerCompetencias(asignaturaId);
+  const competenciasResumen = calcularResumenCompetencias(
+    datos.map(d => ({
+      puntaje_maximo: d.puntajeMax,
+      promedio_obtenido: d.promedio,
+      competencias: d.competencia,
+    }))
+  );
+  const competencias = competenciasResumen
+    .filter(c => c.competencia !== 'Total')
+    .map(c => ({
+      ID_Competencia: c.competencia,
+      puntaje_ideal: c.puntajeIdeal,
+      puntaje_promedio: c.promedio,
+      cumplimiento: c.cumplimiento,
+    }));
   const asignatura = await obtenerAsignatura(asignaturaId);
 
   const introduccion = await crearIntroduccion(asignatura.Nombre, asignatura.Carrera);
@@ -155,6 +163,12 @@ exports.generarInforme = async asignaturaId => {
         min: d.minimo,
         promedio: d.promedio,
         porcentaje: d.porcentaje,
+        raNombre: d.raNombre,
+        raDescripcion: d.raDescripcion,
+        contenidoNucleo: d.contenidoNucleo,
+        contenidoDescripcion: d.contenidoDescripcion,
+        asignaturaNombre: asignatura.Nombre,
+        carreraNombre: asignatura.Carrera,
       })
     )
   );
@@ -210,33 +224,62 @@ exports.generarInforme = async asignaturaId => {
         criterios: [],
         analisis: [],
         competencias: {},
+        estudiantes: 0,
       };
+    }
+    if (d.total > instancias[d.instancia].estudiantes) {
+      instancias[d.instancia].estudiantes = d.total;
     }
     instancias[d.instancia].criterios.push(d);
     instancias[d.instancia].analisis.push(analisis[idx]);
 
-    const comp = instancias[d.instancia].competencias[d.competencia] || {
-      puntajeIdeal: 0,
-      promedios: [],
-    };
-    comp.puntajeIdeal += d.puntajeMax;
-    comp.promedios.push(d.promedio);
-    instancias[d.instancia].competencias[d.competencia] = comp;
+    const claves = String(d.competencia || '')
+      .split(/\s*\+\s*/)
+      .filter(Boolean);
+    if (!claves.length) claves.push('Desconocida');
+    claves.forEach(c => {
+      const comp = instancias[d.instancia].competencias[c] || {
+        puntajeIdeal: 0,
+        promedioSum: 0,
+      };
+      // Count the full indicator score for each associated competencia
+      comp.puntajeIdeal += d.puntajeMax * d.total;
+      if (typeof d.promedio === 'number') {
+        comp.promedioSum += d.promedio * d.total;
+      }
+      instancias[d.instancia].competencias[c] = comp;
+    });
   });
 
   for (const i of Object.values(instancias)) {
     const resumen = i.criterios.map(c => c.indicador).join(', ');
-    i.conclusion = await conclusionCriterios(resumen);
-    i.recomendaciones = [await recomendacionesTemas(resumen)];
+    i.conclusion = await conclusionCriterios({
+      resumen,
+      asignaturaNombre: asignatura.Nombre,
+      carreraNombre: asignatura.Carrera,
+    });
+    i.recomendaciones = [
+      await recomendacionesTemas(
+        resumen,
+        asignatura.Nombre,
+        asignatura.Carrera
+      ),
+    ];
 
     i.competenciasResumen = [];
     for (const [comp, datos] of Object.entries(i.competencias)) {
-      const promedio =
-        Math.round((datos.promedios.reduce((a, b) => a + b, 0) / datos.promedios.length) * 10) / 10;
-      const cumplimiento = Math.round((promedio / datos.puntajeIdeal) * 100);
+      const puntajeIdeal = i.estudiantes
+        ? Math.round((datos.puntajeIdeal / i.estudiantes) * 10) / 10
+        : 0;
+      const promedio = i.estudiantes
+        ? Math.round((datos.promedioSum / i.estudiantes) * 10) / 10
+        : 0;
+      const cumplimiento = puntajeIdeal
+        ? Math.round((promedio / puntajeIdeal) * 100)
+        : 0;
       i.competenciasResumen.push({
         competencia: comp,
-        puntajeIdeal: datos.puntajeIdeal,
+        puntajeIdeal,
         promedio,
         cumplimiento,
       });
@@ -248,29 +291,56 @@ exports.generarInforme = async asignaturaId => {
           puntajeIdeal: c.puntajeIdeal,
           promedio: c.promedio,
           cumplimiento: c.cumplimiento,
+          asignaturaNombre: asignatura.Nombre,
+          carreraNombre: asignatura.Carrera,
         })
       )
     );
     i.recomendacionesCompetencias = await Promise.all(
       i.competenciasResumen.map(c =>
-        recomendacionesCompetencia(c.competencia, c.cumplimiento)
+        recomendacionesCompetencia(
+          c.competencia,
+          c.cumplimiento,
+          asignatura.Nombre,
+          asignatura.Carrera
+        )
       )
     );
+
   }
 
   // totalNiveles ya calculado al agregar rubricas
 
   const resumenComp = competencias.map(c => `${c.ID_Competencia}: ${c.cumplimiento}%`).join(', ');
-  const conclusion = await conclusionCompetencias(resumenComp);
+  const conclusion = await conclusionCompetencias({
+    resumen: resumenComp,
+    asignaturaNombre: asignatura.Nombre,
+    carreraNombre: asignatura.Carrera,
+  });
 
   const recomendacionesComp = await Promise.all(
-    competencias.map(c => recomendacionesCompetencia(c.ID_Competencia, c.cumplimiento))
+    competencias.map(c =>
+      recomendacionesCompetencia(
+        c.ID_Competencia,
+        c.cumplimiento,
+        asignatura.Nombre,
+        asignatura.Carrera
+      )
+    )
   );
 
-  const recomendaciones = await recomendacionesGenerales('temas de la asignatura');
+  const recomendaciones = await recomendacionesGenerales(
+    'temas de la asignatura',
+    asignatura.Nombre,
+    asignatura.Carrera
+  );
 
   const resumenTemasFinal = [...new Set(datos.map(d => d.indicador))].join(', ');
-  const recomendacionesTemasFinal = await recomendacionesTemas(resumenTemasFinal);
+  const recomendacionesTemasFinal = await recomendacionesTemas(
+    resumenTemasFinal,
+    asignatura.Nombre,
+    asignatura.Carrera
+  );
 
   const barrasPath = await generarGraficoBarras(
     datos.map(d => d.indicador),

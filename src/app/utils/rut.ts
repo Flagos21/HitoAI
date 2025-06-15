@@ -20,3 +20,17 @@ export function validarRut(rut: string): boolean {
   else dvCalc = expected.toString();
   return dvCalc === dv;
 }
+
+export function formatRut(rut: string): string {
+  const limpio = cleanRut(rut);
+  if (limpio.length <= 1) return limpio;
+  const cuerpo = limpio.slice(0, -1);
+  const dv = limpio.slice(-1);
+  let formatted = '';
+  for (let i = cuerpo.length; i > 0; i -= 3) {
+    const start = Math.max(i - 3, 0);
+    const segment = cuerpo.slice(start, i);
+    formatted = segment + (formatted ? '.' + formatted : '');
+  }
+  return `${formatted}-${dv}`;
+}

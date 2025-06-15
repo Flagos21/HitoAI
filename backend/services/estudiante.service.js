@@ -19,6 +19,22 @@ exports.getNoInscritos = () => {
   });
 };
 
+exports.getDisponiblesPorAsignatura = (asignaturaId) => {
+  const sql = `
+    SELECT * FROM estudiante e
+    WHERE NOT EXISTS (
+      SELECT 1 FROM inscripcion i
+      WHERE i.estudiante_ID_Estudiante = e.ID_Estudiante
+        AND i.asignatura_ID_Asignatura = ?
+    )
+  `;
+  return new Promise((resolve, reject) => {
+    connection.query(sql, [asignaturaId], (err, results) =>
+      err ? reject(err) : resolve(results)
+    );
+  });
+};
+
 exports.crear = (est) => {
   const sql = `INSERT INTO estudiante (ID_Estudiante, Nombre, Apellido, Anio_Ingreso) VALUES (?, ?, ?, ?)`;
   return new Promise((resolve, reject) => {
