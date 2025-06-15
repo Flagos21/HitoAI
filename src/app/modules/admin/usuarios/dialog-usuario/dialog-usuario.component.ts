@@ -6,12 +6,13 @@ import { UsuarioService } from '../../../../services/usuario.service';
 import { RolService } from '../../../../services/rol.service';
 import { Usuario, Rol } from '../../../../models';
 import { cleanRut, validarRut } from '../../../../utils/rut';
+import { RutFormatPipe } from '../../../../pipes/rut-format.pipe';
 import { claveSegura } from '../../../../utils/clave';
 
 @Component({
   selector: 'app-dialog-usuario',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RutFormatPipe],
   templateUrl: './dialog-usuario.component.html',
   styleUrls: ['./dialog-usuario.component.css']
 })

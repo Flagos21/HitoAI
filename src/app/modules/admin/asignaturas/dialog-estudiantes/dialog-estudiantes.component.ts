@@ -5,11 +5,12 @@ import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { EstudianteService } from '../../../../services/estudiante.service';
 import { DialogFormEstudianteComponent } from '../dialog-form-estudiante/dialog-form-estudiante.component';
 import { Estudiante } from '../../../../models';
+import { RutFormatPipe } from '../../../../pipes/rut-format.pipe';
 
 @Component({
   selector: 'app-dialog-estudiantes',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RutFormatPipe],
   templateUrl: './dialog-estudiantes.component.html',
   styleUrls: ['./dialog-estudiantes.component.css']
 })
@@ -26,11 +27,11 @@ export class DialogEstudiantesComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.cargarEstudiantesNoInscritos();
+    this.cargarEstudiantes();
   }
 
-  cargarEstudiantesNoInscritos() {
-    this.estudianteService.obtenerNoInscritos().subscribe(data => {
+  cargarEstudiantes() {
+    this.estudianteService.obtenerTodos().subscribe(data => {
       this.estudiantes = data;
     });
   }
@@ -49,7 +50,7 @@ export class DialogEstudiantesComponent implements OnInit {
     modalRef.componentInstance.datos = modo === 'crear' ? null : est;
 
     modalRef.result.then(res => {
-      if (res === 'actualizado') this.cargarEstudiantesNoInscritos();
+      if (res === 'actualizado') this.cargarEstudiantes();
     }).catch(() => {});
   }
 
@@ -60,7 +61,7 @@ export class DialogEstudiantesComponent implements OnInit {
       this.estudianteService.cargarDesdeCSV(archivo).subscribe((resp) => {
         this.mensajeCSV = resp.message || 'Estudiantes cargados';
         this.mostrarToastCSV = true;
-        this.cargarEstudiantesNoInscritos();
+        this.cargarEstudiantes();
 
         setTimeout(() => this.mostrarToastCSV = false, 3000);
       });

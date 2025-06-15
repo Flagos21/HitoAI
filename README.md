@@ -47,6 +47,12 @@ To start the backend API, change into the `backend/` directory and run:
 npm start
 ```
 
+To run the backend unit tests use:
+
+```bash
+npm test
+```
+
 ## Code scaffolding
 
 Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
@@ -132,6 +138,10 @@ cd backend
 npm install chartjs-node-canvas@latest
 
 ```
+
+Without these packages the report generator will skip chart creation. If your
+generated PDF or Word files are missing graphs, verify that `pdfkit`, `docx`
+and `chartjs-node-canvas` are installed correctly.
 
 ## Additional Resources
 

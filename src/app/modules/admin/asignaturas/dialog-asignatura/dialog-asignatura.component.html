@@ -110,7 +110,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let est of estudiantesInscritos">
-            <td>{{ est.ID_Estudiante }}</td>
+            <td>{{ est.ID_Estudiante | rutFormat }}</td>
             <td>{{ est.Nombre }}</td>
             <td>{{ est.Apellido }}</td>
             <td *ngIf="puedeDesvincular">

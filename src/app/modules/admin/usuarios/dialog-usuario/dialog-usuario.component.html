@@ -43,7 +43,7 @@
   <div *ngIf="modo !== 'crear'">
     <div class="mb-3">
       <label class="form-label">RUT</label>
-      <input type="text" class="form-control" [value]="usuario.ID_Usuario" disabled />
+      <input type="text" class="form-control" [value]="usuario.ID_Usuario | rutFormat" disabled />
     </div>
     <div class="mb-3">
       <label class="form-label">Nombre</label>
