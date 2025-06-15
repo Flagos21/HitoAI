@@ -11,15 +11,14 @@ function calcularResumenCompetencias(datos) {
   datos.forEach(d => {
     const comps = parseCompetencias(d.competencias);
     if (!comps.length) comps.push('Desconocida');
-    // Split points evenly across all competencies for this indicator
-    const count = comps.length;
     comps.forEach(c => {
       if (!map[c]) map[c] = { puntajeIdeal: 0, promedio: 0 };
       if (typeof d.puntaje_maximo === 'number') {
-        map[c].puntajeIdeal += d.puntaje_maximo / count;
+        // Count the full score for each associated competencia
+        map[c].puntajeIdeal += d.puntaje_maximo;
       }
       if (typeof d.promedio_obtenido === 'number') {
-        map[c].promedio += d.promedio_obtenido / count;
+        map[c].promedio += d.promedio_obtenido;
       }
     });
   });
