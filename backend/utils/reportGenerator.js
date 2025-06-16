@@ -587,7 +587,7 @@ function generarBloqueDesgloseIndicadoresDOCX(instancia) {
 function buildBarChart(labels, values) {
   if (!Chart) return null;
   return new Chart({
-    type: ChartType.BAR,
+    type: ChartType.COLUMN,
     width: 500,
     height: 250,
     legend: { position: 'none' },
