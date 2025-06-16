@@ -50,19 +50,29 @@ async function generarGraficoBarras(labels, datos, nombreArchivo = 'grafico.png'
       label: 'Alumnos sobre promedio (%)',
       data: datos.map(d => Number(d) || 0),
       backgroundColor: defaultColors[3],
+      maxBarThickness: 40,
+      barPercentage: 0.5,
     });
   } else if (Array.isArray(datos)) {
     datasets = datos.map((ds, idx) => {
       const label = ds.label || `Serie ${idx + 1}`;
       const data = (ds.data || []).map(d => Number(d) || 0);
       const bg = ds.backgroundColor || ds.color || colorMap[label] || defaultColors[idx % defaultColors.length];
-      return { label, data, backgroundColor: bg };
+      return {
+        label,
+        data,
+        backgroundColor: bg,
+        maxBarThickness: 40,
+        barPercentage: 0.5,
+      };
     });
   } else if (typeof datos === 'object' && datos !== null) {
     datasets = Object.entries(datos).map(([label, data], idx) => ({
       label,
       data: (data || []).map(d => Number(d) || 0),
       backgroundColor: colorMap[label] || defaultColors[idx % defaultColors.length],
+      maxBarThickness: 40,
+      barPercentage: 0.5,
     }));
   }
 
@@ -73,15 +83,15 @@ async function generarGraficoBarras(labels, datos, nombreArchivo = 'grafico.png'
       datasets,
     },
     options: {
-      indexAxis: 'x',
+      indexAxis: 'y',
       scales: {
-        y: {
+        x: {
           beginAtZero: true,
           max: 100,
           ticks: { stepSize: 10 },
           title: { display: true, text: '% de Alumnos' },
         },
-        x: {
+        y: {
           title: { display: true, text: 'Indicadores' },
         },
       },
