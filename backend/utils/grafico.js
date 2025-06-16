@@ -73,15 +73,15 @@ async function generarGraficoBarras(labels, datos, nombreArchivo = 'grafico.png'
       datasets,
     },
     options: {
-      indexAxis: 'y',
+      indexAxis: 'x',
       scales: {
-        x: {
+        y: {
           beginAtZero: true,
           max: 100,
           ticks: { stepSize: 10 },
           title: { display: true, text: '% de Alumnos' },
         },
-        y: {
+        x: {
           title: { display: true, text: 'Indicadores' },
         },
       },
