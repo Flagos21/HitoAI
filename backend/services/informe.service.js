@@ -343,12 +343,6 @@ exports.generarInforme = async asignaturaId => {
     asignatura.Carrera
   );
 
-  const barrasPath = await generarGraficoBarras(
-    datos.map(d => d.indicador),
-    datos.map(d => Number(d.porcentaje) || 0),
-    'barras.png'
-  );
-
   const compPath = await generarGraficoLineas(
     competencias.map(c => c.ID_Competencia),
     competencias.map(c => Number(c.cumplimiento) || 0),
@@ -392,7 +386,7 @@ exports.generarInforme = async asignaturaId => {
     conclusion,
     recomendaciones,
     recomendacionesTemasFinal,
-    graficos: { barrasPath, compPath, ...graficosInstancias },
+    graficos: { compPath, ...graficosInstancias },
   };
 
   let pdf = Buffer.from('');
@@ -416,7 +410,7 @@ exports.generarInforme = async asignaturaId => {
   if (pdf.length) fs.writeFileSync(path.join(outDir, `${base}.pdf`), pdf);
 
   if (docx.length) fs.writeFileSync(path.join(outDir, `${base}.docx`), docx);
-  const archivosGraficos = [barrasPath, compPath];
+  const archivosGraficos = [compPath];
   Object.values(graficosInstancias).forEach(obj => {
     if (obj.barras) archivosGraficos.push(...obj.barras);
     if (obj.tortas) archivosGraficos.push(...obj.tortas);
