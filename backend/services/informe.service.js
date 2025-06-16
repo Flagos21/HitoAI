@@ -4,6 +4,7 @@ const path = require('path');
 const {
   generarGraficoBarras,
   generarGraficoLineas,
+  generarGraficoTorta,
 } = require('../utils/grafico');
 const {
   crearIntroduccion,
@@ -357,13 +358,21 @@ exports.generarInforme = async asignaturaId => {
   const graficosInstancias = {};
   for (const [num, inst] of Object.entries(instancias)) {
     graficosInstancias[num] = await Promise.all(
-      inst.criterios.map((c, idx) =>
-        generarGraficoBarras(
+      inst.criterios.map(async (c, idx) => {
+        const barra = await generarGraficoBarras(
           [c.indicador],
           [Number(c.porcentaje) || 0],
           `instancia_${num}_${idx}.png`
-        )
-      )
+        );
+        const labels = (c.niveles || []).map(n => n.nombre);
+        const valores = (c.niveles || []).map(n => n.porcentaje);
+        const torta = await generarGraficoTorta(
+          labels,
+          valores,
+          `instancia_${num}_${idx}_pie.png`
+        );
+        return [barra, torta];
+      })
     );
   }
 
@@ -407,7 +416,10 @@ exports.generarInforme = async asignaturaId => {
   if (docx.length) fs.writeFileSync(path.join(outDir, `${base}.docx`), docx);
   const archivosGraficos = [barrasPath, compPath];
   Object.values(graficosInstancias).forEach(arr => {
-    archivosGraficos.push(...arr);
+    arr.forEach(p => {
+      if (Array.isArray(p)) archivosGraficos.push(...p);
+      else archivosGraficos.push(p);
+    });
   });
   archivosGraficos.forEach(p => {
     if (fs.existsSync(p)) fs.unlinkSync(p);

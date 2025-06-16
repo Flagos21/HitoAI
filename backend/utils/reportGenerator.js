@@ -197,7 +197,7 @@ function generarBloqueDesgloseIndicadoresPDF(doc, instancia) {
 }
 
 function generarGraficoDesempenoPDF(doc, paths) {
-  const arr = Array.isArray(paths) ? paths : [paths];
+  const arr = Array.isArray(paths) ? paths.flat() : [paths];
   arr.forEach(p => {
     if (p && fs.existsSync(p)) {
       doc.image(p, { width: 500 });
@@ -1022,12 +1022,17 @@ exports.generarDOCXCompleto = async contenido => {
       // C. Gráfico por instancia
       const grafPaths = (contenido.graficos && contenido.graficos[num]) || [];
       inst.criterios.forEach((c, idx) => {
-        const graf = generarGraficoDesempenoDOCX(
-          [c.indicador],
-          [c.porcentaje],
-          grafPaths[idx]
-        );
-        if (graf) instanciasParagraphs.push(graf);
+        const pathsArr = Array.isArray(grafPaths[idx])
+          ? grafPaths[idx]
+          : [grafPaths[idx]];
+        pathsArr.forEach(p => {
+          const graf = generarGraficoDesempenoDOCX(
+            [c.indicador],
+            [c.porcentaje],
+            p
+          );
+          if (graf) instanciasParagraphs.push(graf);
+        });
       });
       // D. Tabla de distribución de niveles por criterio
       instanciasParagraphs.push(generarTablaCriteriosPorIndicadorDOCX(inst));
