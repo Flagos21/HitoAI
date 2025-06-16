@@ -1057,14 +1057,6 @@ exports.generarDOCXCompleto = async contenido => {
     });
 
   const grafParags = [];
-  if (Array.isArray(contenido.datos) && contenido.datos.length) {
-    const g = generarGraficoDesempenoDOCX(
-      contenido.datos.map(d => d.indicador),
-      contenido.datos.map(d => d.porcentaje),
-      contenido.graficos && contenido.graficos.barrasPath
-    );
-    if (g) grafParags.push(g);
-  }
   if (Array.isArray(contenido.competencias) && contenido.competencias.length) {
     const g = generarGraficoDesempenoDOCX(
       contenido.competencias.map(c => c.ID_Competencia),

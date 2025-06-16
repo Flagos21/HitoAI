@@ -144,7 +144,12 @@ async function generarGraficoTorta(labels, datos, nombreArchivo = 'torta.png') {
       plugins: {
         datalabels: {
           color: '#000000',
-          formatter: v => `${v}%`,
+          formatter: (val, ctx) => {
+            const data = ctx.chart.data.datasets[0].data || [];
+            const sum = data.reduce((acc, d) => acc + Number(d || 0), 0);
+            const pct = sum ? (val / sum) * 100 : 0;
+            return `${pct % 1 ? pct.toFixed(1) : pct}%`;
+          },
         },
       },
     },
