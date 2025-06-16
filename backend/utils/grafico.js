@@ -126,13 +126,27 @@ async function generarGraficoTorta(labels, datos, nombreArchivo = 'torta.png') {
       datasets: [
         {
           data: datos,
-          backgroundColor: [
-            'rgba(75, 192, 192, 0.6)',
-            'rgba(255, 205, 86, 0.6)',
-            'rgba(255, 99, 132, 0.6)'
-          ],
+          backgroundColor: labels.map((_, i) => {
+            const colors = [
+              'rgba(75, 192, 192, 0.6)',
+              'rgba(54, 162, 235, 0.6)',
+              'rgba(255, 205, 86, 0.6)',
+              'rgba(255, 99, 132, 0.6)',
+              'rgba(153, 102, 255, 0.6)',
+              'rgba(201, 203, 207, 0.6)',
+            ];
+            return colors[i % colors.length];
+          }),
         },
       ],
+    },
+    options: {
+      plugins: {
+        datalabels: {
+          color: '#000000',
+          formatter: v => `${v}%`,
+        },
+      },
     },
   };
   const buffer = await chartJSNodeCanvas.renderToBuffer(config);

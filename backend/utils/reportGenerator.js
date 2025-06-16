@@ -891,8 +891,11 @@ exports.generarPDFCompleto = contenido => {
         doc.moveDown(0.5);
         // B. Desglose por indicador
         generarBloqueDesgloseIndicadoresPDF(doc, inst);
-        // C. Gráfico por instancia
-        generarGraficoDesempenoPDF(doc, contenido.graficos && contenido.graficos[num]);
+        // C. Gráficos de barras por instancia
+        const grafObj = contenido.graficos && contenido.graficos[num];
+        generarGraficoDesempenoPDF(doc, grafObj && grafObj.barras);
+        generarTablaCriteriosPorIndicadorPDF(doc, inst);
+        generarGraficoDesempenoPDF(doc, grafObj && grafObj.tortas);
         // D. Conclusiones de instancia
         generarConclusionPDF(doc, inst);
         // E. Recomendaciones generales de instancia
@@ -1019,23 +1022,27 @@ exports.generarDOCXCompleto = async contenido => {
       );
       // B. Desglose por indicador
       instanciasParagraphs.push(...generarBloqueDesgloseIndicadoresDOCX(inst));
-      // C. Gráfico por instancia
-      const grafPaths = (contenido.graficos && contenido.graficos[num]) || [];
-      inst.criterios.forEach((c, idx) => {
-        const pathsArr = Array.isArray(grafPaths[idx])
-          ? grafPaths[idx]
-          : [grafPaths[idx]];
-        pathsArr.forEach(p => {
-          const graf = generarGraficoDesempenoDOCX(
-            [c.indicador],
-            [c.porcentaje],
-            p
-          );
-          if (graf) instanciasParagraphs.push(graf);
-        });
+      // C. Gráficos de barras por instancia
+      const grafObj = (contenido.graficos && contenido.graficos[num]) || {};
+      (grafObj.barras || []).forEach((p, idx) => {
+        const graf = generarGraficoDesempenoDOCX(
+          [inst.criterios[idx].indicador],
+          [inst.criterios[idx].porcentaje],
+          p
+        );
+        if (graf) instanciasParagraphs.push(graf);
       });
       // D. Tabla de distribución de niveles por criterio
       instanciasParagraphs.push(generarTablaCriteriosPorIndicadorDOCX(inst));
+      // E. Gráficos de torta por instancia
+      (grafObj.tortas || []).forEach((p, idx) => {
+        const graf = generarGraficoDesempenoDOCX(
+          [inst.criterios[idx].indicador],
+          [inst.criterios[idx].porcentaje],
+          p
+        );
+        if (graf) instanciasParagraphs.push(graf);
+      });
       const grafNivel = generarGraficoDistribucionNivelesDOCX(inst);
       if (grafNivel) instanciasParagraphs.push(grafNivel);
       // Se omite la generación de tablas y conclusiones por Resultado de Aprendizaje
