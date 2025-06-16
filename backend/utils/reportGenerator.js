@@ -196,11 +196,14 @@ function generarBloqueDesgloseIndicadoresPDF(doc, instancia) {
   });
 }
 
-function generarGraficoDesempenoPDF(doc, path) {
-  if (path && fs.existsSync(path)) {
-    doc.image(path, { width: 500 });
-    doc.moveDown();
-  }
+function generarGraficoDesempenoPDF(doc, paths) {
+  const arr = Array.isArray(paths) ? paths : [paths];
+  arr.forEach(p => {
+    if (p && fs.existsSync(p)) {
+      doc.image(p, { width: 500 });
+      doc.moveDown();
+    }
+  });
 }
 
 function generarTablaCriteriosPorIndicadorPDF(doc, instancia) {
@@ -587,7 +590,7 @@ function generarBloqueDesgloseIndicadoresDOCX(instancia) {
 function buildBarChart(labels, values) {
   if (!Chart) return null;
   return new Chart({
-    type: ChartType.COLUMN,
+    type: ChartType.BAR,
     width: 500,
     height: 250,
     legend: { position: 'none' },
@@ -1017,12 +1020,15 @@ exports.generarDOCXCompleto = async contenido => {
       // B. Desglose por indicador
       instanciasParagraphs.push(...generarBloqueDesgloseIndicadoresDOCX(inst));
       // C. Gráfico por instancia
-      const graf = generarGraficoDesempenoDOCX(
-        inst.criterios.map(c => c.indicador),
-        inst.criterios.map(c => c.porcentaje),
-        contenido.graficos && contenido.graficos[num]
-      );
-      if (graf) instanciasParagraphs.push(graf);
+      const grafPaths = (contenido.graficos && contenido.graficos[num]) || [];
+      inst.criterios.forEach((c, idx) => {
+        const graf = generarGraficoDesempenoDOCX(
+          [c.indicador],
+          [c.porcentaje],
+          grafPaths[idx]
+        );
+        if (graf) instanciasParagraphs.push(graf);
+      });
       // D. Tabla de distribución de niveles por criterio
       instanciasParagraphs.push(generarTablaCriteriosPorIndicadorDOCX(inst));
       const grafNivel = generarGraficoDistribucionNivelesDOCX(inst);

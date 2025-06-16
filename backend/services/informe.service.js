@@ -356,11 +356,15 @@ exports.generarInforme = async asignaturaId => {
 
   const graficosInstancias = {};
   for (const [num, inst] of Object.entries(instancias)) {
-    graficosInstancias[num] = await generarGraficoBarras(
-      inst.criterios.map(c => c.indicador),
-      inst.criterios.map(c => Number(c.porcentaje) || 0),
-      `instancia_${num}.png`
-    );
+    graficosInstancias[num] = [];
+    for (const [idx, c] of inst.criterios.entries()) {
+      const path = await generarGraficoBarras(
+        [c.indicador],
+        [Number(c.porcentaje) || 0],
+        `instancia_${num}_${idx}.png`
+      );
+      graficosInstancias[num].push(path);
+    }
   }
 
   const resumenIndicadores = [...datos].sort((a, b) => a.instancia - b.instancia);
@@ -401,7 +405,10 @@ exports.generarInforme = async asignaturaId => {
   if (pdf.length) fs.writeFileSync(path.join(outDir, `${base}.pdf`), pdf);
 
   if (docx.length) fs.writeFileSync(path.join(outDir, `${base}.docx`), docx);
-  const archivosGraficos = [barrasPath, compPath, ...Object.values(graficosInstancias)];
+  const archivosGraficos = [barrasPath, compPath];
+  Object.values(graficosInstancias).forEach(arr => {
+    archivosGraficos.push(...arr);
+  });
   archivosGraficos.forEach(p => {
     if (fs.existsSync(p)) fs.unlinkSync(p);
   });
