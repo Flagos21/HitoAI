@@ -13,6 +13,25 @@
       </h3>
     </div>
 
+    <div class="card mb-4">
+      <div class="card-body">
+        <div class="row g-2">
+          <div class="col-md-4">
+            <input type="text" class="form-control" placeholder="Buscar por RUT..." [(ngModel)]="filtroId" (input)="aplicarFiltros()" />
+          </div>
+          <div class="col-md-4">
+            <input type="text" class="form-control" placeholder="Nombre o apellido..." [(ngModel)]="filtroTexto" (input)="aplicarFiltros()" />
+          </div>
+          <div class="col-md-4">
+            <select class="form-select" [(ngModel)]="filtroRol" (change)="aplicarFiltros()">
+              <option value="">Todos los roles</option>
+              <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div *ngFor="let grupo of agrupados" class="mb-4">
       <div class="card shadow-sm border-0">
         <div class="card-header fw-bold" style="background-color: #0073E6; color: white;">
