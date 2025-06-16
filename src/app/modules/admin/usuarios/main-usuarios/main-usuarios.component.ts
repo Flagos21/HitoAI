@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 import { UsuarioService } from '../../../../services/usuario.service';
 import { Usuario } from '../../../../models';
@@ -10,13 +11,18 @@ import { RutFormatPipe } from '../../../../pipes/rut-format.pipe';
 @Component({
   selector: 'app-main-usuarios',
   standalone: true,
-  imports: [CommonModule, NgbModalModule, SidebarComponent, RutFormatPipe],
+  imports: [CommonModule, FormsModule, NgbModalModule, SidebarComponent, RutFormatPipe],
   templateUrl: './main-usuarios.component.html',
   styleUrls: ['./main-usuarios.component.css']
 })
 export class MainUsuariosComponent implements OnInit {
   rolUsuario: string = '';
   agrupados: { rol: string; usuarios: Usuario[] }[] = [];
+  usuarios: Usuario[] = [];
+  roles: string[] = [];
+  filtroId = '';
+  filtroTexto = '';
+  filtroRol = '';
 
   constructor(private usuarioService: UsuarioService, private modalService: NgbModal) {}
 
@@ -27,14 +33,30 @@ export class MainUsuariosComponent implements OnInit {
 
   cargarUsuarios() {
     this.usuarioService.getUsuarios().subscribe(data => {
-      const mapa: { [k: string]: Usuario[] } = {};
-      for (const u of data) {
-        const key = u.Rol || 'Sin Rol';
-        if (!mapa[key]) mapa[key] = [];
-        mapa[key].push(u);
-      }
-      this.agrupados = Object.keys(mapa).map(k => ({ rol: k, usuarios: mapa[k] }));
+      this.usuarios = data;
+      this.roles = Array.from(new Set(data.map(u => u.Rol || '')));
+      this.aplicarFiltros();
     });
+  }
+
+  aplicarFiltros() {
+    const id = this.filtroId.toLowerCase();
+    const texto = this.filtroTexto.toLowerCase();
+    const rol = this.filtroRol;
+
+    const filtrados = this.usuarios.filter(u =>
+      (!id || u.ID_Usuario.toLowerCase().includes(id)) &&
+      (!texto || u.Nombre.toLowerCase().includes(texto)) &&
+      (!rol || u.Rol === rol)
+    );
+
+    const mapa: { [k: string]: Usuario[] } = {};
+    for (const u of filtrados) {
+      const key = u.Rol || 'Sin Rol';
+      if (!mapa[key]) mapa[key] = [];
+      mapa[key].push(u);
+    }
+    this.agrupados = Object.keys(mapa).map(k => ({ rol: k, usuarios: mapa[k] }));
   }
 
   abrirDialog(modo: 'crear' | 'ver' | 'editar' | 'rol', usuario?: Usuario) {
