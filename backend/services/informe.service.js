@@ -356,15 +356,15 @@ exports.generarInforme = async asignaturaId => {
 
   const graficosInstancias = {};
   for (const [num, inst] of Object.entries(instancias)) {
-    graficosInstancias[num] = [];
-    for (const [idx, c] of inst.criterios.entries()) {
-      const path = await generarGraficoBarras(
-        [c.indicador],
-        [Number(c.porcentaje) || 0],
-        `instancia_${num}_${idx}.png`
-      );
-      graficosInstancias[num].push(path);
-    }
+    graficosInstancias[num] = await Promise.all(
+      inst.criterios.map((c, idx) =>
+        generarGraficoBarras(
+          [c.indicador],
+          [Number(c.porcentaje) || 0],
+          `instancia_${num}_${idx}.png`
+        )
+      )
+    );
   }
 
   const resumenIndicadores = [...datos].sort((a, b) => a.instancia - b.instancia);
