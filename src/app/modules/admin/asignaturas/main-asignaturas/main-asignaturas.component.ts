@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { DialogAsignaturaComponent } from '../dialog-asignatura/dialog-asignatura.component';
@@ -12,13 +13,15 @@ import { SidebarComponent } from '../../../../shared/components/sidebar/sidebar.
 @Component({
   selector: 'app-main-asignaturas',
   standalone: true,
-  imports: [CommonModule, NgbModalModule, SidebarComponent],
+  imports: [CommonModule, FormsModule, NgbModalModule, SidebarComponent],
   templateUrl: './main-asignaturas.component.html',
   styleUrls: ['./main-asignaturas.component.css']
 })
 export class MainAsignaturasComponent implements OnInit {
   rolUsuario: string = '';
   asignaturasPorCarrera: { carrera: string; asignaturas: Asignatura[] }[] = [];
+  asignaturas: Asignatura[] = [];
+  filtroTexto: string = '';
 
   constructor(
     private modalService: NgbModal,
@@ -32,17 +35,27 @@ export class MainAsignaturasComponent implements OnInit {
 
   cargarAsignaturas() {
     this.asignaturaService.obtenerTodas().subscribe(data => {
-      const agrupadas: { [key: string]: Asignatura[] } = {};
-      for (const a of data) {
-        const key = a.Carrera || '';
-        if (!agrupadas[key]) agrupadas[key] = [];
-        agrupadas[key].push(a);
-      }
-      this.asignaturasPorCarrera = Object.keys(agrupadas).map(k => ({
-        carrera: k,
-        asignaturas: agrupadas[k]
-      }));
+      this.asignaturas = data;
+      this.aplicarFiltro();
     });
+  }
+
+  aplicarFiltro() {
+    const texto = this.filtroTexto.toLowerCase();
+    const filtradas = this.asignaturas.filter(a =>
+      a.ID_Asignatura.toLowerCase().includes(texto) ||
+      a.Nombre.toLowerCase().includes(texto)
+    );
+    const agrupadas: { [key: string]: Asignatura[] } = {};
+    for (const a of filtradas) {
+      const key = a.Carrera || '';
+      if (!agrupadas[key]) agrupadas[key] = [];
+      agrupadas[key].push(a);
+    }
+    this.asignaturasPorCarrera = Object.keys(agrupadas).map(k => ({
+      carrera: k,
+      asignaturas: agrupadas[k]
+    }));
   }
 
   abrirDialog(modo: 'crear' | 'ver' | 'editar', asignatura?: Asignatura) {
