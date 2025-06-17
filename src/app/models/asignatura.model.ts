@@ -8,4 +8,5 @@ export interface Asignatura {
   usuario_ID_Usuario: string;
   Carrera?: string;
   Profesor?: string;
+  Estado?: string;
 }
