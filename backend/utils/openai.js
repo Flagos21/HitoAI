@@ -108,7 +108,15 @@ exports.analizarCriterio = ({
   asignaturaNombre,
   carreraNombre,
 }) => {
-  const prompt = `Teniendo en cuenta los datos de las tablas de Evaluación, Indicador, Resultado de Aprendizaje, Contenido y Aplicación, analiza pedagógicamente el criterio "${indicador}" evaluado en "${evaluacion}" dentro de la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}. El contenido relacionado es "${contenidoNucleo}" (${contenidoDescripcion}) y corresponde al RA "${raNombre}" (${raDescripcion}). Se obtuvo un puntaje máximo de ${max}, un mínimo de ${min}, un promedio de ${promedio} y un logro del ${porcentaje}%. Incluye recomendaciones de mejora.`;
+  const prompt =
+    `Actúa como un experto pedagogo. ` +
+    `Utilizando la información de las tablas de Evaluación, Indicador, Resultado de Aprendizaje, Contenido y Aplicación, ` +
+    `realiza un análisis profundo del indicador "${indicador}" (criterio "${competencia}") ` +
+    `evaluado en "${evaluacion}" dentro de la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}. ` +
+    `Explica cómo el contenido "${contenidoNucleo}" (${contenidoDescripcion}) se relaciona con el RA "${raNombre}" (${raDescripcion}). ` +
+    `Analiza los valores obtenidos (máximo ${max}, mínimo ${min}, promedio ${promedio} y logro ${porcentaje}%) ` +
+    `señalando tendencias, fortalezas, debilidades y posibles causas. ` +
+    `Concluye con recomendaciones pedagógicas para mejorar el rendimiento.`;
   const fallback = buildIndicatorFallback({
     indicador,
     max,
@@ -120,7 +128,12 @@ exports.analizarCriterio = ({
 };
 
 exports.conclusionCompetencias = ({ resumen, asignaturaNombre, carreraNombre }) => {
-  const prompt = `A partir de toda la información registrada en las evaluaciones y resúmenes de competencias, elabora una conclusión global sobre el rendimiento de los estudiantes en la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}. Utiliza los porcentajes de cumplimiento por competencia: ${resumen}.`;
+  const prompt =
+    `Actúa como un experto pedagogo. ` +
+    `Basándote en los porcentajes de cumplimiento por competencia (${resumen}), ` +
+    `redacta una conclusión detallada sobre el desempeño de los estudiantes ` +
+    `en la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}. ` +
+    `Describe tendencias, fortalezas, debilidades y posibles acciones de mejora.`;
   return safe(prompt, `Conclusión de competencias: ${resumen}`);
 };
 
@@ -130,7 +143,11 @@ exports.recomendacionesTemas = (temas, asignaturaNombre, carreraNombre) => {
 };
 
 exports.conclusionCriterios = ({ resumen, asignaturaNombre, carreraNombre }) => {
-  const prompt = `Utilizando la información disponible en las tablas de Indicadores y Aplicación, redacta una síntesis del rendimiento alcanzado en los criterios: ${resumen}. Esta conclusión corresponde a la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}.`;
+  const prompt =
+    `Como experto en evaluación educativa, analiza en profundidad los resultados ` +
+    `de los criterios ${resumen} en la asignatura ${asignaturaNombre} ` +
+    `de la carrera ${carreraNombre}. ` +
+    `Explica los patrones observados y señala sus implicaciones pedagógicas.`;
   return safe(prompt, `Conclusion de criterios: ${resumen}`);
 };
 
@@ -161,7 +178,12 @@ exports.conclusionRA = ({
   asignaturaNombre,
   carreraNombre,
 }) => {
-  const prompt = `Tomando en cuenta la información de las tablas relacionadas con el resultado de aprendizaje, redacta una conclusión breve sobre "${raNombre}" (${raDescripcion}) en la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}. El promedio de sus indicadores es ${promedio}.`;
+  const prompt =
+    `Actúa como un experto pedagogo. ` +
+    `Analiza el resultado de aprendizaje "${raNombre}" (${raDescripcion}) ` +
+    `en la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}. ` +
+    `Con un promedio de indicadores de ${promedio}, ` +
+    `elabora una conclusión detallada que interprete el rendimiento y sugiera posibles mejoras.`;
   return safe(prompt, `Conclusión de ${raNombre}: ${promedio}`);
 };
 
