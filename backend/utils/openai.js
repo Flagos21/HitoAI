@@ -88,22 +88,22 @@ exports.analizarCriterio = ({
   asignaturaNombre,
   carreraNombre,
 }) => {
-  const prompt = `En la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}, correspondiente al contenido "${contenidoNucleo}" (${contenidoDescripcion}) y al resultado de aprendizaje "${raNombre}" (${raDescripcion}), redacta un análisis pedagógico y recomendaciones para el criterio "${indicador}" evaluado en "${evaluacion}". Resultados obtenidos: Máximo ${max}, Mínimo ${min}, Promedio ${promedio}, ${porcentaje}% sobre el promedio.`;
+  const prompt = `Teniendo en cuenta los datos de las tablas de Evaluación, Indicador, Resultado de Aprendizaje, Contenido y Aplicación, analiza pedagógicamente el criterio "${indicador}" evaluado en "${evaluacion}" dentro de la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}. El contenido relacionado es "${contenidoNucleo}" (${contenidoDescripcion}) y corresponde al RA "${raNombre}" (${raDescripcion}). Se obtuvo un puntaje máximo de ${max}, un mínimo de ${min}, un promedio de ${promedio} y un logro del ${porcentaje}%. Incluye recomendaciones de mejora.`;
   return safe(prompt, `Análisis de ${indicador}`);
 };
 
 exports.conclusionCompetencias = ({ resumen, asignaturaNombre, carreraNombre }) => {
-  const prompt = `En la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}, redacta una conclusión general del rendimiento de los estudiantes considerando los siguientes resultados por competencia: ${resumen}.`;
+  const prompt = `A partir de toda la información registrada en las evaluaciones y resúmenes de competencias, elabora una conclusión global sobre el rendimiento de los estudiantes en la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}. Utiliza los porcentajes de cumplimiento por competencia: ${resumen}.`;
   return safe(prompt, `Conclusión de competencias: ${resumen}`);
 };
 
 exports.recomendacionesTemas = (temas, asignaturaNombre, carreraNombre) => {
-  const prompt = `En la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}, entrega recomendaciones generales de mejora para los siguientes temas: ${temas}.`;
+  const prompt = `Considerando el desempeño observado en las evaluaciones y las necesidades detectadas, sugiere recomendaciones para mejorar los siguientes temas en la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}: ${temas}.`;
   return safe(prompt, `Recomendaciones para ${temas}`);
 };
 
 exports.conclusionCriterios = ({ resumen, asignaturaNombre, carreraNombre }) => {
-  const prompt = `En la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}, redacta una conclusión breve sobre el rendimiento observado en los siguientes criterios: ${resumen}.`;
+  const prompt = `Utilizando la información disponible en las tablas de Indicadores y Aplicación, redacta una síntesis del rendimiento alcanzado en los criterios: ${resumen}. Esta conclusión corresponde a la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}.`;
   return safe(prompt, `Conclusion de criterios: ${resumen}`);
 };
 
@@ -113,17 +113,17 @@ exports.recomendacionesCompetencia = (
   asignaturaNombre,
   carreraNombre,
 ) => {
-  const prompt = `Actúa como un experto pedagogo. En la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}, la competencia ${competencia} registra un cumplimiento de ${cumplimiento}%. Sugiere acciones concretas, estrategias de enseñanza y actividades que ayuden a mejorar esta competencia.`;
+  const prompt = `Actúa como un experto pedagogo y, considerando toda la evidencia obtenida en las evaluaciones, propone acciones concretas y estrategias de enseñanza que permitan mejorar la competencia ${competencia} que actualmente presenta un ${cumplimiento}% de cumplimiento en la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}.`;
   return safe(prompt, `Recomendaciones para ${competencia}`);
 };
 
 exports.analisisCompetencia = ({ competencia, puntajeIdeal, promedio, cumplimiento, asignaturaNombre, carreraNombre }) => {
-  const prompt = `Eres un experto en educación superior. En la asignatura ${asignaturaNombre} de la carrera ${carreraNombre} se obtuvo un puntaje ideal de ${puntajeIdeal} para la competencia ${competencia}. El promedio alcanzado fue de ${promedio} y el cumplimiento fue ${cumplimiento}%. Redacta un análisis pedagógico detallado considerando causas posibles y su impacto en la formación profesional.`;
+  const prompt = `Con base en las cifras registradas en las distintas evaluaciones, analiza en detalle la competencia ${competencia} de la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}. El puntaje ideal fue ${puntajeIdeal}, el promedio ${promedio} y el grado de cumplimiento ${cumplimiento}%. Explica posibles causas de estos resultados y cómo repercuten en la formación profesional.`;
   return safe(prompt, `Analisis de la competencia ${competencia}`);
 };
 
 exports.recomendacionesGenerales = (temas, asignaturaNombre, carreraNombre) => {
-  const prompt = `En la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}, entrega recomendaciones generales para reforzar los siguientes temas: ${temas}.`;
+  const prompt = `Revisa los resultados obtenidos en las distintas evaluaciones y formula recomendaciones generales para reforzar los temas ${temas} en la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}.`;
   return safe(prompt, `Recomendaciones para ${temas}`);
 };
 
@@ -134,7 +134,7 @@ exports.conclusionRA = ({
   asignaturaNombre,
   carreraNombre,
 }) => {
-  const prompt = `En la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}, redacta una breve conclusión pedagógica sobre el resultado de aprendizaje "${raNombre}" (${raDescripcion}). El puntaje promedio de sus indicadores es ${promedio}.`;
+  const prompt = `Tomando en cuenta la información de las tablas relacionadas con el resultado de aprendizaje, redacta una conclusión breve sobre "${raNombre}" (${raDescripcion}) en la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}. El promedio de sus indicadores es ${promedio}.`;
   return safe(prompt, `Conclusión de ${raNombre}: ${promedio}`);
 };
 
