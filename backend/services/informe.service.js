@@ -17,7 +17,7 @@ const {
   analisisCompetencia,
   recomendacionesGenerales,
 } = require('../utils/openai');
-const { generarPDFCompleto, generarDOCXCompleto } = require('../utils/reportGenerator');
+const { generarDOCXCompleto } = require('../utils/reportGenerator');
 const {
   calcularResumenCompetencias,
 } = require('../utils/resumenCompetencias');
@@ -389,13 +389,6 @@ exports.generarInforme = async asignaturaId => {
     graficos: { compPath, ...graficosInstancias },
   };
 
-  let pdf = Buffer.from('');
-  try {
-    pdf = await generarPDFCompleto(contenido);
-  } catch (err) {
-    console.warn('PDF generation skipped:', err.message);
-  }
-
   let docx = Buffer.from('');
   try {
     docx = await generarDOCXCompleto(contenido);
@@ -407,8 +400,6 @@ exports.generarInforme = async asignaturaId => {
   const base = `Informe-${asignatura.Nombre}-${new Date().toISOString().split('T')[0]}`.replace(/\s+/g, '_');
   const outDir = path.join(__dirname, '..', 'uploads');
   if (!fs.existsSync(outDir)) fs.mkdirSync(outDir);
-  if (pdf.length) fs.writeFileSync(path.join(outDir, `${base}.pdf`), pdf);
-
   if (docx.length) fs.writeFileSync(path.join(outDir, `${base}.docx`), docx);
   const archivosGraficos = [compPath];
   Object.values(graficosInstancias).forEach(obj => {
@@ -418,5 +409,5 @@ exports.generarInforme = async asignaturaId => {
   archivosGraficos.forEach(p => {
     if (fs.existsSync(p)) fs.unlinkSync(p);
   });
-  return { pdf, docx, nombre: `${base}.pdf`, nombreDocx: `${base}.docx` };
+  return { docx, nombreDocx: `${base}.docx` };
 };
