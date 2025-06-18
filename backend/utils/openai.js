@@ -6,7 +6,7 @@ const MODEL = 'gpt-3.5-turbo';
 
 function callOpenAI(prompt) {
   if (!API_KEY) {
-    return Promise.resolve('(openai key missing) ' + prompt);
+    return Promise.reject(new Error('OpenAI key missing'));
   }
   return new Promise((resolve, reject) => {
     const data = JSON.stringify({
@@ -51,6 +51,26 @@ async function safe(prompt, fallback) {
   }
 }
 
+function buildIndicatorFallback({ indicador, max, min, promedio, porcentaje }) {
+  const diff = max - min;
+  let dispersion;
+  if (diff >= 6) dispersion = 'una dispersión muy amplia';
+  else if (diff >= 3) dispersion = 'una diferencia notable entre puntajes';
+  else dispersion = 'poca variación en los puntajes';
+
+  let tendencia;
+  if (porcentaje >= 60) tendencia = 'la mayoría de los estudiantes superó el promedio';
+  else if (porcentaje >= 40) tendencia = 'aproximadamente la mitad superó el promedio';
+  else tendencia = 'solo una minoría superó el promedio';
+
+  return (
+    `El indicador "${indicador}" obtuvo un puntaje promedio de ${promedio}. ` +
+    `El máximo fue ${max} y el mínimo ${min}, mostrando ${dispersion}. ` +
+    `El ${porcentaje}% de los estudiantes estuvo sobre el promedio, por lo que ${tendencia}. ` +
+    'Revisa las tablas asociadas para comprender el contexto y orientar la retroalimentación.'
+  );
+}
+
 
 exports.crearIntroduccion = (asignatura, carrera) => ({
   objetivo: {
@@ -89,7 +109,14 @@ exports.analizarCriterio = ({
   carreraNombre,
 }) => {
   const prompt = `Teniendo en cuenta los datos de las tablas de Evaluación, Indicador, Resultado de Aprendizaje, Contenido y Aplicación, analiza pedagógicamente el criterio "${indicador}" evaluado en "${evaluacion}" dentro de la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}. El contenido relacionado es "${contenidoNucleo}" (${contenidoDescripcion}) y corresponde al RA "${raNombre}" (${raDescripcion}). Se obtuvo un puntaje máximo de ${max}, un mínimo de ${min}, un promedio de ${promedio} y un logro del ${porcentaje}%. Incluye recomendaciones de mejora.`;
-  return safe(prompt, `Análisis de ${indicador}`);
+  const fallback = buildIndicatorFallback({
+    indicador,
+    max,
+    min,
+    promedio,
+    porcentaje,
+  });
+  return safe(prompt, fallback);
 };
 
 exports.conclusionCompetencias = ({ resumen, asignaturaNombre, carreraNombre }) => {

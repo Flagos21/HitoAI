@@ -11,6 +11,10 @@ cp backend/.env.example backend/.env
 # then edit backend/.env and set OPENAI_API_KEY=your_key
 ```
 
+If no API key is provided or the OpenAI service is unavailable, the report
+generator will fall back to a basic analysis based solely on the scores stored
+in the database.
+
 ## Development servers
 
 ### Backend
