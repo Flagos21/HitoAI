@@ -1,4 +1,5 @@
 const CarreraService = require('../services/carrera.service');
+const { validateLengths } = require('../utils/validateLengths');
 
 exports.getAllCarreras = async (req, res) => {
   const carreras = await CarreraService.getAll();
@@ -7,12 +8,24 @@ exports.getAllCarreras = async (req, res) => {
 
 exports.crearCarrera = async (req, res) => {
   const { Nombre, usuario_ID_Usuario } = req.body;
+  const err = validateLengths({ Nombre, usuario_ID_Usuario }, {
+    Nombre: 100,
+    usuario_ID_Usuario: 10
+  });
+  if (err) return res.status(400).json({ message: err });
+
   await CarreraService.crear({ Nombre, facultad_ID_Facultad: 1, usuario_ID_Usuario });
   res.status(201).json({ message: 'Carrera creada con éxito' });
 };
 
 exports.actualizarCarrera = async (req, res) => {
   const { Nombre, usuario_ID_Usuario } = req.body;
+  const err = validateLengths({ Nombre, usuario_ID_Usuario }, {
+    Nombre: 100,
+    usuario_ID_Usuario: 10
+  });
+  if (err) return res.status(400).json({ message: err });
+
   await CarreraService.actualizar(req.params.id, { Nombre, usuario_ID_Usuario });
   res.json({ message: 'Carrera actualizada' });
 };
