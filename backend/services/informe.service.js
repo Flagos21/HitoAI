@@ -28,6 +28,13 @@ function query(sql, params = []) {
   });
 }
 
+function toNumber(value) {
+  if (value == null) return 0;
+  if (typeof value === 'number') return value;
+  const n = parseFloat(value);
+  return Number.isNaN(n) ? 0 : n;
+}
+
 async function obtenerDatosIndicadores(asignaturaId) {
   const sql = `
       SELECT
@@ -66,7 +73,14 @@ async function obtenerDatosIndicadores(asignaturaId) {
       JOIN inscripcion ins ON ins.ID_Inscripcion = a.inscripcion_ID_Inscripcion
       WHERE ins.asignatura_ID_Asignatura = ?
       GROUP BY ev.ID_Evaluacion, i.ID_Indicador;`;
-  return query(sql, [asignaturaId]);
+  const rows = await query(sql, [asignaturaId]);
+  return rows.map(r => ({
+    ...r,
+    maximo: toNumber(r.maximo),
+    minimo: toNumber(r.minimo),
+    promedio: toNumber(r.promedio),
+    porcentaje: toNumber(r.porcentaje),
+  }));
 }
 
 
@@ -105,7 +119,12 @@ async function obtenerRubricas(asignaturaId) {
       JOIN inscripcion ins ON ins.ID_Inscripcion = a.inscripcion_ID_Inscripcion
       WHERE ins.asignatura_ID_Asignatura = ?
       GROUP BY ev.ID_Evaluacion, i.ID_Indicador, c.ID_Criterio;`;
-  return query(sql, [asignaturaId]);
+  const rows = await query(sql, [asignaturaId]);
+  return rows.map(r => ({
+    ...r,
+    promedio: toNumber(r.promedio),
+    porcentaje: toNumber(r.porcentaje),
+  }));
 }
 
 async function obtenerPromediosCriterio(asignaturaId) {
@@ -245,9 +264,7 @@ exports.generarInforme = async asignaturaId => {
       };
       // Count the full indicator score for each associated competencia
       comp.puntajeIdeal += d.puntajeMax * d.total;
-      if (typeof d.promedio === 'number') {
-        comp.promedioSum += d.promedio * d.total;
-      }
+      comp.promedioSum += toNumber(d.promedio) * d.total;
       instancias[d.instancia].competencias[c] = comp;
     });
   });
