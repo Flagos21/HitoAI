@@ -89,7 +89,18 @@ exports.analizarCriterio = ({
   carreraNombre,
 }) => {
   const prompt = `Teniendo en cuenta los datos de las tablas de Evaluación, Indicador, Resultado de Aprendizaje, Contenido y Aplicación, analiza pedagógicamente el criterio "${indicador}" evaluado en "${evaluacion}" dentro de la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}. El contenido relacionado es "${contenidoNucleo}" (${contenidoDescripcion}) y corresponde al RA "${raNombre}" (${raDescripcion}). Se obtuvo un puntaje máximo de ${max}, un mínimo de ${min}, un promedio de ${promedio} y un logro del ${porcentaje}%. Incluye recomendaciones de mejora.`;
-  return safe(prompt, `Análisis de ${indicador}`);
+  const diff = max - min;
+  let dispersion;
+  if (diff > 5) dispersion = 'una alta dispersión en los resultados';
+  else if (diff > 2) dispersion = 'cierta dispersión en los resultados';
+  else dispersion = 'poca dispersión en los resultados';
+  const tendencia = porcentaje >= 50 ? 'la mayoría de los estudiantes superó el promedio' : 'solo una minoría superó el promedio';
+  const fallback =
+    `El indicador "${indicador}" obtuvo un puntaje promedio de ${promedio}. ` +
+    `El máximo alcanzado fue ${max} y el mínimo ${min}, evidenciando ${dispersion}. ` +
+    `${porcentaje}% de los estudiantes estuvo sobre el promedio, por lo que ${tendencia}. ` +
+    `Revisa las tablas de distribución de niveles y promedios por criterio para contextualizar estos resultados y orientar la retroalimentación.`;
+  return safe(prompt, fallback);
 };
 
 exports.conclusionCompetencias = ({ resumen, asignaturaNombre, carreraNombre }) => {

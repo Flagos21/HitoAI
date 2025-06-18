@@ -565,8 +565,7 @@ function generarBloqueDesgloseIndicadoresDOCX(instancia) {
   instancia.criterios.forEach((c, idx) => {
     parts.push(
       new Paragraph({
-        style: 'ListParagraph',
-        bullet: { level: 0 },
+        heading: HeadingLevel.HEADING_3,
         children: [new TextRun(c.indicador)],
       })
     );
