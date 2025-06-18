@@ -1,4 +1,5 @@
 const UsuarioService = require('../services/usuario.service');
+const { validateLengths } = require('../utils/validateLengths');
 
 // Crear nuevo usuario
 exports.crearUsuario = async (req, res) => {
@@ -8,6 +9,13 @@ exports.crearUsuario = async (req, res) => {
   if (!ID_Usuario || !Nombre || !Clave || !Rol_ID_Rol) {
     return res.status(400).json({ message: 'Faltan datos requeridos para crear el usuario' });
   }
+
+  const err = validateLengths({ ID_Usuario: rut, Nombre, Clave }, {
+    ID_Usuario: 10,
+    Nombre: 100,
+    Clave: 100
+  });
+  if (err) return res.status(400).json({ message: err });
 
   try {
     await UsuarioService.crearUsuario(rut, Nombre, Clave, Rol_ID_Rol);
@@ -78,6 +86,9 @@ exports.actualizarClave = async (req, res) => {
   if (!clave) {
     return res.status(400).json({ message: 'La clave es requerida' });
   }
+
+  const err = validateLengths({ clave }, { clave: 100 });
+  if (err) return res.status(400).json({ message: err });
 
   try {
     await UsuarioService.actualizarClave(id, clave);
