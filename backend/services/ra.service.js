@@ -138,6 +138,17 @@ exports.eliminar = (id) => {
     });
   });
 };
+
+// Comprobar si el RA tiene indicadores asociados
+exports.tieneIndicadores = (id) => {
+  const sql = 'SELECT COUNT(*) AS count FROM indicador WHERE ra_ID_RA = ?';
+  return new Promise((resolve, reject) => {
+    connection.query(sql, [id], (err, results) => {
+      if (err) return reject(err);
+      resolve(results[0].count > 0);
+    });
+  });
+};
 exports.getByAsignatura = (asignaturaId) => {
   const sql = `
     SELECT 
