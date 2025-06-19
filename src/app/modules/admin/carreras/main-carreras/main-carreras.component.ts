@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { CarreraService } from '../../../../services/carrera.service';
 import { UsuarioService } from '../../../../services/usuario.service';
 import { DialogCarreraComponent } from '../dialog-carrera/dialog-carrera.component';
@@ -12,12 +13,14 @@ import { Carrera, Usuario } from '../../../../models';
   templateUrl: './main-carreras.component.html',
   styleUrls: ['./main-carreras.component.css'],
   standalone: true,
-  imports: [CommonModule, NgbModalModule, SidebarComponent]
+  imports: [CommonModule, FormsModule, NgbModalModule, SidebarComponent]
 })
 export class MainCarrerasComponent implements OnInit {
   carreras: Carrera[] = [];
+  carrerasFiltradas: Carrera[] = [];
   jefes: Usuario[] = [];
   rolUsuario: string = '';
+  filtroTexto: string = '';
 
   constructor(
     private carreraService: CarreraService,
@@ -32,7 +35,18 @@ export class MainCarrerasComponent implements OnInit {
   }
 
   cargarCarreras() {
-    this.carreraService.getCarreras().subscribe(data => this.carreras = data);
+    this.carreraService.getCarreras().subscribe(data => {
+      this.carreras = data;
+      this.aplicarFiltro();
+    });
+  }
+
+  aplicarFiltro() {
+    const texto = this.filtroTexto.toLowerCase();
+    this.carrerasFiltradas = this.carreras.filter(c =>
+      c.Nombre.toLowerCase().includes(texto) ||
+      (c.JefeCarrera ? c.JefeCarrera.toLowerCase().includes(texto) : false)
+    );
   }
 
   cargarJefes() {
