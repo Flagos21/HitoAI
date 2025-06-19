@@ -120,3 +120,11 @@ exports.existe = (id) => {
     });
   });
 };
+
+// Eliminar un usuario
+exports.eliminar = (id) => {
+  const sql = `DELETE FROM usuario WHERE ID_Usuario = ?`;
+  return new Promise((resolve, reject) => {
+    connection.query(sql, [id], (err) => (err ? reject(err) : resolve()));
+  });
+};
