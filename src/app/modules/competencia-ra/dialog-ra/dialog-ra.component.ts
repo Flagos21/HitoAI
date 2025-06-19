@@ -149,9 +149,17 @@ export class DialogRaComponent implements OnInit {
     }
 
     this.bloqueado = true;
-    this.mensajeExito = 'Resultado eliminado';
-    this.raService.eliminar(this.ra.ID_RA!).subscribe(() => {
-      setTimeout(() => this.cerrarConExito(), 1500);
+    this.raService.eliminar(this.ra.ID_RA!).subscribe({
+      next: () => {
+        this.mensajeExito = 'Resultado eliminado';
+        setTimeout(() => this.cerrarConExito(), 1500);
+      },
+      error: (err) => {
+        this.bloqueado = false;
+        this.accionConfirmada = null;
+        this.mensajeError = err.error?.message || 'Error al eliminar RA';
+        setTimeout(() => (this.mensajeError = ''), 3000);
+      },
     });
   }
 
