@@ -18,8 +18,20 @@ exports.getDisponiblesPorAsignatura = async (req, res) => {
 };
 
 exports.crear = async (req, res) => {
-  await EstudianteService.crear(req.body);
-  res.status(201).json({ message: 'Estudiante creado' });
+  try {
+    const existe = await EstudianteService.existe(req.body.ID_Estudiante);
+    if (existe) {
+      return res.status(400).json({ message: 'Estudiante inscrito' });
+    }
+    await EstudianteService.crear(req.body);
+    res.status(201).json({ message: 'Estudiante creado' });
+  } catch (error) {
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({ message: 'Estudiante inscrito' });
+    }
+    console.error('Error al crear estudiante:', error);
+    res.status(500).json({ message: 'Error al crear estudiante' });
+  }
 };
 
 exports.actualizar = async (req, res) => {
@@ -28,8 +40,16 @@ exports.actualizar = async (req, res) => {
 };
 
 exports.eliminar = async (req, res) => {
-  await EstudianteService.eliminar(req.params.id);
-  res.json({ message: 'Estudiante eliminado' });
+  try {
+    await EstudianteService.eliminar(req.params.id);
+    res.json({ message: 'Estudiante eliminado' });
+  } catch (error) {
+    if (error.code === 'ER_ROW_IS_REFERENCED_2') {
+      return res.status(400).json({ message: 'Estudiante inscrito' });
+    }
+    console.error('Error al eliminar estudiante:', error);
+    res.status(500).json({ message: 'Error al eliminar estudiante' });
+  }
 };
 
 exports.cargarCSV = async (req, res) => {
