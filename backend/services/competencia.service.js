@@ -53,6 +53,17 @@ exports.existeNombreOtro = (nombre, id) => {
   });
 };
 
+// Comprobar si una competencia está vinculada a algún RA
+exports.tieneRA = (id) => {
+  const sql = 'SELECT 1 FROM ra_competencia WHERE competencia_ID_Competencia = ? LIMIT 1';
+  return new Promise((resolve, reject) => {
+    connection.query(sql, [id], (err, results) => {
+      if (err) return reject(err);
+      resolve(results.length > 0);
+    });
+  });
+};
+
 // Crear una nueva competencia
 exports.crear = ({ ID_Competencia, Nombre, Descripcion, Tipo }) => {
   const sql = `

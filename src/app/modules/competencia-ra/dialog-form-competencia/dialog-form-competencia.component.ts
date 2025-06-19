@@ -116,9 +116,21 @@ export class DialogFormCompetenciaComponent implements OnInit {
 
     this.bloqueado = true;
     this.mensajeExito = 'Competencia eliminada';
-    this.competenciaService.eliminar(this.competencia.ID_Competencia).subscribe(() => {
-      setTimeout(() => this.cerrarConExito(), 1500);
-    });
+    this.competenciaService
+      .eliminar(this.competencia.ID_Competencia)
+      .subscribe({
+        next: () => {
+          setTimeout(() => this.cerrarConExito(), 1500);
+        },
+        error: (err) => {
+          this.bloqueado = false;
+          this.accionConfirmada = null;
+          this.mensajeExito = '';
+          this.mensajeError =
+            err.error?.message || 'Error al eliminar competencia';
+          setTimeout(() => (this.mensajeError = ''), 3000);
+        }
+      });
   }
 
   private cerrarConExito() {
