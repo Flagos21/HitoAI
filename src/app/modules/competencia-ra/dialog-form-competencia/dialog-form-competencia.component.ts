@@ -63,8 +63,17 @@ export class DialogFormCompetenciaComponent implements OnInit {
 
     this.bloqueado = true;
     this.mensajeExito = 'Competencia creada con éxito';
-    this.competenciaService.crear(this.competencia).subscribe(() => {
-      setTimeout(() => this.cerrarConExito(), 1500);
+    this.competenciaService.crear(this.competencia).subscribe({
+      next: () => {
+        setTimeout(() => this.cerrarConExito(), 1500);
+      },
+      error: (err) => {
+        this.bloqueado = false;
+        this.accionConfirmada = null;
+        this.mensajeExito = '';
+        this.mensajeError = err.error?.message || 'Error al crear competencia';
+        setTimeout(() => (this.mensajeError = ''), 3000);
+      }
     });
   }
 
@@ -85,8 +94,17 @@ export class DialogFormCompetenciaComponent implements OnInit {
     this.mensajeExito = 'Competencia actualizada correctamente';
     this.competenciaService
       .actualizar(this.competencia.ID_Competencia, this.competencia)
-      .subscribe(() => {
-        setTimeout(() => this.cerrarConExito(), 1500);
+      .subscribe({
+        next: () => {
+          setTimeout(() => this.cerrarConExito(), 1500);
+        },
+        error: (err) => {
+          this.bloqueado = false;
+          this.accionConfirmada = null;
+          this.mensajeExito = '';
+          this.mensajeError = err.error?.message || 'Error al actualizar competencia';
+          setTimeout(() => (this.mensajeError = ''), 3000);
+        }
       });
   }
 

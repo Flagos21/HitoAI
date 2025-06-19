@@ -20,6 +20,39 @@ exports.getById = (id) => {
   });
 };
 
+// Verificar si existe una competencia con el ID dado
+exports.existeId = (id) => {
+  const sql = 'SELECT 1 FROM competencia WHERE ID_Competencia = ? LIMIT 1';
+  return new Promise((resolve, reject) => {
+    connection.query(sql, [id], (err, results) => {
+      if (err) return reject(err);
+      resolve(results.length > 0);
+    });
+  });
+};
+
+// Verificar si existe una competencia con el nombre dado
+exports.existeNombre = (nombre) => {
+  const sql = 'SELECT 1 FROM competencia WHERE Nombre = ? LIMIT 1';
+  return new Promise((resolve, reject) => {
+    connection.query(sql, [nombre], (err, results) => {
+      if (err) return reject(err);
+      resolve(results.length > 0);
+    });
+  });
+};
+
+// Verificar si existe una competencia con el nombre dado excluyendo un ID
+exports.existeNombreOtro = (nombre, id) => {
+  const sql = 'SELECT 1 FROM competencia WHERE Nombre = ? AND ID_Competencia <> ? LIMIT 1';
+  return new Promise((resolve, reject) => {
+    connection.query(sql, [nombre, id], (err, results) => {
+      if (err) return reject(err);
+      resolve(results.length > 0);
+    });
+  });
+};
+
 // Crear una nueva competencia
 exports.crear = ({ ID_Competencia, Nombre, Descripcion, Tipo }) => {
   const sql = `
