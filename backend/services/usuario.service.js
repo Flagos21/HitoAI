@@ -109,3 +109,14 @@ exports.actualizarRol = (id, rolId) => {
     });
   });
 };
+
+// Verificar si un usuario existe por su ID
+exports.existe = (id) => {
+  const sql = `SELECT 1 FROM usuario WHERE ID_Usuario = ? LIMIT 1`;
+  return new Promise((resolve, reject) => {
+    connection.query(sql, [id], (err, results) => {
+      if (err) return reject(err);
+      resolve(results.length > 0);
+    });
+  });
+};

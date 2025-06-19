@@ -18,10 +18,18 @@ exports.crearUsuario = async (req, res) => {
   if (err) return res.status(400).json({ message: err });
 
   try {
+    const existe = await UsuarioService.existe(rut);
+    if (existe) {
+      return res.status(400).json({ message: 'Usuario ya registrado' });
+    }
+
     await UsuarioService.crearUsuario(rut, Nombre, Clave, Rol_ID_Rol);
     res.status(201).json({ message: 'Usuario creado correctamente' });
   } catch (error) {
     console.error(error);
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({ message: 'Usuario ya registrado' });
+    }
     res.status(500).json({ message: 'Error al crear usuario' });
   }
 };

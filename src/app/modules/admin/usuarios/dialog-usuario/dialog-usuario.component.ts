@@ -119,9 +119,16 @@ export class DialogUsuarioComponent {
 
     if (this.bloqueado) return;
     this.bloqueado = true;
-    this.usuarioService.crearUsuario(this.usuario).subscribe(() => {
-      this.mensajeExito = 'Usuario creado';
-      setTimeout(() => this.cerrarConExito(), 1500);
+    this.usuarioService.crearUsuario(this.usuario).subscribe({
+      next: () => {
+        this.mensajeExito = 'Usuario creado';
+        setTimeout(() => this.cerrarConExito(), 1500);
+      },
+      error: (err) => {
+        this.bloqueado = false;
+        this.mensajeError = err.error?.message || 'Error al crear usuario';
+        setTimeout(() => (this.mensajeError = ''), 3000);
+      }
     });
   }
 
