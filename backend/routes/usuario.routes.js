@@ -9,6 +9,7 @@ router.get('/profesores', controller.getProfesores);
 router.get('/todos', controller.getTodos);
 router.put('/clave/:id', controller.actualizarClave);
 router.put('/rol/:id', controller.actualizarRol);
+router.delete('/eliminar/:id', controller.eliminar);
 
 
 module.exports = router;

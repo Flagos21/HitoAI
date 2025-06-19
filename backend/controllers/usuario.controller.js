@@ -122,3 +122,15 @@ exports.actualizarRol = async (req, res) => {
     res.status(500).json({ message: 'Error al actualizar rol' });
   }
 };
+
+// Eliminar usuario
+exports.eliminar = async (req, res) => {
+  const { id } = req.params;
+  try {
+    await UsuarioService.eliminar(id);
+    res.json({ message: 'Usuario eliminado' });
+  } catch (error) {
+    console.error('Error al eliminar usuario:', error);
+    res.status(500).json({ message: 'Error al eliminar usuario' });
+  }
+};

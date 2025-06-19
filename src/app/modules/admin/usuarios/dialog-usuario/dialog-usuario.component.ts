@@ -32,7 +32,7 @@ export class DialogUsuarioComponent {
   mensajeExito = '';
   mensajeError = '';
   bloqueado = false;
-  accionConfirmada: 'crear' | 'actualizar' | 'rol' | null = null;
+  accionConfirmada: 'crear' | 'actualizar' | 'rol' | 'eliminar' | null = null;
   private modalCerrado = false;
 
   constructor(
@@ -152,6 +152,27 @@ export class DialogUsuarioComponent {
         this.mensajeExito = 'Rol actualizado';
         setTimeout(() => this.cerrarConExito(), 1500);
       });
+  }
+
+  eliminarUsuario() {
+    if (!this.accionConfirmada) {
+      this.accionConfirmada = 'eliminar';
+      return;
+    }
+
+    if (this.bloqueado) return;
+    this.bloqueado = true;
+    this.usuarioService.eliminar(this.usuario.ID_Usuario).subscribe({
+      next: () => {
+        this.mensajeExito = 'Usuario eliminado';
+        setTimeout(() => this.cerrarConExito(), 1500);
+      },
+      error: () => {
+        this.bloqueado = false;
+        this.mensajeError = 'No se pudo eliminar el usuario';
+        setTimeout(() => (this.mensajeError = ''), 3000);
+      }
+    });
   }
 
   cancelar() {
