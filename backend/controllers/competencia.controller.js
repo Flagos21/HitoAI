@@ -39,6 +39,13 @@ exports.actualizarCompetencia = async (req, res) => {
 
 // Eliminar una competencia
 exports.eliminarCompetencia = async (req, res) => {
+  const tieneRA = await CompetenciaService.tieneRA(req.params.id);
+  if (tieneRA) {
+    return res
+      .status(400)
+      .json({ message: 'La competencia está relacionada con uno o más RA' });
+  }
+
   await CompetenciaService.eliminar(req.params.id);
   res.json({ message: 'Competencia eliminada' });
 };
