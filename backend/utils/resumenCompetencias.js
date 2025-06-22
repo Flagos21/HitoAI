@@ -6,6 +6,13 @@ function parseCompetencias(value) {
     .filter(Boolean);
 }
 
+function toNumber(val) {
+  if (val == null) return 0;
+  if (typeof val === 'number') return val;
+  const n = parseFloat(val);
+  return Number.isNaN(n) ? 0 : n;
+}
+
 function calcularResumenCompetencias(datos) {
   const map = {};
   datos.forEach(d => {
@@ -13,13 +20,11 @@ function calcularResumenCompetencias(datos) {
     if (!comps.length) comps.push('Desconocida');
     comps.forEach(c => {
       if (!map[c]) map[c] = { puntajeIdeal: 0, promedio: 0 };
-      if (typeof d.puntaje_maximo === 'number') {
-        // Count the full score for each associated competencia
-        map[c].puntajeIdeal += d.puntaje_maximo;
-      }
-      if (typeof d.promedio_obtenido === 'number') {
-        map[c].promedio += d.promedio_obtenido;
-      }
+      const max = toNumber(d.puntaje_maximo);
+      const prom = toNumber(d.promedio_obtenido);
+      // Count the full score for each associated competencia
+      map[c].puntajeIdeal += max;
+      map[c].promedio += prom;
     });
   });
   const resumen = Object.entries(map).map(([competencia, v]) => {

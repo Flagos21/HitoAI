@@ -52,7 +52,15 @@ exports.actualizarRA = async (req, res) => {
 
 exports.eliminarRA = async (req, res) => {
   try {
-    await RaService.eliminar(req.params.id);
+    const id = req.params.id;
+    const tieneIndicadores = await RaService.tieneIndicadores(id);
+    if (tieneIndicadores) {
+      return res.status(400).json({
+        message:
+          'No se puede eliminar el resultado de aprendizaje porque tiene indicadores relacionados',
+      });
+    }
+    await RaService.eliminar(id);
     res.json({ message: 'Resultado de Aprendizaje eliminado' });
   } catch (error) {
     res.status(500).json({ message: 'Error al eliminar RA', error: error.message });

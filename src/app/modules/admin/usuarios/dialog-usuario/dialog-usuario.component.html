@@ -85,6 +85,7 @@
       <i
         class="bi"
         [ngClass]="{
+          'bi-exclamation-triangle-fill text-danger': accionConfirmada === 'eliminar',
           'bi-check-circle-fill': accionConfirmada === 'crear',
           'bi-pencil-fill': accionConfirmada === 'actualizar' || accionConfirmada === 'rol'
         }"
@@ -98,6 +99,7 @@
       <button class="btn btn-success btn-sm text-white" *ngIf="accionConfirmada === 'crear'" (click)="crear()">Sí, crear</button>
       <button class="btn btn-primary btn-sm text-white" *ngIf="accionConfirmada === 'actualizar'" (click)="renovarClave()">Sí, actualizar</button>
       <button class="btn btn-info btn-sm text-white" *ngIf="accionConfirmada === 'rol'" (click)="cambiarRol()">Sí, actualizar</button>
+      <button class="btn btn-danger btn-sm text-white" *ngIf="accionConfirmada === 'eliminar'" (click)="eliminarUsuario()">Sí, eliminar</button>
       <button class="btn btn-outline-secondary btn-sm" (click)="cancelarConfirmacion()">Cancelar</button>
     </div>
   </div>
@@ -138,6 +140,13 @@
   <button class="btn btn-secondary" (click)="cancelar()" [disabled]="bloqueado">Cancelar</button>
 </div>
 
-<div class="modal-footer" *ngIf="modo === 'ver' || mensajeExito">
+<div class="modal-footer" *ngIf="modo === 'ver' && !mensajeExito && !accionConfirmada">
+  <button class="btn btn-danger" (click)="eliminarUsuario()" [disabled]="bloqueado">
+    <i class="bi bi-trash3-fill me-1"></i> Eliminar
+  </button>
+  <button class="btn btn-secondary" (click)="cancelar()" [disabled]="bloqueado">Cerrar</button>
+</div>
+
+<div class="modal-footer" *ngIf="mensajeExito">
   <button class="btn btn-secondary" (click)="cancelar()" [disabled]="bloqueado">Cerrar</button>
 </div>

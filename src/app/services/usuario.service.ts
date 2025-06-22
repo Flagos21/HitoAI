@@ -38,4 +38,8 @@ export class UsuarioService {
     return this.http.put(`${this.apiUrl}/rol/${id}`, { rolId });
   }
 
+  eliminar(id: string) {
+    return this.http.delete(`${this.apiUrl}/eliminar/${id}`);
+  }
+
 }

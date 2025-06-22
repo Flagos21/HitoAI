@@ -196,11 +196,14 @@ function generarBloqueDesgloseIndicadoresPDF(doc, instancia) {
   });
 }
 
-function generarGraficoDesempenoPDF(doc, path) {
-  if (path && fs.existsSync(path)) {
-    doc.image(path, { width: 500 });
-    doc.moveDown();
-  }
+function generarGraficoDesempenoPDF(doc, paths) {
+  const arr = Array.isArray(paths) ? paths.flat() : [paths];
+  arr.forEach(p => {
+    if (p && fs.existsSync(p)) {
+      doc.image(p, { width: 500 });
+      doc.moveDown();
+    }
+  });
 }
 
 function generarTablaCriteriosPorIndicadorPDF(doc, instancia) {
@@ -562,8 +565,7 @@ function generarBloqueDesgloseIndicadoresDOCX(instancia) {
   instancia.criterios.forEach((c, idx) => {
     parts.push(
       new Paragraph({
-        style: 'ListParagraph',
-        bullet: { level: 0 },
+        heading: HeadingLevel.HEADING_3,
         children: [new TextRun(c.indicador)],
       })
     );
@@ -587,7 +589,7 @@ function generarBloqueDesgloseIndicadoresDOCX(instancia) {
 function buildBarChart(labels, values) {
   if (!Chart) return null;
   return new Chart({
-    type: ChartType.COLUMN,
+    type: ChartType.BAR,
     width: 500,
     height: 250,
     legend: { position: 'none' },
@@ -888,8 +890,11 @@ exports.generarPDFCompleto = contenido => {
         doc.moveDown(0.5);
         // B. Desglose por indicador
         generarBloqueDesgloseIndicadoresPDF(doc, inst);
-        // C. Gráfico por instancia
-        generarGraficoDesempenoPDF(doc, contenido.graficos && contenido.graficos[num]);
+        // C. Gráficos de barras por instancia
+        const grafObj = contenido.graficos && contenido.graficos[num];
+        generarGraficoDesempenoPDF(doc, grafObj && grafObj.barras);
+        generarTablaCriteriosPorIndicadorPDF(doc, inst);
+        generarGraficoDesempenoPDF(doc, grafObj && grafObj.tortas);
         // D. Conclusiones de instancia
         generarConclusionPDF(doc, inst);
         // E. Recomendaciones generales de instancia
@@ -1016,15 +1021,27 @@ exports.generarDOCXCompleto = async contenido => {
       );
       // B. Desglose por indicador
       instanciasParagraphs.push(...generarBloqueDesgloseIndicadoresDOCX(inst));
-      // C. Gráfico por instancia
-      const graf = generarGraficoDesempenoDOCX(
-        inst.criterios.map(c => c.indicador),
-        inst.criterios.map(c => c.porcentaje),
-        contenido.graficos && contenido.graficos[num]
-      );
-      if (graf) instanciasParagraphs.push(graf);
+      // C. Gráficos de barras por instancia
+      const grafObj = (contenido.graficos && contenido.graficos[num]) || {};
+      (grafObj.barras || []).forEach((p, idx) => {
+        const graf = generarGraficoDesempenoDOCX(
+          [inst.criterios[idx].indicador],
+          [inst.criterios[idx].porcentaje],
+          p
+        );
+        if (graf) instanciasParagraphs.push(graf);
+      });
       // D. Tabla de distribución de niveles por criterio
       instanciasParagraphs.push(generarTablaCriteriosPorIndicadorDOCX(inst));
+      // E. Gráficos de torta por instancia
+      (grafObj.tortas || []).forEach((p, idx) => {
+        const graf = generarGraficoDesempenoDOCX(
+          [inst.criterios[idx].indicador],
+          [inst.criterios[idx].porcentaje],
+          p
+        );
+        if (graf) instanciasParagraphs.push(graf);
+      });
       const grafNivel = generarGraficoDistribucionNivelesDOCX(inst);
       if (grafNivel) instanciasParagraphs.push(grafNivel);
       // Se omite la generación de tablas y conclusiones por Resultado de Aprendizaje
@@ -1039,14 +1056,6 @@ exports.generarDOCXCompleto = async contenido => {
     });
 
   const grafParags = [];
-  if (Array.isArray(contenido.datos) && contenido.datos.length) {
-    const g = generarGraficoDesempenoDOCX(
-      contenido.datos.map(d => d.indicador),
-      contenido.datos.map(d => d.porcentaje),
-      contenido.graficos && contenido.graficos.barrasPath
-    );
-    if (g) grafParags.push(g);
-  }
   if (Array.isArray(contenido.competencias) && contenido.competencias.length) {
     const g = generarGraficoDesempenoDOCX(
       contenido.competencias.map(c => c.ID_Competencia),

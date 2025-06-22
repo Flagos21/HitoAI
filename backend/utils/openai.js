@@ -6,7 +6,7 @@ const MODEL = 'gpt-3.5-turbo';
 
 function callOpenAI(prompt) {
   if (!API_KEY) {
-    return Promise.resolve('(openai key missing) ' + prompt);
+    return Promise.reject(new Error('OpenAI key missing'));
   }
   return new Promise((resolve, reject) => {
     const data = JSON.stringify({
@@ -51,6 +51,26 @@ async function safe(prompt, fallback) {
   }
 }
 
+function buildIndicatorFallback({ indicador, max, min, promedio, porcentaje }) {
+  const diff = max - min;
+  let dispersion;
+  if (diff >= 6) dispersion = 'una dispersión muy amplia';
+  else if (diff >= 3) dispersion = 'una diferencia notable entre puntajes';
+  else dispersion = 'poca variación en los puntajes';
+
+  let tendencia;
+  if (porcentaje >= 60) tendencia = 'la mayoría de los estudiantes superó el promedio';
+  else if (porcentaje >= 40) tendencia = 'aproximadamente la mitad superó el promedio';
+  else tendencia = 'solo una minoría superó el promedio';
+
+  return (
+    `El indicador "${indicador}" obtuvo un puntaje promedio de ${promedio}. ` +
+    `El máximo fue ${max} y el mínimo ${min}, mostrando ${dispersion}. ` +
+    `El ${porcentaje}% de los estudiantes estuvo sobre el promedio, por lo que ${tendencia}. ` +
+    'Revisa las tablas asociadas para comprender el contexto y orientar la retroalimentación.'
+  );
+}
+
 
 exports.crearIntroduccion = (asignatura, carrera) => ({
   objetivo: {
@@ -88,22 +108,46 @@ exports.analizarCriterio = ({
   asignaturaNombre,
   carreraNombre,
 }) => {
-  const prompt = `En la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}, correspondiente al contenido "${contenidoNucleo}" (${contenidoDescripcion}) y al resultado de aprendizaje "${raNombre}" (${raDescripcion}), redacta un análisis pedagógico y recomendaciones para el criterio "${indicador}" evaluado en "${evaluacion}". Resultados obtenidos: Máximo ${max}, Mínimo ${min}, Promedio ${promedio}, ${porcentaje}% sobre el promedio.`;
-  return safe(prompt, `Análisis de ${indicador}`);
+  const prompt =
+    `Actúa como un experto pedagogo. ` +
+    `Utilizando la información de las tablas de Evaluación, Indicador, Resultado de Aprendizaje, Contenido y Aplicación, ` +
+    `realiza un análisis profundo del indicador "${indicador}" (criterio "${competencia}") ` +
+    `evaluado en "${evaluacion}" dentro de la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}. ` +
+    `Explica cómo el contenido "${contenidoNucleo}" (${contenidoDescripcion}) se relaciona con el RA "${raNombre}" (${raDescripcion}). ` +
+    `Analiza los valores obtenidos (máximo ${max}, mínimo ${min}, promedio ${promedio} y logro ${porcentaje}%) ` +
+    `señalando tendencias, fortalezas, debilidades y posibles causas. ` +
+    `Concluye con recomendaciones pedagógicas para mejorar el rendimiento.`;
+  const fallback = buildIndicatorFallback({
+    indicador,
+    max,
+    min,
+    promedio,
+    porcentaje,
+  });
+  return safe(prompt, fallback);
 };
 
 exports.conclusionCompetencias = ({ resumen, asignaturaNombre, carreraNombre }) => {
-  const prompt = `En la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}, redacta una conclusión general del rendimiento de los estudiantes considerando los siguientes resultados por competencia: ${resumen}.`;
+  const prompt =
+    `Actúa como un experto pedagogo. ` +
+    `Basándote en los porcentajes de cumplimiento por competencia (${resumen}), ` +
+    `redacta una conclusión detallada sobre el desempeño de los estudiantes ` +
+    `en la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}. ` +
+    `Describe tendencias, fortalezas, debilidades y posibles acciones de mejora.`;
   return safe(prompt, `Conclusión de competencias: ${resumen}`);
 };
 
 exports.recomendacionesTemas = (temas, asignaturaNombre, carreraNombre) => {
-  const prompt = `En la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}, entrega recomendaciones generales de mejora para los siguientes temas: ${temas}.`;
+  const prompt = `Considerando el desempeño observado en las evaluaciones y las necesidades detectadas, sugiere recomendaciones para mejorar los siguientes temas en la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}: ${temas}.`;
   return safe(prompt, `Recomendaciones para ${temas}`);
 };
 
 exports.conclusionCriterios = ({ resumen, asignaturaNombre, carreraNombre }) => {
-  const prompt = `En la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}, redacta una conclusión breve sobre el rendimiento observado en los siguientes criterios: ${resumen}.`;
+  const prompt =
+    `Como experto en evaluación educativa, analiza en profundidad los resultados ` +
+    `de los criterios ${resumen} en la asignatura ${asignaturaNombre} ` +
+    `de la carrera ${carreraNombre}. ` +
+    `Explica los patrones observados y señala sus implicaciones pedagógicas.`;
   return safe(prompt, `Conclusion de criterios: ${resumen}`);
 };
 
@@ -113,17 +157,17 @@ exports.recomendacionesCompetencia = (
   asignaturaNombre,
   carreraNombre,
 ) => {
-  const prompt = `Actúa como un experto pedagogo. En la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}, la competencia ${competencia} registra un cumplimiento de ${cumplimiento}%. Sugiere acciones concretas, estrategias de enseñanza y actividades que ayuden a mejorar esta competencia.`;
+  const prompt = `Actúa como un experto pedagogo y, considerando toda la evidencia obtenida en las evaluaciones, propone acciones concretas y estrategias de enseñanza que permitan mejorar la competencia ${competencia} que actualmente presenta un ${cumplimiento}% de cumplimiento en la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}.`;
   return safe(prompt, `Recomendaciones para ${competencia}`);
 };
 
 exports.analisisCompetencia = ({ competencia, puntajeIdeal, promedio, cumplimiento, asignaturaNombre, carreraNombre }) => {
-  const prompt = `Eres un experto en educación superior. En la asignatura ${asignaturaNombre} de la carrera ${carreraNombre} se obtuvo un puntaje ideal de ${puntajeIdeal} para la competencia ${competencia}. El promedio alcanzado fue de ${promedio} y el cumplimiento fue ${cumplimiento}%. Redacta un análisis pedagógico detallado considerando causas posibles y su impacto en la formación profesional.`;
+  const prompt = `Con base en las cifras registradas en las distintas evaluaciones, analiza en detalle la competencia ${competencia} de la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}. El puntaje ideal fue ${puntajeIdeal}, el promedio ${promedio} y el grado de cumplimiento ${cumplimiento}%. Explica posibles causas de estos resultados y cómo repercuten en la formación profesional.`;
   return safe(prompt, `Analisis de la competencia ${competencia}`);
 };
 
 exports.recomendacionesGenerales = (temas, asignaturaNombre, carreraNombre) => {
-  const prompt = `En la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}, entrega recomendaciones generales para reforzar los siguientes temas: ${temas}.`;
+  const prompt = `Revisa los resultados obtenidos en las distintas evaluaciones y formula recomendaciones generales para reforzar los temas ${temas} en la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}.`;
   return safe(prompt, `Recomendaciones para ${temas}`);
 };
 
@@ -134,7 +178,12 @@ exports.conclusionRA = ({
   asignaturaNombre,
   carreraNombre,
 }) => {
-  const prompt = `En la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}, redacta una breve conclusión pedagógica sobre el resultado de aprendizaje "${raNombre}" (${raDescripcion}). El puntaje promedio de sus indicadores es ${promedio}.`;
+  const prompt =
+    `Actúa como un experto pedagogo. ` +
+    `Analiza el resultado de aprendizaje "${raNombre}" (${raDescripcion}) ` +
+    `en la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}. ` +
+    `Con un promedio de indicadores de ${promedio}, ` +
+    `elabora una conclusión detallada que interprete el rendimiento y sugiera posibles mejoras.`;
   return safe(prompt, `Conclusión de ${raNombre}: ${promedio}`);
 };
 

@@ -2,11 +2,12 @@ const connection = require('../db/connection');
 
 exports.obtenerTodas = () => {
   const sql = `
-    SELECT 
+    SELECT
       a.*, u.Nombre AS Profesor, c.Nombre AS Carrera
     FROM asignatura a
     JOIN usuario u ON u.ID_Usuario = a.usuario_ID_Usuario
     JOIN carrera c ON c.ID_Carrera = a.carrera_ID_Carrera
+    WHERE a.Estado = 'Activo'
   `;
   return new Promise((resolve, reject) => {
     connection.query(sql, (err, results) => (err ? reject(err) : resolve(results)));
@@ -19,7 +20,7 @@ exports.obtenerPorCarreraDelJefe = (idUsuario) => {
     FROM asignatura a
     JOIN carrera c ON a.carrera_ID_Carrera = c.ID_Carrera
     JOIN usuario u ON u.ID_Usuario = a.usuario_ID_Usuario
-    WHERE c.usuario_ID_Usuario = ?
+    WHERE c.usuario_ID_Usuario = ? AND a.Estado = 'Activo'
   `;
   return new Promise((resolve, reject) => {
     connection.query(sql, [idUsuario], (err, results) =>
@@ -37,7 +38,7 @@ exports.obtenerPorProfesor = (rutProfesor) => {
     SELECT a.*, c.Nombre AS Carrera
     FROM asignatura a
     JOIN carrera c ON a.carrera_ID_Carrera = c.ID_Carrera
-    WHERE a.usuario_ID_Usuario = ?
+    WHERE a.usuario_ID_Usuario = ? AND a.Estado = 'Activo'
   `;
   return new Promise((resolve, reject) => {
     connection.query(sql, [rutProfesor], (err, results) => (err ? reject(err) : resolve(results)));
@@ -53,8 +54,9 @@ exports.crear = (data) => {
       N_Hito,
       Plan_Academico,
       carrera_ID_Carrera,
-      usuario_ID_Usuario
-    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+      usuario_ID_Usuario,
+      Estado
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `;
   const params = [
     data.ID_Asignatura,
@@ -63,7 +65,8 @@ exports.crear = (data) => {
     data.N_Hito,
     data.Plan_Academico,
     data.carrera_ID_Carrera,
-    data.usuario_ID_Usuario
+    data.usuario_ID_Usuario,
+    data.Estado || 'Activo'
   ];
   return new Promise((resolve, reject) => {
     connection.query(sql, params, (err) => (err ? reject(err) : resolve()));
@@ -91,8 +94,16 @@ exports.actualizar = (id, data) => {
 };
 
 exports.eliminar = (id) => {
-  const sql = 'DELETE FROM asignatura WHERE ID_Asignatura = ?';
+  const sqlAsignatura =
+    "UPDATE asignatura SET Estado = 'Inactivo' WHERE ID_Asignatura = ?";
+  const sqlInscripciones =
+    "UPDATE inscripcion SET Estado = 'Inactivo' WHERE asignatura_ID_Asignatura = ?";
   return new Promise((resolve, reject) => {
-    connection.query(sql, [id], (err) => (err ? reject(err) : resolve()));
+    connection.query(sqlAsignatura, [id], (err) => {
+      if (err) return reject(err);
+      connection.query(sqlInscripciones, [id], (err2) =>
+        err2 ? reject(err2) : resolve()
+      );
+    });
   });
 };

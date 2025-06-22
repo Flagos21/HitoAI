@@ -4,6 +4,7 @@ const path = require('path');
 const {
   generarGraficoBarras,
   generarGraficoLineas,
+  generarGraficoTorta,
 } = require('../utils/grafico');
 const {
   crearIntroduccion,
@@ -16,7 +17,7 @@ const {
   analisisCompetencia,
   recomendacionesGenerales,
 } = require('../utils/openai');
-const { generarPDFCompleto, generarDOCXCompleto } = require('../utils/reportGenerator');
+const { generarDOCXCompleto } = require('../utils/reportGenerator');
 const {
   calcularResumenCompetencias,
 } = require('../utils/resumenCompetencias');
@@ -25,6 +26,13 @@ function query(sql, params = []) {
   return new Promise((resolve, reject) => {
     connection.query(sql, params, (err, rows) => (err ? reject(err) : resolve(rows)));
   });
+}
+
+function toNumber(value) {
+  if (value == null) return 0;
+  if (typeof value === 'number') return value;
+  const n = parseFloat(value);
+  return Number.isNaN(n) ? 0 : n;
 }
 
 async function obtenerDatosIndicadores(asignaturaId) {
@@ -65,7 +73,14 @@ async function obtenerDatosIndicadores(asignaturaId) {
       JOIN inscripcion ins ON ins.ID_Inscripcion = a.inscripcion_ID_Inscripcion
       WHERE ins.asignatura_ID_Asignatura = ?
       GROUP BY ev.ID_Evaluacion, i.ID_Indicador;`;
-  return query(sql, [asignaturaId]);
+  const rows = await query(sql, [asignaturaId]);
+  return rows.map(r => ({
+    ...r,
+    maximo: toNumber(r.maximo),
+    minimo: toNumber(r.minimo),
+    promedio: toNumber(r.promedio),
+    porcentaje: toNumber(r.porcentaje),
+  }));
 }
 
 
@@ -104,7 +119,12 @@ async function obtenerRubricas(asignaturaId) {
       JOIN inscripcion ins ON ins.ID_Inscripcion = a.inscripcion_ID_Inscripcion
       WHERE ins.asignatura_ID_Asignatura = ?
       GROUP BY ev.ID_Evaluacion, i.ID_Indicador, c.ID_Criterio;`;
-  return query(sql, [asignaturaId]);
+  const rows = await query(sql, [asignaturaId]);
+  return rows.map(r => ({
+    ...r,
+    promedio: toNumber(r.promedio),
+    porcentaje: toNumber(r.porcentaje),
+  }));
 }
 
 async function obtenerPromediosCriterio(asignaturaId) {
@@ -244,9 +264,7 @@ exports.generarInforme = async asignaturaId => {
       };
       // Count the full indicator score for each associated competencia
       comp.puntajeIdeal += d.puntajeMax * d.total;
-      if (typeof d.promedio === 'number') {
-        comp.promedioSum += d.promedio * d.total;
-      }
+      comp.promedioSum += toNumber(d.promedio) * d.total;
       instancias[d.instancia].competencias[c] = comp;
     });
   });
@@ -342,12 +360,6 @@ exports.generarInforme = async asignaturaId => {
     asignatura.Carrera
   );
 
-  const barrasPath = await generarGraficoBarras(
-    datos.map(d => d.indicador),
-    datos.map(d => Number(d.porcentaje) || 0),
-    'barras.png'
-  );
-
   const compPath = await generarGraficoLineas(
     competencias.map(c => c.ID_Competencia),
     competencias.map(c => Number(c.cumplimiento) || 0),
@@ -356,11 +368,25 @@ exports.generarInforme = async asignaturaId => {
 
   const graficosInstancias = {};
   for (const [num, inst] of Object.entries(instancias)) {
-    graficosInstancias[num] = await generarGraficoBarras(
-      inst.criterios.map(c => c.indicador),
-      inst.criterios.map(c => Number(c.porcentaje) || 0),
-      `instancia_${num}.png`
-    );
+    const barras = [];
+    const tortas = [];
+    for (const [idx, c] of inst.criterios.entries()) {
+      const barra = await generarGraficoBarras(
+        [c.indicador],
+        [Number(c.porcentaje) || 0],
+        `instancia_${num}_${idx}.png`
+      );
+      barras.push(barra);
+      const labels = (c.niveles || []).map(n => n.nombre);
+      const valores = (c.niveles || []).map(n => n.porcentaje);
+      const torta = await generarGraficoTorta(
+        labels,
+        valores,
+        `instancia_${num}_${idx}_pie.png`
+      );
+      tortas.push(torta);
+    }
+    graficosInstancias[num] = { barras, tortas };
   }
 
   const resumenIndicadores = [...datos].sort((a, b) => a.instancia - b.instancia);
@@ -377,15 +403,8 @@ exports.generarInforme = async asignaturaId => {
     conclusion,
     recomendaciones,
     recomendacionesTemasFinal,
-    graficos: { barrasPath, compPath, ...graficosInstancias },
+    graficos: { compPath, ...graficosInstancias },
   };
-
-  let pdf = Buffer.from('');
-  try {
-    pdf = await generarPDFCompleto(contenido);
-  } catch (err) {
-    console.warn('PDF generation skipped:', err.message);
-  }
 
   let docx = Buffer.from('');
   try {
@@ -398,12 +417,14 @@ exports.generarInforme = async asignaturaId => {
   const base = `Informe-${asignatura.Nombre}-${new Date().toISOString().split('T')[0]}`.replace(/\s+/g, '_');
   const outDir = path.join(__dirname, '..', 'uploads');
   if (!fs.existsSync(outDir)) fs.mkdirSync(outDir);
-  if (pdf.length) fs.writeFileSync(path.join(outDir, `${base}.pdf`), pdf);
-
   if (docx.length) fs.writeFileSync(path.join(outDir, `${base}.docx`), docx);
-  const archivosGraficos = [barrasPath, compPath, ...Object.values(graficosInstancias)];
+  const archivosGraficos = [compPath];
+  Object.values(graficosInstancias).forEach(obj => {
+    if (obj.barras) archivosGraficos.push(...obj.barras);
+    if (obj.tortas) archivosGraficos.push(...obj.tortas);
+  });
   archivosGraficos.forEach(p => {
     if (fs.existsSync(p)) fs.unlinkSync(p);
   });
-  return { pdf, docx, nombre: `${base}.pdf`, nombreDocx: `${base}.docx` };
+  return { docx, nombreDocx: `${base}.docx` };
 };

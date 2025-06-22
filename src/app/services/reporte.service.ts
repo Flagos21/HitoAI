@@ -7,14 +7,6 @@ export class ReporteService {
   private apiUrl = `${environment.apiUrl}/api/informe`;
   constructor(private http: HttpClient) {}
 
-  generar(asignaturaId: number) {
-    return this.http.get(`${this.apiUrl}/${asignaturaId}`, { responseType: 'blob' });
-  }
-
-  pdf(asignaturaId: number) {
-    return this.http.get(`${this.apiUrl}/${asignaturaId}/pdf`, { responseType: 'blob' });
-  }
-
   word(asignaturaId: number) {
     return this.http.get(`${this.apiUrl}/${asignaturaId}/word`, {
       responseType: 'blob',

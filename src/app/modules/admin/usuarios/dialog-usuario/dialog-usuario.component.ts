@@ -32,7 +32,7 @@ export class DialogUsuarioComponent {
   mensajeExito = '';
   mensajeError = '';
   bloqueado = false;
-  accionConfirmada: 'crear' | 'actualizar' | 'rol' | null = null;
+  accionConfirmada: 'crear' | 'actualizar' | 'rol' | 'eliminar' | null = null;
   private modalCerrado = false;
 
   constructor(
@@ -119,9 +119,16 @@ export class DialogUsuarioComponent {
 
     if (this.bloqueado) return;
     this.bloqueado = true;
-    this.usuarioService.crearUsuario(this.usuario).subscribe(() => {
-      this.mensajeExito = 'Usuario creado';
-      setTimeout(() => this.cerrarConExito(), 1500);
+    this.usuarioService.crearUsuario(this.usuario).subscribe({
+      next: () => {
+        this.mensajeExito = 'Usuario creado';
+        setTimeout(() => this.cerrarConExito(), 1500);
+      },
+      error: (err) => {
+        this.bloqueado = false;
+        this.mensajeError = err.error?.message || 'Error al crear usuario';
+        setTimeout(() => (this.mensajeError = ''), 3000);
+      }
     });
   }
 
@@ -145,6 +152,27 @@ export class DialogUsuarioComponent {
         this.mensajeExito = 'Rol actualizado';
         setTimeout(() => this.cerrarConExito(), 1500);
       });
+  }
+
+  eliminarUsuario() {
+    if (!this.accionConfirmada) {
+      this.accionConfirmada = 'eliminar';
+      return;
+    }
+
+    if (this.bloqueado) return;
+    this.bloqueado = true;
+    this.usuarioService.eliminar(this.usuario.ID_Usuario).subscribe({
+      next: () => {
+        this.mensajeExito = 'Usuario eliminado';
+        setTimeout(() => this.cerrarConExito(), 1500);
+      },
+      error: () => {
+        this.bloqueado = false;
+        this.mensajeError = 'No se pudo eliminar el usuario';
+        setTimeout(() => (this.mensajeError = ''), 3000);
+      }
+    });
   }
 
   cancelar() {
