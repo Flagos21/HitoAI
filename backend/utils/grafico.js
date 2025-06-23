@@ -50,19 +50,29 @@ async function generarGraficoBarras(labels, datos, nombreArchivo = 'grafico.png'
       label: 'Alumnos sobre promedio (%)',
       data: datos.map(d => Number(d) || 0),
       backgroundColor: defaultColors[3],
+      maxBarThickness: 40,
+      barPercentage: 0.5,
     });
   } else if (Array.isArray(datos)) {
     datasets = datos.map((ds, idx) => {
       const label = ds.label || `Serie ${idx + 1}`;
       const data = (ds.data || []).map(d => Number(d) || 0);
       const bg = ds.backgroundColor || ds.color || colorMap[label] || defaultColors[idx % defaultColors.length];
-      return { label, data, backgroundColor: bg };
+      return {
+        label,
+        data,
+        backgroundColor: bg,
+        maxBarThickness: 40,
+        barPercentage: 0.5,
+      };
     });
   } else if (typeof datos === 'object' && datos !== null) {
     datasets = Object.entries(datos).map(([label, data], idx) => ({
       label,
       data: (data || []).map(d => Number(d) || 0),
       backgroundColor: colorMap[label] || defaultColors[idx % defaultColors.length],
+      maxBarThickness: 40,
+      barPercentage: 0.5,
     }));
   }
 
@@ -73,15 +83,15 @@ async function generarGraficoBarras(labels, datos, nombreArchivo = 'grafico.png'
       datasets,
     },
     options: {
-      indexAxis: 'x',
+      indexAxis: 'y',
       scales: {
-        y: {
+        x: {
           beginAtZero: true,
           max: 100,
           ticks: { stepSize: 10 },
           title: { display: true, text: '% de Alumnos' },
         },
-        x: {
+        y: {
           title: { display: true, text: 'Indicadores' },
         },
       },
@@ -116,13 +126,32 @@ async function generarGraficoTorta(labels, datos, nombreArchivo = 'torta.png') {
       datasets: [
         {
           data: datos,
-          backgroundColor: [
-            'rgba(75, 192, 192, 0.6)',
-            'rgba(255, 205, 86, 0.6)',
-            'rgba(255, 99, 132, 0.6)'
-          ],
+          backgroundColor: labels.map((_, i) => {
+            const colors = [
+              'rgba(75, 192, 192, 0.6)',
+              'rgba(54, 162, 235, 0.6)',
+              'rgba(255, 205, 86, 0.6)',
+              'rgba(255, 99, 132, 0.6)',
+              'rgba(153, 102, 255, 0.6)',
+              'rgba(201, 203, 207, 0.6)',
+            ];
+            return colors[i % colors.length];
+          }),
         },
       ],
+    },
+    options: {
+      plugins: {
+        datalabels: {
+          color: '#000000',
+          formatter: (val, ctx) => {
+            const data = ctx.chart.data.datasets[0].data || [];
+            const sum = data.reduce((acc, d) => acc + Number(d || 0), 0);
+            const pct = sum ? (val / sum) * 100 : 0;
+            return `${pct % 1 ? pct.toFixed(1) : pct}%`;
+          },
+        },
+      },
     },
   };
   const buffer = await chartJSNodeCanvas.renderToBuffer(config);

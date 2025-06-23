@@ -165,12 +165,6 @@ export class DialogAsignaturaComponent implements OnInit {
   }
 
   eliminar() {
-    if (this.estudiantesInscritos.length > 0) {
-      this.mensajeError = 'No puedes eliminar esta asignatura porque tiene estudiantes inscritos.';
-      setTimeout(() => (this.mensajeError = ''), 4000);
-      return;
-    }
-
     if (!this.accionConfirmada) {
       this.accionConfirmada = 'eliminar';
       return;
@@ -178,9 +172,11 @@ export class DialogAsignaturaComponent implements OnInit {
 
     this.bloqueado = true;
     this.mensajeExito = 'Asignatura eliminada';
-    this.asignaturaService.eliminar(this.asignatura.ID_Asignatura).subscribe(() => {
-      setTimeout(() => this.cerrarConExito(), 1500);
-    });
+    this.asignaturaService
+      .eliminar(this.asignatura.ID_Asignatura)
+      .subscribe(() => {
+        setTimeout(() => this.cerrarConExito(), 1500);
+      });
   }
 
   private cerrarConExito() {

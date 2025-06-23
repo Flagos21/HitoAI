@@ -1,4 +1,5 @@
 const UsuarioService = require('../services/usuario.service');
+const { validateLengths } = require('../utils/validateLengths');
 
 // Crear nuevo usuario
 exports.crearUsuario = async (req, res) => {
@@ -9,11 +10,26 @@ exports.crearUsuario = async (req, res) => {
     return res.status(400).json({ message: 'Faltan datos requeridos para crear el usuario' });
   }
 
+  const err = validateLengths({ ID_Usuario: rut, Nombre, Clave }, {
+    ID_Usuario: 10,
+    Nombre: 100,
+    Clave: 100
+  });
+  if (err) return res.status(400).json({ message: err });
+
   try {
+    const existe = await UsuarioService.existe(rut);
+    if (existe) {
+      return res.status(400).json({ message: 'Usuario ya registrado' });
+    }
+
     await UsuarioService.crearUsuario(rut, Nombre, Clave, Rol_ID_Rol);
     res.status(201).json({ message: 'Usuario creado correctamente' });
   } catch (error) {
     console.error(error);
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({ message: 'Usuario ya registrado' });
+    }
     res.status(500).json({ message: 'Error al crear usuario' });
   }
 };
@@ -79,6 +95,9 @@ exports.actualizarClave = async (req, res) => {
     return res.status(400).json({ message: 'La clave es requerida' });
   }
 
+  const err = validateLengths({ clave }, { clave: 100 });
+  if (err) return res.status(400).json({ message: err });
+
   try {
     await UsuarioService.actualizarClave(id, clave);
     res.json({ message: 'Clave actualizada' });
@@ -101,5 +120,17 @@ exports.actualizarRol = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error al actualizar rol' });
+  }
+};
+
+// Eliminar usuario
+exports.eliminar = async (req, res) => {
+  const { id } = req.params;
+  try {
+    await UsuarioService.eliminar(id);
+    res.json({ message: 'Usuario eliminado' });
+  } catch (error) {
+    console.error('Error al eliminar usuario:', error);
+    res.status(500).json({ message: 'Error al eliminar usuario' });
   }
 };

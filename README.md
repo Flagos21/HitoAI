@@ -11,6 +11,10 @@ cp backend/.env.example backend/.env
 # then edit backend/.env and set OPENAI_API_KEY=your_key
 ```
 
+If no API key is provided or the OpenAI service is unavailable, the report
+generator will fall back to a basic analysis based solely on the scores stored
+in the database.
+
 ## Development servers
 
 ### Backend
@@ -20,8 +24,8 @@ Install dependencies and start the API server:
 ```bash
 cd backend
 npm install
-# If pdfkit, docx or chartjs-node-canvas are missing, install them explicitly
-# npm install pdfkit docx chartjs-node-canvas@latest
+# If docx or chartjs-node-canvas are missing, install them explicitly
+# npm install docx chartjs-node-canvas@latest
 # If you hit "No matching version" errors for chartjs-node-canvas, try:
 # npm install chartjs-node-canvas@latest
 # On Linux you may also need development headers for the `canvas` package:
@@ -97,37 +101,31 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 
 ## Automatic subject reports
 
-The backend exposes `/api/informe/:asignaturaId` to generate a full PDF
-and Word report for a given course. Make sure you install backend
+The backend exposes `/api/informe/:asignaturaId/word` to generate a Word report for a given course. Make sure you install backend
 dependencies before running the server:
 
 ```bash
 cd backend
 npm install
-# If pdfkit, docx or chartjs-node-canvas are missing, install them explicitly
-# npm install pdfkit docx chartjs-node-canvas@latest
+# If docx or chartjs-node-canvas are missing, install them explicitly
+# npm install docx chartjs-node-canvas@latest
 # On Linux you may also need development headers for the `canvas` package:
 # sudo apt-get install -y build-essential libcairo2-dev libjpeg-dev libpango1.0-dev libgif-dev librsvg2-dev
 ```
 
-These dependencies include `pdfkit`, `docx` and `chartjs-node-canvas`, which are required to generate reports with charts.
+These dependencies include `docx` and `chartjs-node-canvas`, which are required to generate reports with charts.
 
-Reports are saved under `backend/uploads/` and the API returns a ZIP file
-containing both the PDF and Word versions.
+Reports are saved under `backend/uploads/` and the API returns the generated Word document.
 
-If `pdfkit` is not installed, the generated ZIP will only include the Word
-document because the PDF cannot be created. Make sure all optional
-dependencies are installed if you need the PDF output.
 
 ### Troubleshooting
 
-If you see an error like `Cannot find module 'pdfkit'` when starting the
 backend, install the missing dependencies inside `backend/`:
 
 ```bash
 cd backend
 
-npm install pdfkit docx chartjs-node-canvas@latest
+npm install docx chartjs-node-canvas@latest
 ```
 
 If `npm install` fails with a message like `No matching version found for chartjs-node-canvas@^4.2.2`,
@@ -140,7 +138,7 @@ npm install chartjs-node-canvas@latest
 ```
 
 Without these packages the report generator will skip chart creation. If your
-generated PDF or Word files are missing graphs, verify that `pdfkit`, `docx`
+generated Word files are missing graphs, verify that `docx`
 and `chartjs-node-canvas` are installed correctly.
 
 ## Additional Resources

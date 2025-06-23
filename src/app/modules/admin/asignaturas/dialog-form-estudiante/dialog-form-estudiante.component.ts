@@ -74,8 +74,16 @@ export class DialogFormEstudianteComponent implements OnInit {
 
     this.bloqueado = true;
     this.mensajeExito = 'Estudiante creado con éxito';
-    this.estudianteService.crear(this.estudiante).subscribe(() => {
-      setTimeout(() => this.cerrarConExito(), 1500);
+    this.estudianteService.crear(this.estudiante).subscribe({
+      next: () => {
+        setTimeout(() => this.cerrarConExito(), 1500);
+      },
+      error: (err) => {
+        this.bloqueado = false;
+        this.mensajeExito = '';
+        this.mensajeError = err.error?.message || 'Error al crear estudiante';
+        setTimeout(() => (this.mensajeError = ''), 3000);
+      }
     });
   }
 

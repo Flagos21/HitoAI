@@ -4,4 +4,5 @@ export interface Inscripcion {
   Semestre: number;
   estudiante_ID_Estudiante: string;
   asignatura_ID_Asignatura: string;
+  Estado?: string;
 }
