@@ -127,13 +127,22 @@ exports.analizarCriterio = ({
   return safe(prompt, fallback);
 };
 
-exports.conclusionCompetencias = ({ resumen, asignaturaNombre, carreraNombre }) => {
+exports.conclusionCompetencias = ({
+  resumen,
+  asignaturaNombre,
+  carreraNombre,
+  indicadores,
+  ras,
+  contenidos,
+}) => {
   const prompt =
-    `Actúa como un experto pedagogo. ` +
-    `Basándote en los porcentajes de cumplimiento por competencia (${resumen}), ` +
-    `redacta una conclusión detallada sobre el desempeño de los estudiantes ` +
+    `Actúa como un experto pedagogo y analiza de manera integral el desempeño ` +
     `en la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}. ` +
-    `Describe tendencias, fortalezas, debilidades y posibles acciones de mejora.`;
+    `Considera los porcentajes de cumplimiento por competencia (${resumen}), ` +
+    `los indicadores evaluados (${indicadores}), los resultados de aprendizaje ` +
+    `relacionados (${ras}) y los contenidos abordados (${contenidos}). ` +
+    `Redacta una conclusión estructurada (utiliza párrafos breves o viñetas) ` +
+    `que resuma tendencias, fortalezas, debilidades y proponga acciones de mejora.`;
   return safe(prompt, `Conclusión de competencias: ${resumen}`);
 };
 
@@ -142,12 +151,20 @@ exports.recomendacionesTemas = (temas, asignaturaNombre, carreraNombre) => {
   return safe(prompt, `Recomendaciones para ${temas}`);
 };
 
-exports.conclusionCriterios = ({ resumen, asignaturaNombre, carreraNombre }) => {
+exports.conclusionCriterios = ({
+  resumen,
+  asignaturaNombre,
+  carreraNombre,
+  ras,
+  contenidos,
+}) => {
   const prompt =
-    `Como experto en evaluación educativa, analiza en profundidad los resultados ` +
-    `de los criterios ${resumen} en la asignatura ${asignaturaNombre} ` +
-    `de la carrera ${carreraNombre}. ` +
-    `Explica los patrones observados y señala sus implicaciones pedagógicas.`;
+    `Como experto en evaluación educativa, analiza los resultados de los indicadores ${resumen} ` +
+    `en la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}. ` +
+    `Incluye en la interpretación los resultados de aprendizaje relacionados (${ras}) ` +
+    `y los contenidos evaluados (${contenidos}). ` +
+    `Presenta la conclusión de forma estructurada (párrafos breves o viñetas) ` +
+    `destacando patrones observados y sus implicaciones pedagógicas.`;
   return safe(prompt, `Conclusion de criterios: ${resumen}`);
 };
 
@@ -183,7 +200,7 @@ exports.conclusionRA = ({
     `Analiza el resultado de aprendizaje "${raNombre}" (${raDescripcion}) ` +
     `en la asignatura ${asignaturaNombre} de la carrera ${carreraNombre}. ` +
     `Con un promedio de indicadores de ${promedio}, ` +
-    `elabora una conclusión detallada que interprete el rendimiento y sugiera posibles mejoras.`;
+    `redacta una conclusión estructurada (párrafos breves o viñetas) que interprete el rendimiento y sugiera posibles mejoras.`;
   return safe(prompt, `Conclusión de ${raNombre}: ${promedio}`);
 };
 
