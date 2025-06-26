@@ -6,15 +6,17 @@ try {
     'chartjs-node-canvas module not found. Run "npm install" in the backend directory to enable chart generation.'
   );
 }
+
 const fs = require('fs');
 const path = require('path');
 let ChartDataLabels;
 try {
   ChartDataLabels = require('chartjs-plugin-datalabels');
-
 } catch {
   ChartDataLabels = null;
 }
+
+const chroma = require('chroma-js'); // Color library for gradients
 
 const width = 900;
 const height = 500;
@@ -23,12 +25,20 @@ const chartCallback = ChartJS => {
     ChartJS.register(ChartDataLabels);
   }
 };
+
 const chartJSNodeCanvas = ChartJSNodeCanvas
   ? new ChartJSNodeCanvas({ width, height, chartCallback })
   : null;
 
-async function generarGraficoBarras(labels, datos, nombreArchivo = 'grafico.png') {
+function ensureDir() {
+  const dir = path.join(__dirname, '..', 'public', 'img');
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  return dir;
+}
+
+async function generarGraficoBarras(labels, datos, nombreArchivo = 'grafico.png', titulo = 'Gráfico de Barras') {
   if (!chartJSNodeCanvas) return null;
+
   const colorMap = {
     Excelente: 'rgba(75, 192, 192, 0.8)',
     Aceptable: 'rgba(255, 205, 86, 0.8)',
@@ -42,7 +52,6 @@ async function generarGraficoBarras(labels, datos, nombreArchivo = 'grafico.png'
   ];
 
   const wrappedLabels = labels.map(l => l.match(/.{1,15}/g)?.join('\n') || l);
-
   let datasets = [];
 
   if (Array.isArray(datos) && typeof datos[0] === 'number') {
@@ -53,27 +62,6 @@ async function generarGraficoBarras(labels, datos, nombreArchivo = 'grafico.png'
       maxBarThickness: 40,
       barPercentage: 0.5,
     });
-  } else if (Array.isArray(datos)) {
-    datasets = datos.map((ds, idx) => {
-      const label = ds.label || `Serie ${idx + 1}`;
-      const data = (ds.data || []).map(d => Number(d) || 0);
-      const bg = ds.backgroundColor || ds.color || colorMap[label] || defaultColors[idx % defaultColors.length];
-      return {
-        label,
-        data,
-        backgroundColor: bg,
-        maxBarThickness: 40,
-        barPercentage: 0.5,
-      };
-    });
-  } else if (typeof datos === 'object' && datos !== null) {
-    datasets = Object.entries(datos).map(([label, data], idx) => ({
-      label,
-      data: (data || []).map(d => Number(d) || 0),
-      backgroundColor: colorMap[label] || defaultColors[idx % defaultColors.length],
-      maxBarThickness: 40,
-      barPercentage: 0.5,
-    }));
   }
 
   const config = {
@@ -84,6 +72,20 @@ async function generarGraficoBarras(labels, datos, nombreArchivo = 'grafico.png'
     },
     options: {
       indexAxis: 'y',
+      plugins: {
+        title: {
+          display: true,
+          text: titulo,
+          font: { size: 16 },
+        },
+        legend: { display: datasets.length > 1 },
+        datalabels: {
+          color: '#ffffff',
+          anchor: 'center',
+          align: 'center',
+          formatter: v => `${v}%`,
+        },
+      },
       scales: {
         x: {
           beginAtZero: true,
@@ -95,53 +97,44 @@ async function generarGraficoBarras(labels, datos, nombreArchivo = 'grafico.png'
           title: { display: true, text: 'Indicadores' },
         },
       },
-      plugins: {
-        legend: { display: datasets.length > 1 },
-        datalabels: {
-          color: '#ffffff',
-          anchor: 'center',
-          align: 'center',
-          formatter: v => `${v}%`,
-        },
-      },
     },
   };
 
   const buffer = await chartJSNodeCanvas.renderToBuffer(config);
-  const dir = path.join(__dirname, '..', 'public', 'img');
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-  const filePath = path.join(dir, nombreArchivo);
+  const filePath = path.join(ensureDir(), nombreArchivo);
   fs.writeFileSync(filePath, buffer);
   return filePath;
 }
 
-async function generarGraficoTorta(labels, datos, nombreArchivo = 'torta.png') {
+async function generarGraficoTorta(labels, datos, nombreArchivo = 'torta.png', titulo = '') {
   if (!chartJSNodeCanvas) return null;
+
+  const baseColor = '#0069F4';
+  const backgroundColors = chroma
+    .scale([baseColor, 'white'])
+    .colors(labels.length)
+    .map(c => chroma(c).alpha(0.6).css());
+
+  const wrappedTitle = titulo?.match(/.{1,60}/g)?.join('\n') || 'Gráfico de Torta';
+
   const config = {
     type: 'pie',
     data: {
       labels,
       datasets: [
         {
-          data: datos,
-          backgroundColor: labels.map((_, i) => {
-            const colors = [
-              'rgba(75, 192, 192, 0.6)',
-              'rgba(54, 162, 235, 0.6)',
-              'rgba(255, 205, 86, 0.6)',
-              'rgba(255, 99, 132, 0.6)',
-              'rgba(153, 102, 255, 0.6)',
-              'rgba(201, 203, 207, 0.6)',
-            ];
-            return colors[i % colors.length];
-          }),
+          data: datos.map(v => Number(v) || 0),
+          backgroundColor: backgroundColors,
         },
       ],
     },
     options: {
       plugins: {
+        title: {
+          display: true,
+          text: wrappedTitle,
+          font: { size: 16 },
+        },
         datalabels: {
           color: '#000000',
           formatter: (val, ctx) => {
@@ -154,18 +147,19 @@ async function generarGraficoTorta(labels, datos, nombreArchivo = 'torta.png') {
       },
     },
   };
+
   const buffer = await chartJSNodeCanvas.renderToBuffer(config);
-  const dir = path.join(__dirname, '..', 'public', 'img');
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  const filePath = path.join(dir, nombreArchivo);
+  const filePath = path.join(ensureDir(), nombreArchivo);
   fs.writeFileSync(filePath, buffer);
   return filePath;
 }
 
-async function generarGraficoLineas(labels, datos, nombreArchivo = 'lineas.png') {
+async function generarGraficoLineas(labels, datos, nombreArchivo = 'lineas.png', titulo = 'Gráfico de Cumplimiento') {
   if (!chartJSNodeCanvas) return null;
+
   datos = datos.map(d => Number(d) || 0);
   const wrappedLabels = labels.map(l => l.match(/.{1,15}/g)?.join('\n') || l);
+
   const config = {
     type: 'bar',
     data: {
@@ -180,6 +174,20 @@ async function generarGraficoLineas(labels, datos, nombreArchivo = 'lineas.png')
     },
     options: {
       indexAxis: 'x',
+      plugins: {
+        title: {
+          display: true,
+          text: titulo,
+          font: { size: 16 },
+        },
+        legend: { display: false },
+        datalabels: {
+          color: '#ffffff',
+          anchor: 'center',
+          align: 'center',
+          formatter: v => `${v}%`,
+        },
+      },
       scales: {
         y: {
           beginAtZero: true,
@@ -189,21 +197,11 @@ async function generarGraficoLineas(labels, datos, nombreArchivo = 'lineas.png')
         },
         x: { title: { display: true, text: 'Competencias' } },
       },
-      plugins: {
-        legend: { display: false },
-        datalabels: {
-          color: '#ffffff',
-          anchor: 'center',
-          align: 'center',
-          formatter: v => `${v}%`,
-        },
-      },
     },
   };
+
   const buffer = await chartJSNodeCanvas.renderToBuffer(config);
-  const dir = path.join(__dirname, '..', 'public', 'img');
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  const filePath = path.join(dir, nombreArchivo);
+  const filePath = path.join(ensureDir(), nombreArchivo);
   fs.writeFileSync(filePath, buffer);
   return filePath;
 }
