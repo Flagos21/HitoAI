@@ -125,16 +125,19 @@ function analizarCriterio({
     `Relaciona el contenido "${contenidoNucleo}" (${contenidoDescripcion}) con el RA "${raNombre}" (${raDescripcion}). ` +
     `Considera los resultados: máx: ${max}, mín: ${min}, promedio: ${promedio}, logro: ${porcentaje}%. ` +
     `Describe tendencias, fortalezas, debilidades y ofrece recomendaciones pedagógicas.`;
-
+  
   const fallback = buildIndicatorFallback({ indicador, max, min, promedio, porcentaje });
+
 
   return safe(prompt, fallback);
 }
+
 
 function analisisCompetencia({ competencia, puntajeIdeal, promedio, cumplimiento, asignaturaNombre, carreraNombre }) {
   const prompt = `Con base en los resultados de evaluación, analiza la competencia "${competencia}" en la asignatura "${asignaturaNombre}" de la carrera "${carreraNombre}". El puntaje ideal fue ${puntajeIdeal}, el promedio ${promedio} y el cumplimiento ${cumplimiento}%. Describe posibles causas y consecuencias pedagógicas.`;
   return safe(prompt, `Análisis de la competencia ${competencia}`);
 }
+
 
 function recomendacionesCompetencia(competencia, cumplimiento, asignaturaNombre, carreraNombre) {
   const prompt = `Sugiere estrategias pedagógicas para mejorar la competencia "${competencia}" con un cumplimiento del ${cumplimiento}% en la asignatura "${asignaturaNombre}" de la carrera "${carreraNombre}".`;
@@ -154,10 +157,12 @@ function recomendacionesTemas(temas, asignaturaNombre, carreraNombre) {
 function conclusionCompetencias({ resumen, asignaturaNombre, carreraNombre }) {
   const prompt =
     `Actúa como un experto pedagogo. ` +
+
     `Basándote en los porcentajes de cumplimiento por competencia (${resumen}), ` +
     `redacta una conclusión detallada sobre el desempeño de los estudiantes ` +
     `en la asignatura "${asignaturaNombre}" de la carrera "${carreraNombre}". ` +
     `Describe tendencias, fortalezas, debilidades y posibles acciones de mejora.`;
+
 
   return safe(prompt, `Conclusión de competencias: ${resumen}`);
 }
