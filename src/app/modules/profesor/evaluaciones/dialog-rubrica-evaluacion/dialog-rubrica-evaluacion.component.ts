@@ -94,11 +94,15 @@ export class DialogRubricaEvaluacionComponent implements OnInit {
     return Object.values(this.puntajes).reduce((a, b) => a + (b || 0), 0);
   }
 
-  calcularNota(): number {
-    const totalMax = this.indicadores.reduce(
+  calcularPuntajeIdeal(): number {
+    return this.indicadores.reduce(
       (acc, ind) => acc + ind.Puntaje_Max,
       0
     );
+  }
+
+  calcularNota(): number {
+    const totalMax = this.calcularPuntajeIdeal();
     if (totalMax === 0) return 0;
     return Math.round((this.calcularTotal() / totalMax) * 100);
   }
