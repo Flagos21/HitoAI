@@ -7,6 +7,7 @@ import { Usuario } from '../../../../models';
 import { SidebarComponent } from '../../../../shared/components/sidebar/sidebar.component';
 import { DialogUsuarioComponent } from '../dialog-usuario/dialog-usuario.component';
 import { RutFormatPipe } from '../../../../pipes/rut-format.pipe';
+import { cleanRut } from '../../../../utils/rut';
 
 @Component({
   selector: 'app-main-usuarios',
@@ -40,12 +41,12 @@ export class MainUsuariosComponent implements OnInit {
   }
 
   aplicarFiltros() {
-    const id = this.filtroId.toLowerCase();
+    const idClean = cleanRut(this.filtroId).toLowerCase();
     const texto = this.filtroTexto.toLowerCase();
     const rol = this.filtroRol;
 
     const filtrados = this.usuarios.filter(u =>
-      (!id || u.ID_Usuario.toLowerCase().includes(id)) &&
+      (!idClean || cleanRut(u.ID_Usuario).toLowerCase().includes(idClean)) &&
       (!texto || u.Nombre.toLowerCase().includes(texto)) &&
       (!rol || u.Rol === rol)
     );
