@@ -59,7 +59,7 @@ export class DialogEstudiantesComponent implements OnInit {
     if (input.files && input.files.length > 0) {
       const archivo = input.files[0];
       this.estudianteService.cargarDesdeCSV(archivo).subscribe((resp) => {
-        this.mensajeCSV = resp.message || 'Estudiantes cargados';
+        this.mensajeCSV = resp.message || `${resp.agregados} estudiantes agregados y ${resp.rechazados} rechazados por RUT inválido`;
         this.mostrarToastCSV = true;
         this.cargarEstudiantes();
 
