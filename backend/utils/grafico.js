@@ -117,8 +117,21 @@ async function generarGraficoBarras(labels, datos, nombreArchivo = 'grafico.png'
   return filePath;
 }
 
-async function generarGraficoTorta(labels, datos, nombreArchivo = 'torta.png') {
+async function generarGraficoTorta(
+  labels,
+  datos,
+  nombreArchivo = 'torta.png',
+  titulo = ''
+) {
   if (!chartJSNodeCanvas) return null;
+  const colors = [
+    'rgba(33, 150, 243, 0.7)',
+    'rgba(76, 175, 80, 0.7)',
+    'rgba(255, 193, 7, 0.7)',
+    'rgba(244, 67, 54, 0.7)',
+    'rgba(156, 39, 176, 0.7)',
+    'rgba(158, 158, 158, 0.7)',
+  ];
   const config = {
     type: 'pie',
     data: {
@@ -126,22 +139,13 @@ async function generarGraficoTorta(labels, datos, nombreArchivo = 'torta.png') {
       datasets: [
         {
           data: datos,
-          backgroundColor: labels.map((_, i) => {
-            const colors = [
-              'rgba(75, 192, 192, 0.6)',
-              'rgba(54, 162, 235, 0.6)',
-              'rgba(255, 205, 86, 0.6)',
-              'rgba(255, 99, 132, 0.6)',
-              'rgba(153, 102, 255, 0.6)',
-              'rgba(201, 203, 207, 0.6)',
-            ];
-            return colors[i % colors.length];
-          }),
+          backgroundColor: labels.map((_, i) => colors[i % colors.length]),
         },
       ],
     },
     options: {
       plugins: {
+        title: { display: !!titulo, text: titulo },
         datalabels: {
           color: '#000000',
           formatter: (val, ctx) => {
