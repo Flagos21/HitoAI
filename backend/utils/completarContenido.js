@@ -4,9 +4,37 @@ const {
   recomendacionesCompetencia,
   conclusionCompetencias,
   recomendacionesTemas,
-} = require('./openai'); // cambia el nombre si lo tienes diferente
+} = require('./openai'); // asegúrate que este sea el archivo correcto
 
 const { calcularResumenCompetencias } = require('./resumenCompetencias');
+
+// NUEVA función para conclusiones por criterio
+function conclusionCriterios(instancia, carrera = '', asignatura = '') {
+  if (!instancia || !Array.isArray(instancia.criterios)) return [];
+
+  return instancia.criterios.map(c => {
+    const indicador = c.indicador || 'Indicador no definido';
+    const maximo = c.maximo ?? 'N/A';
+    const minimo = c.minimo ?? 'N/A';
+    const promedio = c.promedio ?? 'N/A';
+    const porcentaje = c.porcentaje ?? 'N/A';
+
+    return (
+`### Indicador: ${indicador}
+- **Máximo Puntaje Obtenido**: ${maximo}  
+- **Mínimo Puntaje Obtenido**: ${minimo}  
+- **Puntaje Promedio**: ${promedio}  
+- **% de Alumnos sobre el Promedio**: ${porcentaje}%
+
+En este indicador se evalúa la capacidad del estudiante para cumplir con el criterio "${indicador}". Este se vincula con los contenidos desarrollados en la asignatura "${asignatura}" de la carrera "${carrera}". 
+
+De acuerdo con los resultados obtenidos, el puntaje promedio fue de ${promedio}, con un porcentaje de ${porcentaje}% de estudiantes que superaron el promedio. Esto sugiere un rendimiento ${porcentaje >= 75 ? 'destacado' : porcentaje >= 60 ? 'aceptable' : 'mejorable'} por parte del grupo.
+
+Se recomienda reforzar los contenidos asociados a este indicador a través de prácticas, retroalimentación dirigida y actividades contextualizadas para mejorar la comprensión y aplicación del criterio evaluado.
+`
+    );
+  });
+}
 
 async function completarInstancia(instancia, asignatura, carrera) {
   // A. Generar análisis por cada criterio
@@ -66,6 +94,9 @@ async function completarInstancia(instancia, asignatura, carrera) {
   instancia.recomendaciones = [
     await recomendacionesTemas(temas, asignatura, carrera),
   ];
+
+  // F. Conclusiones por criterio (estilo documento formal)
+  instancia.conclusion = conclusionCriterios(instancia, carrera, asignatura).join('\n\n');
 }
 
 async function completarContenido(contenido) {
