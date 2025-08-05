@@ -1,11 +1,7 @@
 const connection = require('../db/connection');
 const fs = require('fs');
 const path = require('path');
-const {
-  generarGraficoBarras,
-  generarGraficoLineas,
-  generarGraficoTorta,
-} = require('../utils/grafico');
+const { generarGraficoLineas, generarGraficoTorta } = require('../utils/grafico');
 const {
   crearIntroduccion,
   analizarCriterio,
@@ -154,6 +150,19 @@ exports.generarInforme = async asignaturaId => {
   const datos = await obtenerDatosIndicadores(asignaturaId);
   const rubricas = await obtenerRubricas(asignaturaId);
   const promedios = await obtenerPromediosCriterio(asignaturaId);
+
+  const indicadoresSet = new Set();
+  const raSet = new Set();
+  const contenidoSet = new Set();
+  datos.forEach(d => {
+    if (d.indicador) indicadoresSet.add(d.indicador);
+    if (d.raNombre) raSet.add(d.raNombre);
+    if (d.contenidoNucleo) contenidoSet.add(d.contenidoNucleo);
+  });
+  const indicadoresResumenTxt = [...indicadoresSet].join(', ');
+  const raResumenTxt = [...raSet].join(', ');
+  const contenidoResumenTxt = [...contenidoSet].join(', ');
+
   const competenciasResumen = calcularResumenCompetencias(
     datos.map(d => ({
       puntaje_maximo: d.puntajeMax,
@@ -245,6 +254,8 @@ exports.generarInforme = async asignaturaId => {
         analisis: [],
         competencias: {},
         estudiantes: 0,
+        ras: new Set(),
+        contenidos: new Set(),
       };
     }
     if (d.total > instancias[d.instancia].estudiantes) {
@@ -252,6 +263,8 @@ exports.generarInforme = async asignaturaId => {
     }
     instancias[d.instancia].criterios.push(d);
     instancias[d.instancia].analisis.push(analisis[idx]);
+    if (d.raNombre) instancias[d.instancia].ras.add(d.raNombre);
+    if (d.contenidoNucleo) instancias[d.instancia].contenidos.add(d.contenidoNucleo);
 
     const claves = String(d.competencia || '')
       .split(/\s*\+\s*/)
@@ -271,10 +284,14 @@ exports.generarInforme = async asignaturaId => {
 
   for (const i of Object.values(instancias)) {
     const resumen = i.criterios.map(c => c.indicador).join(', ');
+    const raResumen = [...i.ras].join(', ');
+    const contenidoResumen = [...i.contenidos].join(', ');
     i.conclusion = await conclusionCriterios({
       resumen,
       asignaturaNombre: asignatura.Nombre,
       carreraNombre: asignatura.Carrera,
+      ras: raResumen,
+      contenidos: contenidoResumen,
     });
     i.recomendaciones = [
       await recomendacionesTemas(
@@ -329,11 +346,16 @@ exports.generarInforme = async asignaturaId => {
 
   // totalNiveles ya calculado al agregar rubricas
 
-  const resumenComp = competencias.map(c => `${c.ID_Competencia}: ${c.cumplimiento}%`).join(', ');
+  const resumenComp = competencias
+    .map(c => `${c.ID_Competencia}: ${c.cumplimiento}%`)
+    .join(', ');
   const conclusion = await conclusionCompetencias({
     resumen: resumenComp,
     asignaturaNombre: asignatura.Nombre,
     carreraNombre: asignatura.Carrera,
+    indicadores: indicadoresResumenTxt,
+    ras: raResumenTxt,
+    contenidos: contenidoResumenTxt,
   });
 
   const recomendacionesComp = await Promise.all(
@@ -368,25 +390,19 @@ exports.generarInforme = async asignaturaId => {
 
   const graficosInstancias = {};
   for (const [num, inst] of Object.entries(instancias)) {
-    const barras = [];
     const tortas = [];
     for (const [idx, c] of inst.criterios.entries()) {
-      const barra = await generarGraficoBarras(
-        [c.indicador],
-        [Number(c.porcentaje) || 0],
-        `instancia_${num}_${idx}.png`
-      );
-      barras.push(barra);
       const labels = (c.niveles || []).map(n => n.nombre);
       const valores = (c.niveles || []).map(n => n.porcentaje);
       const torta = await generarGraficoTorta(
         labels,
         valores,
-        `instancia_${num}_${idx}_pie.png`
+        `instancia_${num}_${idx}_pie.png`,
+        c.indicador
       );
       tortas.push(torta);
     }
-    graficosInstancias[num] = { barras, tortas };
+    graficosInstancias[num] = { tortas };
   }
 
   const resumenIndicadores = [...datos].sort((a, b) => a.instancia - b.instancia);
@@ -420,7 +436,6 @@ exports.generarInforme = async asignaturaId => {
   if (docx.length) fs.writeFileSync(path.join(outDir, `${base}.docx`), docx);
   const archivosGraficos = [compPath];
   Object.values(graficosInstancias).forEach(obj => {
-    if (obj.barras) archivosGraficos.push(...obj.barras);
     if (obj.tortas) archivosGraficos.push(...obj.tortas);
   });
   archivosGraficos.forEach(p => {

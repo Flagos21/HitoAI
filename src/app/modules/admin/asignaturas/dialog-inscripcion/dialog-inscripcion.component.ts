@@ -6,6 +6,7 @@ import { EstudianteService } from '../../../../services/estudiante.service';
 import { InscripcionService } from '../../../../services/inscripcion.service';
 import { Asignatura, Estudiante, Inscripcion } from '../../../../models';
 import { RutFormatPipe } from '../../../../pipes/rut-format.pipe';
+import { cleanRut } from '../../../../utils/rut';
 
 
 @Component({
@@ -42,8 +43,9 @@ export class DialogInscripcionComponent implements OnInit {
 
   estudiantesFiltrados() {
     const f = this.filtro.toLowerCase();
+    const fRut = cleanRut(this.filtro).toLowerCase();
     return this.estudiantes.filter(e =>
-      e.ID_Estudiante.toLowerCase().includes(f) ||
+      cleanRut(e.ID_Estudiante).toLowerCase().includes(fRut) ||
       e.Nombre.toLowerCase().includes(f) ||
       e.Apellido.toLowerCase().includes(f)
     );

@@ -106,35 +106,39 @@ async function generarGraficoBarras(labels, datos, nombreArchivo = 'grafico.png'
   return filePath;
 }
 
-async function generarGraficoTorta(labels, datos, nombreArchivo = 'torta.png', titulo = '') {
+
+async function generarGraficoTorta(
+  labels,
+  datos,
+  nombreArchivo = 'torta.png',
+  titulo = ''
+) {
   if (!chartJSNodeCanvas) return null;
-
-  const baseColor = '#0069F4';
-  const backgroundColors = chroma
-    .scale([baseColor, 'white'])
-    .colors(labels.length)
-    .map(c => chroma(c).alpha(0.6).css());
-
-  const wrappedTitle = titulo?.match(/.{1,60}/g)?.join('\n') || 'Gráfico de Torta';
-
+  const colors = [
+    'rgba(33, 150, 243, 0.7)',
+    'rgba(76, 175, 80, 0.7)',
+    'rgba(255, 193, 7, 0.7)',
+    'rgba(244, 67, 54, 0.7)',
+    'rgba(156, 39, 176, 0.7)',
+    'rgba(158, 158, 158, 0.7)',
+  ];
   const config = {
     type: 'pie',
     data: {
       labels,
       datasets: [
         {
-          data: datos.map(v => Number(v) || 0),
-          backgroundColor: backgroundColors,
+          data: datos,
+          backgroundColor: labels.map((_, i) => colors[i % colors.length]),
+
         },
       ],
     },
     options: {
       plugins: {
-        title: {
-          display: true,
-          text: wrappedTitle,
-          font: { size: 16 },
-        },
+
+        title: { display: !!titulo, text: titulo },
+
         datalabels: {
           color: '#000000',
           formatter: (val, ctx) => {

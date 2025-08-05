@@ -128,37 +128,37 @@ function buildIndicatorFallback({ indicador, max, min, promedio, porcentaje }) {
   );
 }
 
-async function analizarCriterio(data) {
-  const competencias = await cargarCompetencias();
-  const texto = (data.competencia || '').split('+').map(id => {
-    const c = competencias[id.trim()];
-    return c ? c : id.trim();
-  }).join(' + ');
 
-  const prompt = `Actúa como un experto pedagogo. ` +
-    `Analiza el indicador "${data.indicador}" (criterio "${texto}") ` +
-    `evaluado en "${data.evaluacion}" de la asignatura "${data.asignaturaNombre}" de la carrera "${data.carreraNombre}". ` +
-    `Relaciona el contenido "${data.contenidoNucleo}" (${data.contenidoDescripcion}) con el RA "${data.raNombre}" (${data.raDescripcion}). ` +
-    `Analiza los valores obtenidos (máx: ${data.max}, mín: ${data.min}, promedio: ${data.promedio}, logro: ${data.porcentaje}%) ` +
-    `y entrega observaciones pedagógicas.`;
+function analizarCriterio({
+  indicador, competencia, evaluacion, max, min, promedio, porcentaje,
+  raNombre, raDescripcion, contenidoNucleo, contenidoDescripcion,
+  asignaturaNombre, carreraNombre,
+}) {
+  const prompt =
+    `Actúa como un experto pedagogo. ` +
+    `Utilizando la información de evaluación, analiza el indicador "${indicador}" (criterio "${competencia}") ` +
+    `en la evaluación "${evaluacion}" de la asignatura "${asignaturaNombre}" en la carrera "${carreraNombre}". ` +
+    `Relaciona el contenido "${contenidoNucleo}" (${contenidoDescripcion}) con el RA "${raNombre}" (${raDescripcion}). ` +
+    `Considera los resultados: máx: ${max}, mín: ${min}, promedio: ${promedio}, logro: ${porcentaje}%. ` +
+    `Describe tendencias, fortalezas, debilidades y ofrece recomendaciones pedagógicas.`;
+  
+  const fallback = buildIndicatorFallback({ indicador, max, min, promedio, porcentaje });
 
-  const fallback = buildIndicatorFallback(data);
+
   return safe(prompt, fallback);
 }
 
-async function analisisCompetencia(data) {
-  const competencias = await cargarCompetencias();
-  const texto = competencias[data.competencia] || data.competencia;
-  const prompt = `Con base en los resultados de evaluación, analiza la competencia "${texto}" en la asignatura "${data.asignaturaNombre}" de la carrera "${data.carreraNombre}". ` +
-    `El puntaje ideal fue ${data.puntajeIdeal}, el promedio ${data.promedio} y el cumplimiento ${data.cumplimiento}%. Describe posibles causas y consecuencias pedagógicas.`;
-  return safe(prompt, `Análisis de la competencia ${texto}`);
+
+function analisisCompetencia({ competencia, puntajeIdeal, promedio, cumplimiento, asignaturaNombre, carreraNombre }) {
+  const prompt = `Con base en los resultados de evaluación, analiza la competencia "${competencia}" en la asignatura "${asignaturaNombre}" de la carrera "${carreraNombre}". El puntaje ideal fue ${puntajeIdeal}, el promedio ${promedio} y el cumplimiento ${cumplimiento}%. Describe posibles causas y consecuencias pedagógicas.`;
+  return safe(prompt, `Análisis de la competencia ${competencia}`);
 }
 
-async function recomendacionesCompetencia(competencia, cumplimiento, asignaturaNombre, carreraNombre) {
-  const competencias = await cargarCompetencias();
-  const texto = competencias[competencia] || competencia;
-  const prompt = `Sugiere estrategias pedagógicas para mejorar la competencia "${texto}" con un cumplimiento del ${cumplimiento}% en la asignatura "${asignaturaNombre}" de la carrera "${carreraNombre}".`;
-  return safe(prompt, `Recomendaciones para ${texto}`);
+
+function recomendacionesCompetencia(competencia, cumplimiento, asignaturaNombre, carreraNombre) {
+  const prompt = `Sugiere estrategias pedagógicas para mejorar la competencia "${competencia}" con un cumplimiento del ${cumplimiento}% en la asignatura "${asignaturaNombre}" de la carrera "${carreraNombre}".`;
+  return safe(prompt, `Recomendaciones para ${competencia}`);
+
 }
 
 async function conclusionCriterios({ resumen, asignaturaNombre, carreraNombre }) {
@@ -171,9 +171,19 @@ async function recomendacionesTemas(temas, asignaturaNombre, carreraNombre) {
   return safe(prompt, `Recomendaciones para ${temas}`);
 }
 
-async function recomendacionesGenerales(asignaturaNombre, carreraNombre) {
-  const prompt = `Revisa los resultados obtenidos en las distintas evaluaciones y formula recomendaciones generales para reforzar los temas de la asignatura "${asignaturaNombre}" de la carrera "${carreraNombre}".`;
-  return safe(prompt, `Recomendaciones generales para ${asignaturaNombre}`);
+
+function conclusionCompetencias({ resumen, asignaturaNombre, carreraNombre }) {
+  const prompt =
+    `Actúa como un experto pedagogo. ` +
+
+    `Basándote en los porcentajes de cumplimiento por competencia (${resumen}), ` +
+    `redacta una conclusión detallada sobre el desempeño de los estudiantes ` +
+    `en la asignatura "${asignaturaNombre}" de la carrera "${carreraNombre}". ` +
+    `Describe tendencias, fortalezas, debilidades y posibles acciones de mejora.`;
+
+
+  return safe(prompt, `Conclusión de competencias: ${resumen}`);
+
 }
 
 async function conclusionCompetencias({ resumen, asignaturaNombre, carreraNombre }) {

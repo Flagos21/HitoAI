@@ -890,16 +890,14 @@ exports.generarPDFCompleto = contenido => {
         doc.moveDown(0.5);
         // B. Desglose por indicador
         generarBloqueDesgloseIndicadoresPDF(doc, inst);
-        // C. Gráficos de barras por instancia
         const grafObj = contenido.graficos && contenido.graficos[num];
-        generarGraficoDesempenoPDF(doc, grafObj && grafObj.barras);
         generarTablaCriteriosPorIndicadorPDF(doc, inst);
         generarGraficoDesempenoPDF(doc, grafObj && grafObj.tortas);
-        // D. Conclusiones de instancia
+        // C. Conclusiones de instancia
         generarConclusionPDF(doc, inst);
-        // E. Recomendaciones generales de instancia
+        // D. Recomendaciones generales de instancia
         generarRecomendacionesPDF(doc, inst);
-        // F. Tabla de desempeño por criterio (rúbrica)
+        // E. Tabla de desempeño por criterio (rúbrica)
         doc.fontSize(14).text('Promedio por Criterio', { underline: true });
         doc.moveDown(0.5);
         generarTablaPromediosPorCriterioPDF(doc, inst);
@@ -910,11 +908,11 @@ exports.generarPDFCompleto = contenido => {
         //   drawRATablePDF(doc, inst.raResumen);
         //   generarConclusionRAPDF(doc, inst);
         // }
-        // G. Tabla de cumplimiento por competencia
+        // F. Tabla de cumplimiento por competencia
         generarTablaCompetenciasInstanciaPDF(doc, inst);
-        // H. Análisis por competencia
+        // G. Análisis por competencia
         generarAnalisisCompetenciasPDF(doc, inst);
-        // I. Recomendaciones por competencia
+        // H. Recomendaciones por competencia
         generarRecomendacionesCompetenciasPDF(doc, inst);
       });
 
@@ -1021,19 +1019,10 @@ exports.generarDOCXCompleto = async contenido => {
       );
       // B. Desglose por indicador
       instanciasParagraphs.push(...generarBloqueDesgloseIndicadoresDOCX(inst));
-      // C. Gráficos de barras por instancia
-      const grafObj = (contenido.graficos && contenido.graficos[num]) || {};
-      (grafObj.barras || []).forEach((p, idx) => {
-        const graf = generarGraficoDesempenoDOCX(
-          [inst.criterios[idx].indicador],
-          [inst.criterios[idx].porcentaje],
-          p
-        );
-        if (graf) instanciasParagraphs.push(graf);
-      });
-      // D. Tabla de distribución de niveles por criterio
+      // C. Tabla de distribución de niveles por criterio
       instanciasParagraphs.push(generarTablaCriteriosPorIndicadorDOCX(inst));
-      // E. Gráficos de torta por instancia
+      // D. Gráficos de torta por instancia
+      const grafObj = (contenido.graficos && contenido.graficos[num]) || {};
       (grafObj.tortas || []).forEach((p, idx) => {
         const graf = generarGraficoDesempenoDOCX(
           [inst.criterios[idx].indicador],
