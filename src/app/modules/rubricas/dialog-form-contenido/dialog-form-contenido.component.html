@@ -15,7 +15,7 @@
 <div class="modal-body position-relative">
   <form *ngIf="modo !== 'ver'">
     <div class="mb-3">
-      <label class="form-label">Núcleo Temático</label>
+      <label class="form-label">Item</label>
       <input
         type="text"
         class="form-control"
@@ -78,7 +78,7 @@
 
   <!-- Vista solo lectura -->
   <div *ngIf="modo === 'ver'">
-    <p><strong>Núcleo Temático:</strong> {{ contenido.Nucleo_Tematico }}</p>
+    <p><strong>Item:</strong> {{ contenido.Nucleo_Tematico }}</p>
     <p><strong>Descripción:</strong> {{ contenido.Descripcion }}</p>
     <p><strong>Horas:</strong> {{ contenido.Horas }}</p>
   </div>
