@@ -44,7 +44,7 @@ async function obtenerDatosIndicadores(asignaturaId) {
         MIN(a.Obtenido) AS minimo,
         ROUND(AVG(a.Obtenido), 1) AS promedio,
         ROUND(
-          SUM(a.Obtenido > (
+          SUM(a.Obtenido >= (
             SELECT AVG(Obtenido)
             FROM aplicacion
             WHERE indicador_ID_Indicador = i.ID_Indicador
