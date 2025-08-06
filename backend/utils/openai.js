@@ -172,7 +172,7 @@ async function recomendacionesTemas(temas, asignaturaNombre, carreraNombre) {
 }
 
 
-function conclusionCompetencias({ resumen, asignaturaNombre, carreraNombre }) {
+function recomendacionesGenerales({ resumen, asignaturaNombre, carreraNombre }) {
   const prompt =
     `Actúa como un experto pedagogo. ` +
 

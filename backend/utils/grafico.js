@@ -16,8 +16,6 @@ try {
   ChartDataLabels = null;
 }
 
-const chroma = require('chroma-js'); // Color library for gradients
-
 const width = 900;
 const height = 500;
 const chartCallback = ChartJS => {
